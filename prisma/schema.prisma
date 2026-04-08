@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String      @id @default(uuid())
+  name      String      @unique
+  password  String      @default("")
+  role      String      @default("USER") // "USER" or "ADMIN"
+  entries   TimeEntry[]
+  createdAt DateTime    @default(now())
+}
+
+model TimeEntry {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  startTime     DateTime
+  endTime       DateTime?
+  activity      String?   // User-selected activity grouping
+  isConfirmed   Boolean   @default(false)
+  isManualEntry Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
