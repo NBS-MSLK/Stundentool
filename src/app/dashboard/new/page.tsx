@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ACTIVITIES } from '@/lib/activities';
+import confetti from 'canvas-confetti';
 
 export default function NewEntry() {
   const router = useRouter();
@@ -60,7 +61,11 @@ export default function NewEntry() {
         note
       })
     });
-    router.push('/dashboard');
+    
+    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 500);
   };
 
   return (

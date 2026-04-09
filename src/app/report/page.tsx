@@ -97,44 +97,46 @@ function ReportContent() {
               </tbody>
             </table>
 
-            <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
-              <thead>
-                <tr style={{ height: '80px' }}>
-                  <th>Datum</th>
-                  <th>geleistete Arbeit</th>
-                  <th>Gewerk / Arbeitsbereich</th>
-                  <th>Anzahl<br/>Stunden</th>
-                  <th>Name<br/>der Leistungserbringerin/<br/>des Leistungserbringers<br/>(Blockschrift)</th>
-                  <th>Unterschrift<br/>der Leistungserbringerin/<br/>des Leistungserbringers</th>
-                </tr>
-              </thead>
-              <tbody>
-                {chunk.map((e: any) => {
-                  const start = new Date(e.startTime);
-                  const end = new Date(e.endTime);
-                  const diffMs = end.getTime() - start.getTime();
-                  let hours = Math.ceil(diffMs / (1000 * 60 * 60));
-                  if (hours < 1) hours = 1;
-                  const personName = e.user ? e.user.name : user.name;
-                  
-                  return (
-                    <tr key={e.id} style={{ height: '40px' }}>
-                      <td style={{ textAlign: 'center' }}>{start.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                      <td>{e.activity || 'Arbeitstreffen'}{e.note ? ` - ${e.note}` : ''}</td>
-                      <td>{getGroupForActivity(e.activity)}</td>
-                      <td style={{ textAlign: 'right' }}>{hours}</td>
-                      <td>{personName}</td>
-                      <td></td>
-                    </tr>
-                  );
-                })}
-                <tr style={{ height: '40px' }}>
-                  <td colSpan={3} style={{ border: '1px solid black', textAlign: 'right', paddingRight: '1rem' }}>Zwischensumme Seite {index + 1}:</td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold', border: '1px solid black' }}>{pageTotalHours.toFixed(1).replace('.0', '')}</td>
-                  <td colSpan={2} style={{ border: '1px solid black' }}></td>
-                </tr>
-              </tbody>
-            </table>
+            <div style={{ overflowX: 'auto', marginBottom: '1rem', width: '100%' }}>
+              <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+                <thead>
+                  <tr style={{ height: '80px' }}>
+                    <th>Datum</th>
+                    <th>geleistete Arbeit</th>
+                    <th>Gewerk / Arbeitsbereich</th>
+                    <th>Anzahl<br/>Stunden</th>
+                    <th>Name<br/>der Leistungserbringerin/<br/>des Leistungserbringers<br/>(Blockschrift)</th>
+                    <th>Unterschrift<br/>der Leistungserbringerin/<br/>des Leistungserbringers</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {chunk.map((e: any) => {
+                    const start = new Date(e.startTime);
+                    const end = new Date(e.endTime);
+                    const diffMs = end.getTime() - start.getTime();
+                    let hours = Math.ceil(diffMs / (1000 * 60 * 60));
+                    if (hours < 1) hours = 1;
+                    const personName = e.user ? e.user.name : user.name;
+                    
+                    return (
+                      <tr key={e.id} style={{ height: '40px' }}>
+                        <td style={{ textAlign: 'center' }}>{start.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                        <td>{e.activity || 'Arbeitstreffen'}{e.note ? ` - ${e.note}` : ''}</td>
+                        <td>{getGroupForActivity(e.activity)}</td>
+                        <td style={{ textAlign: 'right' }}>{hours}</td>
+                        <td>{personName}</td>
+                        <td></td>
+                      </tr>
+                    );
+                  })}
+                  <tr style={{ height: '40px' }}>
+                    <td colSpan={3} style={{ border: '1px solid black', textAlign: 'right', paddingRight: '1rem' }}>Zwischensumme Seite {index + 1}:</td>
+                    <td style={{ textAlign: 'right', fontWeight: 'bold', border: '1px solid black' }}>{pageTotalHours.toFixed(1).replace('.0', '')}</td>
+                    <td colSpan={2} style={{ border: '1px solid black' }}></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
             <div style={{ marginTop: '2rem', marginBottom: '4rem' }}>
               Ich bestätige, dass die o.g. Arbeitsleistungen im Rahmen der von mir beantragten Fördermaßnahme erbracht wurden.

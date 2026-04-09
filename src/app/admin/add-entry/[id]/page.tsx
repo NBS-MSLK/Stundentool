@@ -3,40 +3,25 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
 import { ACTIVITIES } from '@/lib/activities';
-import confetti from 'canvas-confetti';
 
-export default function EditEntry({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function AddAdminEntry({ params }: { params: Promise<{ id: string }> }) {
+  const { id: userId } = use(params);
   const router = useRouter();
   
-  const [date, setDate] = useState('');
-  const [hours, setHours] = useState('');
+  const [userName, setUserName] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [hours, setHours] = useState('1');
   const [activity, setActivity] = useState('');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/entries/${id}`).then(res => res.json()).then(data => {
-      const entry = data.entry;
-      if (entry) {
-        setDate(new Date(entry.startTime).toISOString().slice(0, 10));
-        if (entry.endTime) {
-          const start = new Date(entry.startTime).getTime();
-          const end = new Date(entry.endTime).getTime();
-          const diff = (end - start) / (1000 * 60 * 60);
-          let h = Math.ceil(diff);
-          if (h < 1) h = 1;
-          setHours(h.toString());
-        }
-        if (entry.activity) {
-            setActivity(entry.activity);
-        }
-        if (entry.note) {
-            setNote(entry.note);
-        }
+    fetch(`/api/users/${userId}`).then(res => res.json()).then(data => {
+      if (data.user) {
+        setUserName(data.user.name);
       }
     });
-  }, [id]);
+  }, [userId]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,22 +30,24 @@ export default function EditEntry({ params }: { params: Promise<{ id: string }> 
     const startObj = new Date(`${date}T08:00:00`); 
     const endObj = new Date(startObj.getTime() + parseInt(hours, 10) * 60 * 60 * 1000);
 
-    await fetch(`/api/entries/${id}`, {
-      method: 'PUT',
+    await fetch(`/api/entries`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ startTime: startObj.toISOString(), endTime: endObj.toISOString(), isConfirmed: true, activity, note })
+      body: JSON.stringify({ 
+        userId, 
+        startTime: startObj.toISOString(), 
+        endTime: endObj.toISOString(), 
+        activity, 
+        note 
+      })
     });
-    
-    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-    setTimeout(() => {
-      router.back();
-    }, 500);
+    router.back();
   };
 
   return (
     <div className="container">
       <div className="glass-card">
-        <h1 style={{ marginBottom: '2rem' }}>Eintrag bearbeiten</h1>
+        <h1 style={{ marginBottom: '2rem' }}>Zeit eintragen für {userName || 'Benutzer'}</h1>
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem' }}>Aktivität</label>

@@ -9,6 +9,8 @@ export default function AdminView() {
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('AKTUELL'); // AKTUELL, ARCHIV, BENUTZER
   const [passwords, setPasswords] = useState<{[key: string]: string}>({});
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
   const router = useRouter();
 
   const fetchEntries = () => {
@@ -62,6 +64,33 @@ export default function AdminView() {
     });
     alert('Passwort erfolgreich gesetzt.');
     setPasswords(prev => ({...prev, [targetUserId]: ''}));
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserName.trim()) return;
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newUserName.trim(), password: newUserPassword })
+    });
+    const data = await res.json();
+    if (data.error) {
+      alert(data.error);
+    } else {
+      alert('Benutzer erfolgreich angelegt.');
+      setNewUserName('');
+      setNewUserPassword('');
+      fetchUsers();
+    }
+  };
+
+  const deleteUser = async (id: string, name: string) => {
+    if (!confirm(`Benutzer "${name}" wirklich löschen? ACHTUNG: Alle eingetragenen Zeiten dieses Benutzers werden ebenfalls unwiderruflich gelöscht!`)) return;
+    
+    await fetch(`/api/users/${id}`, { method: 'DELETE' });
+    fetchUsers();
+    fetchEntries(); // Refresht die Zeiten, falls welche gelöscht wurden
   };
 
   if (!user) return null;
@@ -138,6 +167,22 @@ export default function AdminView() {
       {activeTab === 'BENUTZER' && (
         <div className="glass-card" style={{ overflowX: 'auto' }}>
           <h2 style={{ marginBottom: '1rem' }}>Benutzerverwaltung</h2>
+          
+          <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Neuen Benutzer anlegen</h3>
+            <form onSubmit={handleCreateUser} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+              <div style={{ flex: '1', minWidth: '200px' }}>
+                <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>Name</label>
+                <input type="text" className="input-field" value={newUserName} onChange={e => setNewUserName(e.target.value)} required />
+              </div>
+              <div style={{ flex: '1', minWidth: '200px' }}>
+                <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>Passwort (optional)</label>
+                <input type="text" className="input-field" value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} />
+              </div>
+              <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1.5rem', height: 'fit-content' }}>Benutzer anlegen</button>
+            </form>
+          </div>
+
           <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
@@ -163,7 +208,11 @@ export default function AdminView() {
                     />
                   </td>
                   <td style={{ padding: '1rem' }}>
-                    <button onClick={() => handlePasswordChange(u.id)} className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>Speichern</button>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <button onClick={() => handlePasswordChange(u.id)} className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>Speichern</button>
+                      <Link href={`/admin/add-entry/${u.id}`} className="btn-primary" style={{ backgroundColor: 'var(--text-secondary)', padding: '0.5rem 1rem', textDecoration: 'none', fontSize: '0.85rem' }}>Zeit eintragen</Link>
+                      <button onClick={() => deleteUser(u.id, u.name)} className="btn-primary" style={{ backgroundColor: 'var(--danger)', padding: '0.5rem 1rem', fontSize: '0.85rem' }}>Löschen</button>
+                    </div>
                   </td>
                 </tr>
               ))}
