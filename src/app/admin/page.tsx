@@ -129,13 +129,25 @@ export default function AdminView() {
               </tr>
             </thead>
             <tbody>
-              {currentEntries.map(e => (
-                <tr key={e.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+              {currentEntries.map(e => {
+                let startStr = new Date(e.startTime).toLocaleString('de-DE');
+                let endStr = e.endTime ? new Date(e.endTime).toLocaleString('de-DE') : 'Aktiv...';
+                
+                if (e.isManualEntry && e.endTime) {
+                  startStr = new Date(e.startTime).toLocaleDateString('de-DE');
+                  const diffMs = new Date(e.endTime).getTime() - new Date(e.startTime).getTime();
+                  let hs = Math.ceil(diffMs / (1000 * 60 * 60));
+                  if (hs < 1) hs = 1;
+                  endStr = `+ ${hs} Stunden`;
+                }
+
+                return (
+                 <tr key={e.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1rem', fontWeight: 600 }}>{e.user?.name}</td>
                   <td style={{ padding: '1rem' }}>{e.activity || '-'}</td>
                   <td style={{ padding: '1rem' }}>{e.note || '-'}</td>
-                  <td style={{ padding: '1rem' }}>{new Date(e.startTime).toLocaleString('de-DE')}</td>
-                  <td style={{ padding: '1rem' }}>{e.endTime ? new Date(e.endTime).toLocaleString('de-DE') : 'Aktiv...'}</td>
+                  <td style={{ padding: '1rem' }}>{startStr}</td>
+                  <td style={{ padding: '1rem' }}>{endStr}</td>
                   <td style={{ padding: '1rem' }}>
                     <span style={{ color: e.isConfirmed ? 'var(--success)' : 'var(--danger)', fontWeight: 'bold' }}>
                       {e.isConfirmed ? 'Ja' : 'Nein'}

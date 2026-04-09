@@ -198,12 +198,27 @@ export default function Dashboard() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {entries.map(entry => {
-          const start = new Date(entry.startTime).toLocaleString('de-DE');
-          const end = entry.endTime ? new Date(entry.endTime).toLocaleString('de-DE') : 'Aktiv';
+          let displayText = '';
+          
+          if (entry.isManualEntry && entry.endTime) {
+            const startD = new Date(entry.startTime);
+            const endD = new Date(entry.endTime);
+            const diffMs = endD.getTime() - startD.getTime();
+            let hours = Math.ceil(diffMs / (1000 * 60 * 60));
+            if (hours < 1) hours = 1;
+            
+            const dateStr = startD.toLocaleDateString('de-DE');
+            displayText = `${dateStr} (${hours} Stunden) ${entry.activity ? `(${entry.activity})` : ''}`;
+          } else {
+            const startStr = new Date(entry.startTime).toLocaleString('de-DE');
+            const endStr = entry.endTime ? new Date(entry.endTime).toLocaleString('de-DE') : 'Aktiv';
+            displayText = `${startStr} - ${endStr} ${entry.activity ? `(${entry.activity})` : ''}`;
+          }
+          
           return (
             <div key={entry.id} className="glass-card" style={{ padding: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', borderLeft: entry.isConfirmed ? '4px solid var(--success)' : '4px solid var(--danger)' }}>
               <div>
-                <div style={{ fontWeight: 500 }}>{start} - {end} {entry.activity ? `(${entry.activity})` : ''}</div>
+                <div style={{ fontWeight: 500 }}>{displayText}</div>
                 {entry.note ? <div style={{ fontSize: '0.9rem', fontStyle: 'italic', color: 'var(--text-secondary)', margin: '0.2rem 0' }}>Notiz: {entry.note}</div> : null}
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                   {entry.isConfirmed ? 'Bestätigt' : 'Ausstehend - Bitte überprüfen'}
