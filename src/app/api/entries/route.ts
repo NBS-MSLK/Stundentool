@@ -5,10 +5,12 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get('userId');
   const all = searchParams.get('all');
+  const showArchived = searchParams.get('archived') === 'true';
 
   try {
     if (all === 'true') {
       const entries = await prisma.timeEntry.findMany({
+        where: showArchived ? undefined : { isArchived: false },
         include: { user: true },
         orderBy: { startTime: 'asc' },
       });
@@ -20,7 +22,7 @@ export async function GET(req: Request) {
     }
 
     const entries = await prisma.timeEntry.findMany({
-      where: { userId },
+      where: showArchived ? { userId } : { userId, isArchived: false },
       orderBy: { startTime: 'desc' },
     });
     return NextResponse.json({ entries });
@@ -31,7 +33,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { userId, startTime, endTime, activity } = await req.json();
+    const { userId, startTime, endTime, activity, note } = await req.json();
 
     if (!userId || !startTime || !endTime) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -43,6 +45,7 @@ export async function POST(req: Request) {
         startTime: new Date(startTime),
         endTime: new Date(endTime),
         activity: activity || null,
+        note: note || null,
         isConfirmed: true,
         isManualEntry: true,
       },

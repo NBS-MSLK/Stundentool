@@ -29,7 +29,6 @@ function ReportContent() {
     const u = JSON.parse(userJson);
     setUser(u);
     
-    // An admin can view all, otherwise we only fetch the user's entries
     const fetchUrl = showAll ? '/api/entries?all=true' : `/api/entries?userId=${u.id}`;
     
     fetch(fetchUrl).then(res => res.json()).then(data => {
@@ -41,12 +40,12 @@ function ReportContent() {
 
   if (!user) return null;
 
-  const totalHours = entries.reduce((acc, e) => {
-    const diff = new Date(e.endTime).getTime() - new Date(e.startTime).getTime();
-    let hours = Math.ceil(diff / (1000 * 60 * 60));
-    if (hours < 1) hours = 1;
-    return acc + hours;
-  }, 0);
+  // Split entries into chunks of 12
+  const chunks = [];
+  for (let i = 0; i < entries.length; i += 12) {
+    chunks.push(entries.slice(i, i + 12));
+  }
+  if (chunks.length === 0) chunks.push([]); // Always render at least one empty page
 
   return (
     <div style={{ maxWidth: '100%', margin: '0 auto', padding: '2rem', backgroundColor: 'white', color: 'black', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
@@ -55,8 +54,7 @@ function ReportContent() {
           .no-print { display: none !important; } 
           @page { size: landscape; margin: 10mm; }
           body { background-color: white !important; font-size: 12pt; }
-          table { page-break-inside: auto; }
-          tr { page-break-inside: avoid; page-break-after: auto; }
+          .report-page:not(:last-child) { page-break-after: always; }
         }
         .report-table th, .report-table td {
           border: 1px solid black;
@@ -74,70 +72,81 @@ function ReportContent() {
         <button onClick={() => window.print()} className="btn-primary">Jetzt Drucken</button>
       </div>
 
-      <div style={{ padding: '0' }}>
-        <h3 style={{ marginBottom: '2rem', fontSize: '1.2rem', fontWeight: 'bold' }}>Stundenzettel / Dokumentation der geleisteten Arbeitsstunden im Rahmen bürgerschaftlichen Engagements</h3>
-        
-        <table style={{ marginBottom: '2rem', borderCollapse: 'collapse', width: 'auto' }}>
-          <tbody>
-            <tr>
-              <td style={{ paddingRight: '1rem', paddingBottom: '0.5rem' }}>LEADER-Projekt:</td>
-              <td style={{ borderBottom: '1px solid black', paddingBottom: '0.5rem' }}>MakerSpace Lübbecke</td>
-            </tr>
-            <tr>
-              <td style={{ paddingRight: '1rem' }}>Aktenzeichen:</td>
-              <td style={{ borderBottom: '1px solid black' }}>33.04.01 - 017/2025-001</td>
-            </tr>
-          </tbody>
-        </table>
+      {chunks.map((chunk, index) => {
+        const pageTotalHours = chunk.reduce((acc: number, e: any) => {
+          const diff = new Date(e.endTime).getTime() - new Date(e.startTime).getTime();
+          let hours = Math.ceil(diff / (1000 * 60 * 60));
+          if (hours < 1) hours = 1;
+          return acc + hours;
+        }, 0);
 
-        <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
-          <thead>
-            <tr style={{ height: '80px' }}>
-              <th>Datum</th>
-              <th>geleistete Arbeit</th>
-              <th>Gewerk / Arbeitsbereich</th>
-              <th>Anzahl<br/>Stunden</th>
-              <th>Name<br/>der Leistungserbringerin/<br/>des Leistungserbringers<br/>(Blockschrift)</th>
-              <th>Unterschrift<br/>der Leistungserbringerin/<br/>des Leistungserbringers</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map(e => {
-              const start = new Date(e.startTime);
-              const end = new Date(e.endTime);
-              const diffMs = end.getTime() - start.getTime();
-              let hours = Math.ceil(diffMs / (1000 * 60 * 60));
-              if (hours < 1) hours = 1;
-              const personName = e.user ? e.user.name : user.name;
-              
-              return (
-                <tr key={e.id} style={{ height: '40px' }}>
-                  <td style={{ textAlign: 'center' }}>{start.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                  <td>{e.activity || 'Arbeitstreffen'}</td>
-                  <td>{getGroupForActivity(e.activity)}</td>
-                  <td style={{ textAlign: 'right' }}>{hours}</td>
-                  <td>{personName}</td>
-                  <td></td>
+        return (
+          <div key={index} className="report-page" style={{ padding: '0', marginBottom: '2rem' }}>
+            <h3 style={{ marginBottom: '2rem', fontSize: '1.2rem', fontWeight: 'bold' }}>Stundenzettel / Dokumentation der geleisteten Arbeitsstunden im Rahmen bürgerschaftlichen Engagements (Seite {index + 1}/{chunks.length})</h3>
+            
+            <table style={{ marginBottom: '2rem', borderCollapse: 'collapse', width: 'auto' }}>
+              <tbody>
+                <tr>
+                  <td style={{ paddingRight: '1rem', paddingBottom: '0.5rem' }}>LEADER-Projekt:</td>
+                  <td style={{ borderBottom: '1px solid black', paddingBottom: '0.5rem' }}>MakerSpace Lübbecke</td>
                 </tr>
-              );
-            })}
-            <tr style={{ height: '40px' }}>
-              <td colSpan={3} style={{ border: '1px solid black' }}></td>
-              <td style={{ textAlign: 'right', fontWeight: 'bold', border: '1px solid black' }}>{totalHours.toFixed(1).replace('.0', '')}</td>
-              <td colSpan={2} style={{ border: '1px solid black' }}></td>
-            </tr>
-          </tbody>
-        </table>
+                <tr>
+                  <td style={{ paddingRight: '1rem' }}>Aktenzeichen:</td>
+                  <td style={{ borderBottom: '1px solid black' }}>33.04.01 - 017/2025-001</td>
+                </tr>
+              </tbody>
+            </table>
 
-        <div style={{ marginTop: '2rem', marginBottom: '4rem' }}>
-          Ich bestätige, dass die o.g. Arbeitsleistungen im Rahmen der von mir beantragten Fördermaßnahme erbracht wurden.
-        </div>
+            <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
+              <thead>
+                <tr style={{ height: '80px' }}>
+                  <th>Datum</th>
+                  <th>geleistete Arbeit</th>
+                  <th>Gewerk / Arbeitsbereich</th>
+                  <th>Anzahl<br/>Stunden</th>
+                  <th>Name<br/>der Leistungserbringerin/<br/>des Leistungserbringers<br/>(Blockschrift)</th>
+                  <th>Unterschrift<br/>der Leistungserbringerin/<br/>des Leistungserbringers</th>
+                </tr>
+              </thead>
+              <tbody>
+                {chunk.map((e: any) => {
+                  const start = new Date(e.startTime);
+                  const end = new Date(e.endTime);
+                  const diffMs = end.getTime() - start.getTime();
+                  let hours = Math.ceil(diffMs / (1000 * 60 * 60));
+                  if (hours < 1) hours = 1;
+                  const personName = e.user ? e.user.name : user.name;
+                  
+                  return (
+                    <tr key={e.id} style={{ height: '40px' }}>
+                      <td style={{ textAlign: 'center' }}>{start.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                      <td>{e.activity || 'Arbeitstreffen'}{e.note ? ` - ${e.note}` : ''}</td>
+                      <td>{getGroupForActivity(e.activity)}</td>
+                      <td style={{ textAlign: 'right' }}>{hours}</td>
+                      <td>{personName}</td>
+                      <td></td>
+                    </tr>
+                  );
+                })}
+                <tr style={{ height: '40px' }}>
+                  <td colSpan={3} style={{ border: '1px solid black', textAlign: 'right', paddingRight: '1rem' }}>Zwischensumme Seite {index + 1}:</td>
+                  <td style={{ textAlign: 'right', fontWeight: 'bold', border: '1px solid black' }}>{pageTotalHours.toFixed(1).replace('.0', '')}</td>
+                  <td colSpan={2} style={{ border: '1px solid black' }}></td>
+                </tr>
+              </tbody>
+            </table>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem' }}>
-          <div style={{ width: '30%', borderTop: '1px solid black', paddingTop: '0.5rem' }}>Ort, Datum</div>
-          <div style={{ width: '50%', borderTop: '1px solid black', paddingTop: '0.5rem', textAlign: 'center' }}>Unterschrift der/des Vertretungsberechtigten</div>
-        </div>
-      </div>
+            <div style={{ marginTop: '2rem', marginBottom: '4rem' }}>
+              Ich bestätige, dass die o.g. Arbeitsleistungen im Rahmen der von mir beantragten Fördermaßnahme erbracht wurden.
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem' }}>
+              <div style={{ width: '30%', borderTop: '1px solid black', paddingTop: '0.5rem' }}>Ort, Datum</div>
+              <div style={{ width: '50%', borderTop: '1px solid black', paddingTop: '0.5rem', textAlign: 'center' }}>Unterschrift der/des Vertretungsberechtigten</div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

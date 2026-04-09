@@ -15,6 +15,7 @@ export default function NewEntry() {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10)); // YYYY-MM-DD
   const [hours, setHours] = useState('');
   const [activity, setActivity] = useState('');
+  const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -55,7 +56,8 @@ export default function NewEntry() {
         userId: finalUserId, 
         startTime: startObj.toISOString(), 
         endTime: endObj.toISOString(), 
-        activity 
+        activity,
+        note
       })
     });
     router.push('/dashboard');
@@ -96,6 +98,10 @@ export default function NewEntry() {
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem' }}>Stunden (Jede angefangene Std. = 1 Std., z.B. 1, 2, 3)</label>
             <input type="number" step="1" min="1" className="input-field" placeholder="z. B. 2" value={hours} onChange={e => setHours(e.target.value)} required />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem' }}>Kurze Notiz (optional)</label>
+            <textarea className="input-field" rows={2} value={note} onChange={e => setNote(e.target.value)} placeholder="Z. B. Besonderheiten..." />
           </div>
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
             <button type="submit" className="btn-primary" disabled={loading || !activity}>Eintragen</button>

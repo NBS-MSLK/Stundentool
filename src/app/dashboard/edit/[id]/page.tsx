@@ -11,6 +11,7 @@ export default function EditEntry({ params }: { params: Promise<{ id: string }> 
   const [date, setDate] = useState('');
   const [hours, setHours] = useState('');
   const [activity, setActivity] = useState('');
+  const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,9 @@ export default function EditEntry({ params }: { params: Promise<{ id: string }> 
         if (entry.activity) {
             setActivity(entry.activity);
         }
+        if (entry.note) {
+            setNote(entry.note);
+        }
       }
     });
   }, [id]);
@@ -43,7 +47,7 @@ export default function EditEntry({ params }: { params: Promise<{ id: string }> 
     await fetch(`/api/entries/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ startTime: startObj.toISOString(), endTime: endObj.toISOString(), isConfirmed: true, activity })
+      body: JSON.stringify({ startTime: startObj.toISOString(), endTime: endObj.toISOString(), isConfirmed: true, activity, note })
     });
     router.back(); // Returns user to dashboard or admin seamlessly
   };
@@ -71,6 +75,10 @@ export default function EditEntry({ params }: { params: Promise<{ id: string }> 
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem' }}>Stunden (Jede angefangene Std. = 1 Std., z.B. 1, 2, 3)</label>
             <input type="number" step="1" min="1" className="input-field" value={hours} onChange={e => setHours(e.target.value)} required />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem' }}>Kurze Notiz (optional)</label>
+            <textarea className="input-field" rows={2} value={note} onChange={e => setNote(e.target.value)} placeholder="Z. B. Besonderheiten..." />
           </div>
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
             <button type="submit" className="btn-primary" disabled={loading || !activity || !date || !hours}>Speichern & Bestätigen</button>

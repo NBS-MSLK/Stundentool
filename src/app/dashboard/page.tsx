@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ACTIVITIES } from '@/lib/activities';
 
 type User = { id: string, name: string, role: string };
-type TimeEntry = { id: string, startTime: string, endTime: string | null, isConfirmed: boolean, isManualEntry: boolean, activity: string | null };
+type TimeEntry = { id: string, startTime: string, endTime: string | null, isConfirmed: boolean, isManualEntry: boolean, activity: string | null, note?: string | null, isArchived?: boolean };
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -110,12 +110,13 @@ export default function Dashboard() {
 
   return (
     <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Hallo, {user.name}</h1>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           {user?.role === 'ADMIN' && (
             <Link href="/admin" className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: '#8a2be2' }}>Admin</Link>
           )}
+          <Link href="/dashboard/password" className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: 'var(--accent-primary)' }}>Passwort ändern</Link>
           <button onClick={() => { localStorage.removeItem('user'); router.push('/'); }} className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: 'var(--text-secondary)' }}>Logout</button>
         </div>
       </div>
@@ -146,22 +147,23 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Letzte Einträge</h2>
-        <div>
-          <Link href="/dashboard/new" className="btn-primary" style={{ marginRight: '1rem', padding: '0.4rem 1rem', fontSize: '0.9rem' }}>Nachtragen</Link>
-          <Link href="/report" style={{ color: 'var(--accent-primary)', fontWeight: 500 }}>Zur Druckansicht</Link>
+      <div style={{ marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ fontSize: '1.2rem', fontWeight: 600, whiteSpace: 'nowrap' }}>Letzte Einträge</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <Link href="/dashboard/new" className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem' }}>Nachtragen</Link>
+          <Link href="/report" style={{ color: 'var(--accent-primary)', fontWeight: 500, whiteSpace: 'nowrap' }}>Zur Druckansicht</Link>
         </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {entries.slice(0, 5).map(entry => {
+        {entries.map(entry => {
           const start = new Date(entry.startTime).toLocaleString('de-DE');
           const end = entry.endTime ? new Date(entry.endTime).toLocaleString('de-DE') : 'Aktiv';
           return (
-            <div key={entry.id} className="glass-card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: entry.isConfirmed ? '4px solid var(--success)' : '4px solid var(--danger)' }}>
+            <div key={entry.id} className="glass-card" style={{ padding: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', borderLeft: entry.isConfirmed ? '4px solid var(--success)' : '4px solid var(--danger)' }}>
               <div>
                 <div style={{ fontWeight: 500 }}>{start} - {end} {entry.activity ? `(${entry.activity})` : ''}</div>
+                {entry.note ? <div style={{ fontSize: '0.9rem', fontStyle: 'italic', color: 'var(--text-secondary)', margin: '0.2rem 0' }}>Notiz: {entry.note}</div> : null}
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                   {entry.isConfirmed ? 'Bestätigt' : 'Ausstehend - Bitte überprüfen'}
                 </div>
