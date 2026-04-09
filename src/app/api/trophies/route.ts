@@ -50,8 +50,10 @@ export async function GET() {
       // Special
       const startHour = start.getHours();
       const endHour = end.getHours();
-      if (startHour <= 10 && !dur.includes('spec_early')) dur.push('spec_early');
-      if ((startHour >= 20 || endHour >= 20) && !dur.includes('spec_night')) dur.push('spec_night');
+      if (!e.isManualEntry) {
+        if (startHour <= 10 && !dur.includes('spec_early')) dur.push('spec_early');
+        if ((startHour >= 20 || endHour >= 20) && !dur.includes('spec_night')) dur.push('spec_night');
+      }
       if (hoursFloat > 24 && !dur.includes('spec_time')) dur.push('spec_time');
     });
 
