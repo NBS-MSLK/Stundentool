@@ -131,32 +131,39 @@ export default function Dashboard() {
       </div>
 
       <div className="glass-card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600 }}>
-          <span>Projekt-Fortschritt</span>
-          <span>{stats.hardcodedBaseHours + stats.systemArchivedHours + stats.systemActiveHours} / {stats.totalGoalHours} Stunden</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span>Projekt-Förderwert</span>
+          <div style={{ textAlign: 'right' }}>
+            <span style={{ fontSize: '1.2rem', color: '#ffd700', textShadow: '0 0 10px rgba(255,215,0,0.3)' }}>
+              {((stats.hardcodedBaseHours + stats.systemArchivedHours + stats.systemActiveHours) * 20).toLocaleString('de-DE')} € / {(stats.totalGoalHours * 20).toLocaleString('de-DE')} €
+            </span>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}>
+              ({stats.hardcodedBaseHours + stats.systemArchivedHours + stats.systemActiveHours} / {stats.totalGoalHours} Stunden)
+            </div>
+          </div>
         </div>
-        <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.5rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
+        <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
           <div 
-            style={{ width: `${((stats.hardcodedBaseHours + stats.systemArchivedHours) / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--success)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.75rem', fontWeight: 'bold', transition: 'width 0.5s ease-in-out' }} 
+            style={{ width: `${((stats.hardcodedBaseHours + stats.systemArchivedHours) / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--success)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold', transition: 'width 0.5s ease-in-out' }} 
             title="Eingereicht / Archiviert"
           >
-            {((stats.hardcodedBaseHours + stats.systemArchivedHours) / stats.totalGoalHours) * 100 > 5 && `${stats.hardcodedBaseHours + stats.systemArchivedHours}h`}
+            {((stats.hardcodedBaseHours + stats.systemArchivedHours) / stats.totalGoalHours) * 100 > 10 && `${((stats.hardcodedBaseHours + stats.systemArchivedHours) * 20).toLocaleString('de-DE')} €`}
           </div>
           <div 
-            style={{ width: `${(stats.systemActiveHours / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--accent-primary)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.75rem', fontWeight: 'bold', transition: 'width 0.5s ease-in-out' }} 
+            style={{ width: `${(stats.systemActiveHours / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--accent-primary)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold', transition: 'width 0.5s ease-in-out' }} 
             title="Offen / Neu"
           >
-             {(stats.systemActiveHours / stats.totalGoalHours) * 100 > 5 && `${stats.systemActiveHours}h`}
+             {(stats.systemActiveHours / stats.totalGoalHours) * 100 > 5 && `${(stats.systemActiveHours * 20).toLocaleString('de-DE')} €`}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></div>
-            Bereits eingereicht: {stats.hardcodedBaseHours + stats.systemArchivedHours}h
+            Bereits eingereicht: {((stats.hardcodedBaseHours + stats.systemArchivedHours) * 20).toLocaleString('de-DE')} € ({stats.hardcodedBaseHours + stats.systemArchivedHours}h)
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)' }}></div>
-            Offene Stunden: {stats.systemActiveHours}h
+            Offener Förderwert: {(stats.systemActiveHours * 20).toLocaleString('de-DE')} € ({stats.systemActiveHours}h)
           </div>
         </div>
       </div>

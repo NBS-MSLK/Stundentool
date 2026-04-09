@@ -143,7 +143,7 @@ export default function HighscorePage() {
               <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
                 <th style={{ padding: '1rem', width: '50px', textAlign: 'center' }}>#</th>
                 <th style={{ padding: '1rem' }}>Name</th>
-                <th style={{ padding: '1rem', textAlign: 'right' }}>Stunden</th>
+                <th style={{ padding: '1rem', textAlign: 'right' }}>Förderwert</th>
               </tr>
             </thead>
             <tbody>
@@ -153,7 +153,10 @@ export default function HighscorePage() {
                     {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
                   </td>
                   <td style={{ padding: '1rem', fontWeight: index < 3 ? 'bold' : 'normal' }}>{s.name}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 'bold' }}>{s.hours} h</td>
+                  <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 'bold' }}>
+                    <div style={{ color: '#ffd700', textShadow: '0 0 5px rgba(255,215,0,0.3)', fontSize: '1.1rem' }}>{(s.hours * 20).toLocaleString('de-DE')} €</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{s.hours} Stunden</div>
+                  </td>
                 </tr>
               ))}
               {scores.length === 0 && (
