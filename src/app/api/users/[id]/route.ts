@@ -17,7 +17,10 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
   try {
     const params = await props.params;
     const { id } = params;
-    const { password, showInHighscore } = await req.json();
+    const bodyText = await req.text();
+    console.log('[DEBUG] user update body:', bodyText);
+    const body = JSON.parse(bodyText);
+    const { password, showInHighscore } = body;
 
     const data: any = {};
     if (password !== undefined) data.password = password;
@@ -34,8 +37,8 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
 
     return NextResponse.json({ user: updatedUser });
   } catch (error) {
-    console.error('Update user error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('[DEBUG] Update user error:', error);
+    return NextResponse.json({ error: 'Internal server error', details: String(error) }, { status: 500 });
   }
 }
 

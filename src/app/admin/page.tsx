@@ -165,7 +165,7 @@ export default function AdminView() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )})}
               {currentEntries.length === 0 && (
                 <tr>
                   <td colSpan={7} style={{ padding: '1rem', textAlign: 'center' }}>Keine Einträge vorhanden.</td>
