@@ -115,7 +115,12 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
-
+  const handleConfirm = async (id: string) => {
+    await fetch(`/api/entries/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isConfirmed: true })
+    });
     fetchData(user!.id);
   };
   
@@ -247,7 +252,7 @@ export default function Dashboard() {
                   {displayText}
                   {isTooLong && (
                     <span style={{ backgroundColor: 'var(--danger)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                      > 10h! Bitte korrigieren
+                      {">"} 10h! Bitte korrigieren
                     </span>
                   )}
                   {entry.isSubmitted && (
