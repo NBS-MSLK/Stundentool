@@ -271,7 +271,7 @@ export default function Dashboard() {
                   <>
                     <Link href={`/dashboard/edit/${entry.id}`} style={{ textDecoration: 'none', padding: '0.75rem 1.5rem', borderRadius: 'var(--radius-md)', fontWeight: 600, backgroundColor: 'var(--text-secondary)', color: 'white' }}>Bearbeiten</Link>
                     {entry.isConfirmed ? (
-                      <button className="btn-primary" onClick={() => handleToggleSubmitted(entry.id, !!entry.isSubmitted)} style={{ backgroundColor: 'var(--accent-primary)' }}>Abgeben</button>
+                      <button className="btn-primary" onClick={() => handleToggleSubmitted(entry.id, !!entry.isSubmitted)} style={{ backgroundColor: 'var(--accent-primary)' }}>Unterschrieben dem Vorstand gegeben</button>
                     ) : (
                       <button className="btn-primary" onClick={() => handleConfirm(entry.id)}>Bestätigen</button>
                     )}
