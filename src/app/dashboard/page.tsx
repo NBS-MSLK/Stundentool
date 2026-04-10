@@ -257,7 +257,7 @@ export default function Dashboard() {
                   )}
                   {entry.isSubmitted && (
                     <span style={{ backgroundColor: 'var(--success)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                      ✓ Unterschrieben & Abgegeben
+                      ✓ Unterschrieben dem Vorstand gegeben
                     </span>
                   )}
                 </div>
@@ -277,7 +277,16 @@ export default function Dashboard() {
                     )}
                   </>
                 ) : (
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontStyle: 'italic' }}>Eingereicht (Gesperrt)</div>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontStyle: 'italic' }}>Unterschrieben dem Vorstand gegeben</div>
+                    <button 
+                      className="btn-primary" 
+                      onClick={() => handleToggleSubmitted(entry.id, !!entry.isSubmitted)} 
+                      style={{ backgroundColor: 'var(--text-secondary)', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                    >
+                      Rückgängig
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
