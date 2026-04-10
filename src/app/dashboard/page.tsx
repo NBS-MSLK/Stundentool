@@ -225,7 +225,7 @@ export default function Dashboard() {
         {entries.map(entry => {
           let displayText = '';
           
-          if (entry.isManualEntry && entry.endTime) {
+          if (entry.endTime) {
             const startD = new Date(entry.startTime);
             const endD = new Date(entry.endTime);
             const diffMs = endD.getTime() - startD.getTime();
@@ -233,11 +233,10 @@ export default function Dashboard() {
             if (hours < 1) hours = 1;
             
             const dateStr = startD.toLocaleDateString('de-DE');
-            displayText = `${dateStr} (${hours} Stunden) ${entry.activity ? `(${entry.activity})` : ''}`;
+            displayText = `${dateStr} (${hours} ${hours === 1 ? 'Stunde' : 'Stunden'}) ${entry.activity ? `(${entry.activity})` : ''}`;
           } else {
             const startStr = new Date(entry.startTime).toLocaleString('de-DE');
-            const endStr = entry.endTime ? new Date(entry.endTime).toLocaleString('de-DE') : 'Aktiv';
-            displayText = `${startStr} - ${endStr} ${entry.activity ? `(${entry.activity})` : ''}`;
+            displayText = `${startStr} - Aktiv ${entry.activity ? `(${entry.activity})` : ''}`;
           }
           
           
