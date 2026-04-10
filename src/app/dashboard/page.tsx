@@ -6,7 +6,17 @@ import { ACTIVITIES } from '@/lib/activities';
 import confetti from 'canvas-confetti';
 
 type User = { id: string, name: string, role: string };
-type TimeEntry = { id: string, startTime: string, endTime: string | null, isConfirmed: boolean, isManualEntry: boolean, activity: string | null, note?: string | null, isArchived?: boolean };
+type TimeEntry = { 
+  id: string, 
+  startTime: string, 
+  endTime: string | null, 
+  isConfirmed: boolean, 
+  isManualEntry: boolean, 
+  activity: string | null, 
+  note?: string | null, 
+  isArchived?: boolean,
+  isSubmitted?: boolean 
+};
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -106,11 +116,14 @@ export default function Dashboard() {
     }
   };
 
-  const handleConfirm = async (id: string) => {
+    fetchData(user!.id);
+  };
+  
+  const handleToggleSubmitted = async (id: string, current: boolean) => {
     await fetch(`/api/entries/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isConfirmed: true })
+      body: JSON.stringify({ isSubmitted: !current })
     });
     fetchData(user!.id);
   };
@@ -222,19 +235,44 @@ export default function Dashboard() {
             displayText = `${startStr} - ${endStr} ${entry.activity ? `(${entry.activity})` : ''}`;
           }
           
+          
+          const diffMs = entry.endTime ? new Date(entry.endTime).getTime() - new Date(entry.startTime).getTime() : 0;
+          const hoursCount = Math.ceil(diffMs / (1000 * 60 * 60));
+          const isTooLong = hoursCount > 10;
+          
           return (
-            <div key={entry.id} className="glass-card" style={{ padding: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', borderLeft: entry.isConfirmed ? '4px solid var(--success)' : '4px solid var(--danger)' }}>
-              <div>
-                <div style={{ fontWeight: 500 }}>{displayText}</div>
+            <div key={entry.id} className="glass-card" style={{ padding: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', borderLeft: entry.isConfirmed ? '4px solid var(--success)' : '4px solid var(--danger)', opacity: entry.isSubmitted ? 0.8 : 1 }}>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  {displayText}
+                  {isTooLong && (
+                    <span style={{ backgroundColor: 'var(--danger)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                      > 10h! Bitte korrigieren
+                    </span>
+                  )}
+                  {entry.isSubmitted && (
+                    <span style={{ backgroundColor: 'var(--success)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                      ✓ Unterschrieben & Abgegeben
+                    </span>
+                  )}
+                </div>
                 {entry.note ? <div style={{ fontSize: '0.9rem', fontStyle: 'italic', color: 'var(--text-secondary)', margin: '0.2rem 0' }}>Notiz: {entry.note}</div> : null}
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                   {entry.isConfirmed ? 'Bestätigt' : 'Ausstehend - Bitte überprüfen'}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Link href={`/dashboard/edit/${entry.id}`} style={{ textDecoration: 'none', padding: '0.75rem 1.5rem', borderRadius: 'var(--radius-md)', fontWeight: 600, backgroundColor: 'var(--text-secondary)', color: 'white' }}>Bearbeiten</Link>
-                {!entry.isConfirmed && (
-                  <button className="btn-primary" onClick={() => handleConfirm(entry.id)}>Bestätigen</button>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                {!entry.isSubmitted ? (
+                  <>
+                    <Link href={`/dashboard/edit/${entry.id}`} style={{ textDecoration: 'none', padding: '0.75rem 1.5rem', borderRadius: 'var(--radius-md)', fontWeight: 600, backgroundColor: 'var(--text-secondary)', color: 'white' }}>Bearbeiten</Link>
+                    {entry.isConfirmed ? (
+                      <button className="btn-primary" onClick={() => handleToggleSubmitted(entry.id, !!entry.isSubmitted)} style={{ backgroundColor: 'var(--accent-primary)' }}>Abgeben</button>
+                    ) : (
+                      <button className="btn-primary" onClick={() => handleConfirm(entry.id)}>Bestätigen</button>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontStyle: 'italic' }}>Eingereicht (Gesperrt)</div>
                 )}
               </div>
             </div>

@@ -42,6 +42,10 @@ export default function NewEntry() {
     if (!activity) return alert("Bitte wähle eine Aktivität aus.");
     if (!date || !hours) return alert("Datum und Stunden sind erforderlich.");
     
+    if (parseInt(hours, 10) > 10) {
+      return alert("Maximal 10 Stunden pro Eintrag erlaubt! Bitte teile längere Zeiträume ggf. auf mehrere Tage auf.");
+    }
+    
     setLoading(true);
 
     // Convert Date and Hours to Start and End times

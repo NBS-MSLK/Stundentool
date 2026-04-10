@@ -40,6 +40,11 @@ export default function EditEntry({ params }: { params: Promise<{ id: string }> 
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (parseInt(hours, 10) > 10) {
+      return alert("Maximal 10 Stunden pro Eintrag erlaubt!");
+    }
+
     setLoading(true);
 
     const startObj = new Date(`${date}T08:00:00`); 

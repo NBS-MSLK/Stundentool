@@ -39,15 +39,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const diffMs = end.getTime() - start.getTime();
+    if (diffMs > 10 * 60 * 60 * 1000) {
+      return NextResponse.json({ error: 'Maximal 10 Stunden pro Eintrag erlaubt.' }, { status: 400 });
+    }
+
     const entry = await prisma.timeEntry.create({
       data: {
         userId,
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
-        activity: activity || null,
-        note: note || null,
-        isConfirmed: true,
+        startTime: start,
+        endTime: end,
+        activity,
+        isConfirmed: true, // Manual entries are confirmed by default or by admin
         isManualEntry: true,
+        note
       },
     });
     return NextResponse.json({ entry });

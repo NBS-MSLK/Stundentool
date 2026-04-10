@@ -125,6 +125,7 @@ export default function AdminView() {
                 <th style={{ padding: '1rem' }}>Start</th>
                 <th style={{ padding: '1rem' }}>Ende</th>
                 <th style={{ padding: '1rem' }}>Bestätigt</th>
+                <th style={{ padding: '1rem' }}>Unterschrieben</th>
                 <th style={{ padding: '1rem' }}>Aktion</th>
               </tr>
             </thead>
@@ -152,6 +153,28 @@ export default function AdminView() {
                     <span style={{ color: e.isConfirmed ? 'var(--success)' : 'var(--danger)', fontWeight: 'bold' }}>
                       {e.isConfirmed ? 'Ja' : 'Nein'}
                     </span>
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                    <button 
+                      onClick={async () => {
+                        await fetch(`/api/entries/${e.id}`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ isSubmitted: !e.isSubmitted })
+                        });
+                        fetchEntries();
+                      }}
+                      className="btn-primary" 
+                      style={{ 
+                        backgroundColor: e.isSubmitted ? 'var(--success)' : 'var(--text-secondary)', 
+                        padding: '0.4rem 0.8rem', 
+                        fontSize: '0.8rem',
+                        border: 'none',
+                        borderRadius: 'var(--radius-sm)'
+                      }}
+                    >
+                      {e.isSubmitted ? 'Ja' : 'Nein (Markieren)'}
+                    </button>
                   </td>
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>

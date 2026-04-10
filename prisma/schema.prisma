@@ -26,6 +26,7 @@ model TimeEntry {
   activity      String?   // User-selected activity grouping
   isConfirmed   Boolean   @default(false)
   isManualEntry Boolean   @default(false)
+  isSubmitted   Boolean   @default(false)
   isArchived    Boolean   @default(false)
   note          String?
   createdAt     DateTime  @default(now())
