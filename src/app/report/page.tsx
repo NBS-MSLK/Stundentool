@@ -58,12 +58,12 @@ function ReportContent() {
           .report-page { margin-bottom: 0 !important; padding: 0 !important; }
           h3 { margin-bottom: 1rem !important; }
           .leader-info { margin-bottom: 1rem !important; }
-          .signature-confirm { margin-top: 1rem !important; margin-bottom: 2rem !important; }
-          .signature-area { margin-top: 2rem !important; }
+          .signature-confirm { margin-top: 0.5rem !important; margin-bottom: 1rem !important; }
+          .signature-area { margin-top: 1.5rem !important; }
         }
         .report-table th, .report-table td {
           border: 1px solid black;
-          padding: 0.4rem;
+          padding: 0.3rem 0.5rem;
           vertical-align: middle;
         }
         .report-table th {
@@ -105,7 +105,7 @@ function ReportContent() {
             <div style={{ overflowX: 'auto', marginBottom: '1rem', width: '100%' }}>
               <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                 <thead>
-                  <tr style={{ height: '80px' }}>
+                  <tr style={{ height: '60px' }}>
                     <th>Datum</th>
                     <th>geleistete Arbeit</th>
                     <th>Gewerk / Arbeitsbereich</th>
@@ -143,11 +143,11 @@ function ReportContent() {
               </table>
             </div>
 
-            <div className="signature-confirm" style={{ marginTop: '2rem', marginBottom: '4rem' }}>
+            <div className="signature-confirm" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
               Ich bestätige, dass die o.g. Arbeitsleistungen im Rahmen der von mir beantragten Fördermaßnahme erbracht wurden.
             </div>
 
-            <div className="signature-area" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem' }}>
+            <div className="signature-area" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem' }}>
               <div style={{ width: '30%', borderTop: '1px solid black', paddingTop: '0.5rem' }}>Ort, Datum</div>
               <div style={{ width: '50%', borderTop: '1px solid black', paddingTop: '0.5rem', textAlign: 'center' }}>Unterschrift der/des Vertretungsberechtigten</div>
             </div>
