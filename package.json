@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "npx prisma db push --accept-data-loss && next start",
+    "build": "next build && prisma generate",
+    "start": "prisma db push --accept-data-loss && exec next start",
     "lint": "eslint"
   },
   "dependencies": {
