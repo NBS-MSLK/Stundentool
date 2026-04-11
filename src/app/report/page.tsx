@@ -42,8 +42,8 @@ function ReportContent() {
 
   // Split entries into chunks of 12
   const chunks = [];
-  for (let i = 0; i < entries.length; i += 12) {
-    chunks.push(entries.slice(i, i + 12));
+  for (let i = 0; i < entries.length; i += 10) {
+    chunks.push(entries.slice(i, i + 10));
   }
   if (chunks.length === 0) chunks.push([]); // Always render at least one empty page
 
@@ -52,13 +52,18 @@ function ReportContent() {
       <style dangerouslySetInnerHTML={{ __html: `
         @media print { 
           .no-print { display: none !important; } 
-          @page { size: landscape; margin: 10mm; }
-          body { background-color: white !important; font-size: 12pt; }
+          @page { size: landscape; margin: 5mm; }
+          body { background-color: white !important; font-size: 11pt; }
           .report-page:not(:last-child) { page-break-after: always; }
+          .report-page { margin-bottom: 0 !important; padding: 0 !important; }
+          h3 { margin-bottom: 1rem !important; }
+          .leader-info { margin-bottom: 1rem !important; }
+          .signature-confirm { margin-top: 1rem !important; margin-bottom: 2rem !important; }
+          .signature-area { margin-top: 2rem !important; }
         }
         .report-table th, .report-table td {
           border: 1px solid black;
-          padding: 0.5rem;
+          padding: 0.4rem;
           vertical-align: middle;
         }
         .report-table th {
@@ -84,7 +89,7 @@ function ReportContent() {
           <div key={index} className="report-page" style={{ padding: '0', marginBottom: '2rem' }}>
             <h3 style={{ marginBottom: '2rem', fontSize: '1.2rem', fontWeight: 'bold' }}>Stundenzettel / Dokumentation der geleisteten Arbeitsstunden im Rahmen bürgerschaftlichen Engagements (Seite {index + 1}/{chunks.length})</h3>
             
-            <table style={{ marginBottom: '2rem', borderCollapse: 'collapse', width: 'auto' }}>
+            <table className="leader-info" style={{ marginBottom: '2rem', borderCollapse: 'collapse', width: 'auto' }}>
               <tbody>
                 <tr>
                   <td style={{ paddingRight: '1rem', paddingBottom: '0.5rem' }}>LEADER-Projekt:</td>
@@ -121,7 +126,7 @@ function ReportContent() {
                     return (
                       <tr key={e.id} style={{ height: '40px' }}>
                         <td style={{ textAlign: 'center' }}>{start.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                        <td>{e.activity || 'Arbeitstreffen'}{e.note ? ` - ${e.note}` : ''}</td>
+                        <td>{e.activity || 'Arbeitstreffen'}</td>
                         <td>{getGroupForActivity(e.activity)}</td>
                         <td style={{ textAlign: 'right' }}>{hours}</td>
                         <td>{personName}</td>
@@ -138,11 +143,11 @@ function ReportContent() {
               </table>
             </div>
 
-            <div style={{ marginTop: '2rem', marginBottom: '4rem' }}>
+            <div className="signature-confirm" style={{ marginTop: '2rem', marginBottom: '4rem' }}>
               Ich bestätige, dass die o.g. Arbeitsleistungen im Rahmen der von mir beantragten Fördermaßnahme erbracht wurden.
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem' }}>
+            <div className="signature-area" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem' }}>
               <div style={{ width: '30%', borderTop: '1px solid black', paddingTop: '0.5rem' }}>Ort, Datum</div>
               <div style={{ width: '50%', borderTop: '1px solid black', paddingTop: '0.5rem', textAlign: 'center' }}>Unterschrift der/des Vertretungsberechtigten</div>
             </div>
