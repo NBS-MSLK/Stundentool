@@ -31,11 +31,11 @@ function ReportContent() {
     
     const fetchUrl = showAll ? '/api/entries?all=true' : `/api/entries?userId=${u.id}`;
     
-    fetch(fetchUrl).then(res => res.json()).then(data => {
-      if (data.entries) {
-        setEntries(data.entries.filter((e: any) => e.isConfirmed && e.endTime !== null));
-      }
-    });
+      fetch(fetchUrl).then(res => res.json()).then(data => {
+        if (data.entries) {
+          setEntries(data.entries.filter((e: any) => e.isConfirmed && e.endTime !== null && !e.isSubmitted));
+        }
+      });
   }, [router, showAll]);
 
   if (!user) return null;

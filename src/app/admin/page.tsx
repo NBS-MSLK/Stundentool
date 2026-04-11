@@ -122,10 +122,10 @@ export default function AdminView() {
                 <th style={{ padding: '1rem' }}>Nutzer</th>
                 <th style={{ padding: '1rem' }}>Aktivität</th>
                 <th style={{ padding: '1rem' }}>Notiz</th>
-                <th style={{ padding: '1rem' }}>Start</th>
-                <th style={{ padding: '1rem' }}>Ende</th>
+                <th style={{ padding: '1rem' }}>Datum</th>
+                <th style={{ padding: '1rem' }}>Stunden</th>
                 <th style={{ padding: '1rem' }}>Bestätigt</th>
-                <th style={{ padding: '1rem' }}>Unterschrieben</th>
+                <th style={{ padding: '1rem' }}>Unterschrieben & abgegeben</th>
                 <th style={{ padding: '1rem' }}>Aktion</th>
               </tr>
             </thead>
@@ -173,7 +173,7 @@ export default function AdminView() {
                         borderRadius: 'var(--radius-sm)'
                       }}
                     >
-                      {e.isSubmitted ? 'Ja' : 'Nein (Markieren)'}
+                      {e.isSubmitted ? 'Ja' : 'Nein'}
                     </button>
                   </td>
                   <td style={{ padding: '1rem' }}>
