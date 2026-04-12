@@ -235,8 +235,8 @@ export default function Dashboard() {
             const dateStr = startD.toLocaleDateString('de-DE');
             displayText = `${dateStr} (${hours} ${hours === 1 ? 'Stunde' : 'Stunden'}) ${entry.activity ? `(${entry.activity})` : ''}`;
           } else {
-            const startStr = new Date(entry.startTime).toLocaleString('de-DE');
-            displayText = `${startStr} - Aktiv ${entry.activity ? `(${entry.activity})` : ''}`;
+            const startStr = new Date(entry.startTime).toLocaleDateString('de-DE');
+            displayText = `${startStr} - Läuft gerade... ${entry.activity ? `(${entry.activity})` : ''}`;
           }
           
           

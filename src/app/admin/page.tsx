@@ -131,12 +131,12 @@ export default function AdminView() {
             </thead>
             <tbody>
               {currentEntries.map(e => {
-                let startStr = new Date(e.startTime).toLocaleString('de-DE');
-                let endStr = e.endTime ? new Date(e.endTime).toLocaleString('de-DE') : 'Aktiv...';
+                const startTime = new Date(e.startTime);
+                let startStr = startTime.toLocaleDateString('de-DE');
+                let endStr = 'Aktiv...';
                 
-                if (e.isManualEntry && e.endTime) {
-                  startStr = new Date(e.startTime).toLocaleDateString('de-DE');
-                  const diffMs = new Date(e.endTime).getTime() - new Date(e.startTime).getTime();
+                if (e.endTime) {
+                  const diffMs = new Date(e.endTime).getTime() - startTime.getTime();
                   let hs = Math.ceil(diffMs / (1000 * 60 * 60));
                   if (hs < 1) hs = 1;
                   endStr = `+ ${hs} Stunden`;
