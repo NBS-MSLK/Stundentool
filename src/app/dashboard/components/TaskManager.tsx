@@ -31,6 +31,41 @@ export default function TaskManager({ user }: { user: any }) {
   const openTasks = tasks.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS');
   const doneTasks = tasks.filter(t => t.status === 'DONE');
 
+  const handleVolunteer = async (taskId: string, role: string) => {
+    try {
+      await fetch(`/api/tasks/${taskId}/volunteer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, userName: user.name, role })
+      });
+      fetchTasks();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleVote = async (taskId: string, proposalId: string, vote: string) => {
+    try {
+      await fetch(`/api/tasks/${taskId}/proposals/${proposalId}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, userName: user.name, vote })
+      });
+      fetchTasks();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRemoveVolunteer = async (taskId: string) => {
+    try {
+      await fetch(`/api/tasks/${taskId}/volunteer?userId=${user.id}`, { method: 'DELETE' });
+      fetchTasks();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   if (loading) return <div>Lade Aufgaben...</div>;
 
   return (
@@ -51,8 +86,8 @@ export default function TaskManager({ user }: { user: any }) {
               const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
               
               return (
-                <Link key={task.id} href={`/dashboard/tasks/${task.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <div className="glass-card" style={{ padding: '1rem', borderLeft: '4px solid #8a2be2', backgroundColor: 'rgba(138, 43, 226, 0.05)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div key={task.id} className="glass-card" style={{ padding: '0', borderLeft: '4px solid #8a2be2', backgroundColor: 'rgba(138, 43, 226, 0.05)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  <Link href={`/dashboard/tasks/${task.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '1rem', alignItems: 'center', padding: '1rem' }}>
                     <div style={{ fontSize: '2rem' }}>⏰</div>
                     <div>
                       <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{task.title}</div>
@@ -63,8 +98,28 @@ export default function TaskManager({ user }: { user: any }) {
                         {diffDays < 0 && ` (War vor ${Math.abs(diffDays)} Tagen)`}
                       </div>
                     </div>
+                  </Link>
+                  <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--bg-hover)', backgroundColor: 'var(--bg-primary)' }}>
+                    <div style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Mithilfe:</div>
+                    <div style={{ display: 'flex', gap: '0.2rem' }}>
+                      <button 
+                        onClick={(e) => { e.preventDefault(); handleRemoveVolunteer(task.id); }}
+                        style={{ flex: 1, padding: '0.3rem', background: !task.volunteers?.some((v: any) => v.userId === user.id) ? '#ff4d4f' : 'transparent', border: '1px solid #ff4d4f', borderRadius: '2px', cursor: 'pointer' }}
+                        title="Ich kann gar nicht"
+                      >❌</button>
+                      <button 
+                        onClick={(e) => { e.preventDefault(); handleVolunteer(task.id, 'MAYBE'); }}
+                        style={{ flex: 1, padding: '0.3rem', background: task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'MAYBE' ? '#faad14' : 'transparent', border: '1px solid #faad14', borderRadius: '2px', cursor: 'pointer' }}
+                        title="Vielleicht / Unter Vorbehalt"
+                      >❓</button>
+                      <button 
+                        onClick={(e) => { e.preventDefault(); handleVolunteer(task.id, 'HELPER'); }}
+                        style={{ flex: 1, padding: '0.3rem', background: task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'HELPER' || task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'CONTACT' ? '#52c41a' : 'transparent', border: '1px solid #52c41a', borderRadius: '2px', cursor: 'pointer' }}
+                        title="Ich bin sicher dabei"
+                      >✅</button>
+                    </div>
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>
@@ -77,8 +132,8 @@ export default function TaskManager({ user }: { user: any }) {
       <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Anstehend (Offen / In Bearbeitung)</h3>
       <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
         {openTasks.map(task => (
-          <Link key={task.id} href={`/dashboard/tasks/${task.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div className="glass-card" style={{ padding: '1rem', borderLeft: '4px solid var(--accent-primary)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <div key={task.id} className="glass-card" style={{ padding: '0', borderLeft: '4px solid var(--accent-primary)', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <Link href={`/dashboard/tasks/${task.id}`} style={{ padding: '1rem', textDecoration: 'none', color: 'inherit', flex: 1, display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem' }}>{task.title}</div>
               
               <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem', flex: 1 }}>
@@ -103,8 +158,50 @@ export default function TaskManager({ user }: { user: any }) {
                   {task.status === 'IN_PROGRESS' ? 'IN ARBEIT' : 'OFFEN'}
                 </span>
               </div>
-            </div>
-          </Link>
+            </Link>
+
+            {task.dateProposals?.length > 0 && !task.dueDate ? (
+              <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--bg-hover)', backgroundColor: 'var(--bg-primary)' }}>
+                <div style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Terminvorschläge:</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {task.dateProposals.map((p: any) => {
+                    const myVote = p.votes?.find((v: any) => v.userId === user.id)?.vote;
+                    return (
+                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>{new Date(p.date).toLocaleDateString('de-DE')}</div>
+                        <div style={{ display: 'flex', gap: '0.2rem', width: '100px' }}>
+                          <button onClick={(e) => { e.preventDefault(); handleVote(task.id, p.id, 'NO'); }} style={{ flex: 1, padding: '0.2rem', background: myVote === 'NO' ? '#ff4d4f' : 'transparent', border: '1px solid #ff4d4f', borderRadius: '2px', cursor: 'pointer' }}>❌</button>
+                          <button onClick={(e) => { e.preventDefault(); handleVote(task.id, p.id, 'MAYBE'); }} style={{ flex: 1, padding: '0.2rem', background: myVote === 'MAYBE' ? '#faad14' : 'transparent', border: '1px solid #faad14', borderRadius: '2px', cursor: 'pointer' }}>❓</button>
+                          <button onClick={(e) => { e.preventDefault(); handleVote(task.id, p.id, 'YES'); }} style={{ flex: 1, padding: '0.2rem', background: myVote === 'YES' ? '#52c41a' : 'transparent', border: '1px solid #52c41a', borderRadius: '2px', cursor: 'pointer' }}>✅</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--bg-hover)', backgroundColor: 'var(--bg-primary)' }}>
+                <div style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Mithilfe:</div>
+                <div style={{ display: 'flex', gap: '0.2rem' }}>
+                  <button 
+                    onClick={(e) => { e.preventDefault(); handleRemoveVolunteer(task.id); }}
+                    style={{ flex: 1, padding: '0.3rem', background: !task.volunteers?.some((v: any) => v.userId === user.id) ? '#ff4d4f' : 'transparent', border: '1px solid #ff4d4f', borderRadius: '2px', cursor: 'pointer' }}
+                    title="Ich kann gar nicht"
+                  >❌</button>
+                  <button 
+                    onClick={(e) => { e.preventDefault(); handleVolunteer(task.id, 'MAYBE'); }}
+                    style={{ flex: 1, padding: '0.3rem', background: task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'MAYBE' ? '#faad14' : 'transparent', border: '1px solid #faad14', borderRadius: '2px', cursor: 'pointer' }}
+                    title="Vielleicht / Unter Vorbehalt"
+                  >❓</button>
+                  <button 
+                    onClick={(e) => { e.preventDefault(); handleVolunteer(task.id, 'HELPER'); }}
+                    style={{ flex: 1, padding: '0.3rem', background: task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'HELPER' || task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'CONTACT' ? '#52c41a' : 'transparent', border: '1px solid #52c41a', borderRadius: '2px', cursor: 'pointer' }}
+                    title="Ich bin sicher dabei"
+                  >✅</button>
+                </div>
+              </div>
+            )}
+          </div>
         ))}
         {openTasks.length === 0 && <div style={{ color: 'var(--text-secondary)' }}>Keine offenen Aufgaben vorhanden.</div>}
       </div>

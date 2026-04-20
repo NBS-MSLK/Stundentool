@@ -353,7 +353,9 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{v.userName}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{v.role === 'CONTACT' ? 'Ansprechpartner' : 'Mithilfe'}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      {v.role === 'CONTACT' ? 'Ansprechpartner' : v.role === 'MAYBE' ? 'Vielleicht / Vorbehalt' : 'Mithilfe'}
+                    </div>
                   </div>
                 </div>
               ))}
