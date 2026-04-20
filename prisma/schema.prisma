@@ -8,13 +8,17 @@ datasource db {
 }
 
 model User {
-  id              String      @id @default(uuid())
-  name            String      @unique
-  password        String      @default("")
-  role            String      @default("USER") // "USER" or "ADMIN"
-  showInHighscore Boolean     @default(true)
-  entries         TimeEntry[]
-  createdAt       DateTime    @default(now())
+  id               String          @id @default(uuid())
+  name             String          @unique
+  password         String          @default("")
+  role             String          @default("USER") // "USER" or "ADMIN"
+  showInHighscore  Boolean         @default(true)
+  entries          TimeEntry[]
+  tasksCreated     Task[]          @relation("UserTasksCreated")
+  taskVolunteering TaskVolunteer[]
+  taskDateVotes    TaskDateVote[]
+  taskNotes        TaskNote[]
+  createdAt        DateTime        @default(now())
 }
 
 model TimeEntry {
@@ -31,4 +35,90 @@ model TimeEntry {
   note          String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+}
+
+model Task {
+  id              String          @id @default(uuid())
+  title           String
+  description     String?
+  creatorId       String
+  creator         User            @relation("UserTasksCreated", fields: [creatorId], references: [id])
+  creatorName     String      
+  imageUrl        String?         // Link zu einem Bild
+  dueDate         DateTime?       // Feststehendes Termin-Datum (sobald Terminiert)
+  status          String          @default("OPEN") // "OPEN", "IN_PROGRESS", "DONE", "SCHEDULED"
+  estimatedHours  Int?
+  creatorIsContact Boolean        @default(true) // Ersteller als Zuständig?
+  materials       TaskMaterial[]
+  steps           TaskStep[]
+  volunteers      TaskVolunteer[]
+  dateProposals   TaskDateProposal[]
+  notes           TaskNote[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model TaskStep {
+  id            String    @id @default(uuid())
+  taskId        String
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  description   String
+  estimatedHours Int?
+  isCompleted   Boolean   @default(false)
+}
+
+model TaskMaterial {
+  id            String    @id @default(uuid())
+  taskId        String
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  name          String
+  buyLink       String?
+  isAcquired    Boolean   @default(false)
+}
+
+model TaskVolunteer {
+  id            String    @id @default(uuid())
+  taskId        String
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userName      String
+  role          String    @default("HELPER") // "CONTACT" (Ansprechpartner) or "HELPER"
+}
+
+model TaskDateProposal {
+  id            String    @id @default(uuid())
+  taskId        String
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  date          DateTime
+  timeOfDay     String    @default("ALL_DAY") // "MORNING", "AFTERNOON", "EVENING", "ALL_DAY"
+  votes         TaskDateVote[]
+  createdAt     DateTime  @default(now())
+}
+
+model TaskDateVote {
+  id            String    @id @default(uuid())
+  proposalId    String
+  proposal      TaskDateProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userName      String
+  vote          String    // "YES", "NO", "MAYBE"
+  createdAt     DateTime  @default(now())
+  
+  @@unique([proposalId, userId])
+}
+
+model TaskNote {
+  id            String    @id @default(uuid())
+  taskId        String
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userName      String
+  content       String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@unique([taskId, userId])
 }

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ACTIVITIES } from '@/lib/activities';
 import confetti from 'canvas-confetti';
+import TaskManager from './components/TaskManager';
 
 type User = { id: string, name: string, role: string };
 type TimeEntry = { 
@@ -25,6 +26,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ systemActiveHours: 0, systemArchivedHours: 0, hardcodedBaseHours: 619, totalGoalHours: 2700 });
   const [selectedActivity, setSelectedActivity] = useState('');
+  const [activeTab, setActiveTab] = useState<'STUNDEN' | 'TASKS'>('TASKS');
   
   const [elapsedString, setElapsedString] = useState('00:00:00');
 
@@ -148,7 +150,24 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="glass-card" style={{ marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--bg-secondary)', paddingBottom: '0.5rem', overflowX: 'auto' }}>
+        <button 
+          onClick={() => setActiveTab('TASKS')} 
+          style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'TASKS' ? '3px solid var(--accent-primary)' : '3px solid transparent', color: activeTab === 'TASKS' ? 'white' : 'var(--text-secondary)', fontWeight: activeTab === 'TASKS' ? 'bold' : 'normal', cursor: 'pointer', fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
+          MS-Taskmanager
+        </button>
+        <button 
+          onClick={() => setActiveTab('STUNDEN')} 
+          style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'STUNDEN' ? '3px solid var(--accent-primary)' : '3px solid transparent', color: activeTab === 'STUNDEN' ? 'white' : 'var(--text-secondary)', fontWeight: activeTab === 'STUNDEN' ? 'bold' : 'normal', cursor: 'pointer', fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
+          Zeiterfassung
+        </button>
+      </div>
+
+      {activeTab === 'TASKS' ? (
+        <TaskManager user={user} />
+      ) : (
+        <>
+          <div className="glass-card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
           <span>Projekt-Förderwert</span>
           <div style={{ textAlign: 'right' }}>
@@ -293,6 +312,8 @@ export default function Dashboard() {
         })}
         {entries.length === 0 && <p style={{ color: 'var(--text-secondary)' }}>Noch keine Einträge vorhanden.</p>}
       </div>
+      </>
+      )}
     </div>
   );
 }

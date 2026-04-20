@@ -20,6 +20,10 @@ export default function NewEntry() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const n = urlParams.get('note');
+    if (n) setNote(n);
+    
     const userJson = localStorage.getItem('user');
     if (!userJson) {
       router.push('/');
