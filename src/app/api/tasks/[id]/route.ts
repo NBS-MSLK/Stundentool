@@ -41,8 +41,12 @@ export async function PUT(request: Request, context: unknown) {
     if (proposedDates) {
       dataToUpdate.dateProposals = {
         deleteMany: { id: { notIn: proposedDates.filter((p:any) => p.id).map((p:any) => p.id) } },
+        update: proposedDates.filter((p:any) => p.id).map((p:any) => ({
+          where: { id: p.id },
+          data: { startTime: p.startTime, endTime: p.endTime }
+        })),
         create: proposedDates.filter((p:any) => !p.id).map((p:any) => ({
-          date: new Date(p.date), timeOfDay: p.timeOfDay
+          date: new Date(p.date), startTime: p.startTime, endTime: p.endTime
         }))
       };
     }
