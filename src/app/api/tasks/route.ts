@@ -54,7 +54,8 @@ export async function POST(request: Request) {
         dateProposals: proposedDates && proposedDates.length > 0 ? {
           create: proposedDates.map((p: any) => ({
             date: new Date(p.date),
-            timeOfDay: p.timeOfDay
+            startTime: p.startTime || '08:00',
+            endTime: p.endTime || '09:00'
           }))
         } : undefined,
       },

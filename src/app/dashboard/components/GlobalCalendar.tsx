@@ -38,12 +38,6 @@ export default function GlobalCalendar({ tasks, user, refetch }: { tasks: any[],
     refetch();
   };
 
-  const getTimeLabel = (t: string) => {
-    if (t === 'MORNING') return 'Vormittags';
-    if (t === 'AFTERNOON') return 'Nachmittags';
-    if (t === 'EVENING') return 'Abends';
-    return 'Ganzen Tag';
-  };
 
   return (
     <div className="glass-card" style={{ marginBottom: '2rem', overflowX: 'auto' }}>
@@ -126,7 +120,7 @@ export default function GlobalCalendar({ tasks, user, refetch }: { tasks: any[],
                     <div key={idx} style={{ backgroundColor: 'rgba(138, 43, 226, 0.1)', padding: '0.3rem', borderRadius: '4px', fontSize: '0.75rem' }}>
                       <Link href={`/dashboard/tasks/${item.taskId}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
                         <div style={{ fontWeight: 'bold', color: '#8a2be2', lineHeight: 1.2 }}>{item.taskTitle}</div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{getTimeLabel(p.timeOfDay)}</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{p.startTime || '08:00'} - {p.endTime || '12:00'} Uhr</div>
                         <div style={{ fontSize: '0.65rem', marginBottom: '0.3rem' }}>Zusagen: {totalYes}</div>
                       </Link>
                       

@@ -7,6 +7,10 @@ import GlobalCalendar from './GlobalCalendar';
 export default function TaskManager({ user }: { user: any }) {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [proposingTaskId, setProposingTaskId] = useState<string | null>(null);
+  const [newProposalDate, setNewProposalDate] = useState('');
+  const [newProposalStartTime, setNewProposalStartTime] = useState('08:00');
+  const [newProposalEndTime, setNewProposalEndTime] = useState('12:00');
   const router = useRouter();
 
   useEffect(() => {
@@ -66,14 +70,49 @@ export default function TaskManager({ user }: { user: any }) {
     }
   };
 
+  const handleCreateProposal = async (taskId: string) => {
+    if (!newProposalDate || !newProposalStartTime || !newProposalEndTime) return;
+    
+    if (parseInt(newProposalStartTime) >= parseInt(newProposalEndTime)) {
+      alert('Die Startzeit muss zwingend vor der Endzeit liegen!');
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/tasks/${taskId}/proposals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: newProposalDate, startTime: newProposalStartTime, endTime: newProposalEndTime })
+      });
+      const data = await res.json();
+      if (data.proposal) {
+        await fetch(`/api/tasks/${taskId}/proposals/${data.proposal.id}/vote`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, userName: user.name, vote: 'YES' })
+        });
+        setProposingTaskId(null);
+        setNewProposalDate('');
+        setNewProposalStartTime('08:00');
+        setNewProposalEndTime('12:00');
+        fetchTasks();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   if (loading) return <div>Lade Aufgaben...</div>;
 
   return (
     <div style={{ marginTop: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Arbeitsdienste</h2>
-        <Link href="/dashboard/tasks/new" className="btn-primary" style={{ backgroundColor: 'var(--success)' }}>
-          + Neue Arbeit eintragen
+      <div style={{ marginBottom: '2rem' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1rem' }}>Arbeitsdienste</h2>
+        <Link href="/dashboard/tasks/new" style={{ textDecoration: 'none' }}>
+           <div className="btn-primary" style={{ width: '100%', padding: '1rem', backgroundColor: 'var(--success)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+             <span style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>Ich weiß, was zu tun ist!</span>
+             <span style={{ fontSize: '0.9rem', opacity: 0.9 }}>Neue Arbeit eintragen</span>
+           </div>
         </Link>
       </div>
 
@@ -168,7 +207,7 @@ export default function TaskManager({ user }: { user: any }) {
                     const myVote = p.votes?.find((v: any) => v.userId === user.id)?.vote;
                     return (
                       <div key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>{new Date(p.date).toLocaleDateString('de-DE')}</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>{new Date(p.date).toLocaleDateString('de-DE')} <span style={{color: 'var(--text-secondary)'}}>({p.startTime || '08:00'} - {p.endTime || '12:00'})</span></div>
                         <div style={{ display: 'flex', gap: '0.2rem', width: '100px' }}>
                           <button onClick={(e) => { e.preventDefault(); handleVote(task.id, p.id, 'NO'); }} style={{ flex: 1, padding: '0.2rem', background: myVote === 'NO' ? '#ff4d4f' : 'transparent', border: '1px solid #ff4d4f', borderRadius: '2px', cursor: 'pointer' }}>❌</button>
                           <button onClick={(e) => { e.preventDefault(); handleVote(task.id, p.id, 'MAYBE'); }} style={{ flex: 1, padding: '0.2rem', background: myVote === 'MAYBE' ? '#faad14' : 'transparent', border: '1px solid #faad14', borderRadius: '2px', cursor: 'pointer' }}>❓</button>
@@ -199,6 +238,41 @@ export default function TaskManager({ user }: { user: any }) {
                     title="Ich bin sicher dabei"
                   >✅</button>
                 </div>
+              </div>
+            )}
+            
+            {!task.dueDate && (
+              <div style={{ padding: '0 1rem 0.75rem 1rem', backgroundColor: 'var(--bg-primary)' }}>
+                {proposingTaskId === task.id ? (
+                  <div style={{ padding: '0.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '4px', cursor: 'default' }}>
+                    <input type="date" value={newProposalDate} onChange={e => setNewProposalDate(e.target.value)} className="input-field" style={{ marginBottom: '0.5rem', padding: '0.3rem', width: '100%', fontSize: '0.8rem' }} />
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Von</label>
+                        <select value={newProposalStartTime} onChange={e => setNewProposalStartTime(e.target.value)} className="input-field" style={{ padding: '0.3rem', width: '100%', fontSize: '0.8rem' }}>
+                          {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'].map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Bis</label>
+                        <select value={newProposalEndTime} onChange={e => setNewProposalEndTime(e.target.value)} className="input-field" style={{ padding: '0.3rem', width: '100%', fontSize: '0.8rem' }}>
+                          {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'].map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="btn-primary" onClick={(e) => { e.preventDefault(); handleCreateProposal(task.id); }} style={{ flex: 1, padding: '0.3rem', fontSize: '0.8rem', backgroundColor: 'var(--success)' }}>Speichern</button>
+                      <button className="btn-primary" onClick={(e) => { e.preventDefault(); setProposingTaskId(null); }} style={{ flex: 1, padding: '0.3rem', fontSize: '0.8rem', backgroundColor: 'var(--text-secondary)' }}>Abbruch</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={(e) => { e.preventDefault(); setProposingTaskId(task.id); setNewProposalDate(''); setNewProposalStartTime('08:00'); setNewProposalEndTime('12:00'); }}
+                    style={{ width: '100%', padding: '0.3rem', fontSize: '0.75rem', background: 'transparent', border: '1px dashed var(--text-secondary)', color: 'var(--text-secondary)', borderRadius: '4px', cursor: 'pointer' }}
+                  >
+                    + Eigenen Terminvorschlag
+                  </button>
+                )}
               </div>
             )}
           </div>

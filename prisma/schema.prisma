@@ -91,7 +91,9 @@ model TaskDateProposal {
   taskId        String
   task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
   date          DateTime
-  timeOfDay     String    @default("ALL_DAY") // "MORNING", "AFTERNOON", "EVENING", "ALL_DAY"
+  timeOfDay     String    @default("ALL_DAY") // "MORNING", "AFTERNOON", "EVENING", "ALL_DAY" - deprecated
+  startTime     String    @default("08:00")
+  endTime       String    @default("12:00")
   votes         TaskDateVote[]
   createdAt     DateTime  @default(now())
 }

@@ -14,9 +14,10 @@ export default function NewTask() {
   const [creatorIsContact, setCreatorIsContact] = useState(true);
   
   // Terminal dates + time blocks proposals
-  const [targetDates, setTargetDates] = useState<{date: string, timeOfDay: string}[]>([]);
+  const [targetDates, setTargetDates] = useState<{date: string, startTime: string, endTime: string}[]>([]);
   const [tempDate, setTempDate] = useState('');
-  const [tempTime, setTempTime] = useState('ALL_DAY');
+  const [tempStartTime, setTempStartTime] = useState('08:00');
+  const [tempEndTime, setTempEndTime] = useState('12:00');
   
   const [steps, setSteps] = useState([{ description: '', estimatedHours: '' }]);
   const [materials, setMaterials] = useState([{ name: '', buyLink: '' }]);
@@ -69,9 +70,14 @@ export default function NewTask() {
 
   const addDateProposal = () => {
     if (tempDate) {
-      setTargetDates([...targetDates, { date: tempDate, timeOfDay: tempTime }]);
+      if (parseInt(tempStartTime) >= parseInt(tempEndTime)) {
+        alert('Die Startzeit muss zwingend vor der Endzeit liegen!');
+        return;
+      }
+      setTargetDates([...targetDates, { date: tempDate, startTime: tempStartTime, endTime: tempEndTime }]);
       setTempDate('');
-      setTempTime('ALL_DAY');
+      setTempStartTime('08:00');
+      setTempEndTime('12:00');
     }
   };
 
@@ -79,13 +85,6 @@ export default function NewTask() {
     const fresh = [...targetDates];
     fresh.splice(idx, 1);
     setTargetDates(fresh);
-  };
-
-  const getTimeLabel = (t: string) => {
-    if (t === 'MORNING') return 'Vormittags';
-    if (t === 'AFTERNOON') return 'Nachmittags';
-    if (t === 'EVENING') return 'Abends';
-    return 'Ganzen Tag';
   };
 
   if (!user) return null;
@@ -159,19 +158,28 @@ export default function NewTask() {
             
             {targetDates.map((td, idx) => (
               <div key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'var(--accent-primary)', color: 'white', padding: '0.5rem 1rem', borderRadius: '20px', marginRight: '0.5rem', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                {new Date(td.date).toLocaleDateString('de-DE')} - {getTimeLabel(td.timeOfDay)}
+                {new Date(td.date).toLocaleDateString('de-DE')} ({td.startTime} - {td.endTime})
                 <button type="button" onClick={() => removeDateProposal(idx)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>×</button>
               </div>
             ))}
             
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-              <input type="date" className="input-field" style={{ width: 'auto' }} value={tempDate} onChange={e => setTempDate(e.target.value)} />
-              <select className="input-field" style={{ width: 'auto' }} value={tempTime} onChange={e => setTempTime(e.target.value)}>
-                <option value="ALL_DAY">Ganzen Tag</option>
-                <option value="MORNING">Vormittags</option>
-                <option value="AFTERNOON">Nachmittags</option>
-                <option value="EVENING">Abends</option>
-              </select>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Datum</label>
+                <input type="date" className="input-field" style={{ width: 'auto' }} value={tempDate} onChange={e => setTempDate(e.target.value)} />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Von</label>
+                <select className="input-field" style={{ width: 'auto' }} value={tempStartTime} onChange={e => setTempStartTime(e.target.value)}>
+                  {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'].map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Bis</label>
+                <select className="input-field" style={{ width: 'auto' }} value={tempEndTime} onChange={e => setTempEndTime(e.target.value)}>
+                  {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'].map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
               <button type="button" onClick={addDateProposal} className="btn-primary" disabled={!tempDate}>Hinzufügen</button>
             </div>
           </div>

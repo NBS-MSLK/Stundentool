@@ -6,7 +6,7 @@ export async function POST(request: Request, context: unknown) {
   
   try {
     const body = await request.json();
-    const { date, timeOfDay } = body;
+    const { date, startTime, endTime } = body;
 
     if (!date) {
       return NextResponse.json({ error: 'Missing date' }, { status: 400 });
@@ -16,7 +16,8 @@ export async function POST(request: Request, context: unknown) {
       data: {
         taskId: id,
         date: new Date(date),
-        timeOfDay: timeOfDay || 'ALL_DAY'
+        startTime: startTime || '08:00',
+        endTime: endTime || '09:00'
       },
       include: { votes: true }
     });

@@ -14,12 +14,7 @@ const renderTextWithLinks = (text: string) => {
   });
 };
 
-const getTimeLabel = (t: string) => {
-  if (t === 'MORNING') return 'Vormittags';
-  if (t === 'AFTERNOON') return 'Nachmittags';
-  if (t === 'EVENING') return 'Abends';
-  return 'Ganzen Tag';
-};
+
 
 export default function TaskDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -241,7 +236,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
                     {new Date(p.date).toLocaleDateString('de-DE')}
                   </div>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                    {getTimeLabel(p.timeOfDay)}
+                    {p.startTime || '08:00'} - {p.endTime || '12:00'} Uhr
                   </div>
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '1rem' }}>
