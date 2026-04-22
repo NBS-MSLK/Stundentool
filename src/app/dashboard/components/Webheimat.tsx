@@ -333,9 +333,9 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
             src="https://www.instagram.com/makerspace_luebbecke/embed" 
             width="100%" 
             height="480" 
-            frameBorder="0" 
+            frameBorder={0} 
             scrolling="no" 
-            allowtransparency="true"
+            allowTransparency={true}
             style={{ border: 'none', overflow: 'hidden', borderRadius: 'var(--radius-md)', maxWidth: '500px' }}
           ></iframe>
         </div>
