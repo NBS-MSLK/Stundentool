@@ -114,7 +114,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)' }}></div>
-                Eingereicht: {funding.submittedAmount.toLocaleString('de-DE')} €
+                Aktuell eingereicht: {funding.submittedAmount.toLocaleString('de-DE')} €
               </div>
             </div>
             {funding.lastSubmittedDate && (
@@ -142,6 +142,8 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
                   <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#52c41a' }}>{t.title}</div>
                   <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                     Termin: {new Date(t.dueDate).toLocaleDateString('de-DE')}
+                    {t.dateProposals?.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()) && 
+                      ` (${t.dateProposals.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()).startTime} - ${t.dateProposals.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()).endTime} Uhr)`}
                   </div>
                 </div>
                 <div style={{ fontSize: '0.85rem' }}>
