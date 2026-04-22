@@ -13,6 +13,7 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [videos, setVideos] = useState<any[]>([]);
   const [estimatedHours, setEstimatedHours] = useState('');
   const [status, setStatus] = useState('OPEN');
   const [creatorIsContact, setCreatorIsContact] = useState(true);
@@ -52,6 +53,7 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
         setTitle(data.task.title);
         setDescription(data.task.description || '');
         setImageUrl(data.task.imageUrl || '');
+        setVideos(data.task.videos && data.task.videos.length > 0 ? data.task.videos : [{ url: '', description: '' }]);
         setEstimatedHours(data.task.estimatedHours ? data.task.estimatedHours.toString() : '');
         setStatus(data.task.status);
         setCreatorIsContact(data.task.creatorIsContact);
@@ -97,6 +99,7 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
           title,
           description,
           imageUrl: imageUrl || null,
+          videos: videos.filter(v => v.url.trim()),
           estimatedHours: estimatedHours ? parseInt(estimatedHours) : null,
           status,
           creatorIsContact,
@@ -201,6 +204,70 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
               <input type="url" className="input-field" style={{ flex: 1, minWidth: '250px' }} value={imageUrl} onChange={e => setImageUrl(e.target.value)} />
               {imageUrl && (
                 <div style={{ height: '100px', width: '100px', backgroundImage: `url(${imageUrl})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', borderRadius: '8px', border: '2px solid var(--accent-primary)', flexShrink: 0, backgroundColor: 'var(--bg-secondary)' }} />
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Hilfreiche Videos (YouTube)</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {videos.map((v, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <input 
+                      type="url" 
+                      className="input-field" 
+                      value={v.url} 
+                      onChange={e => {
+                        const newVideos = [...videos];
+                        newVideos[idx].url = e.target.value;
+                        setVideos(newVideos);
+                      }} 
+                      placeholder="YouTube URL (z.B. https://www.youtube.com/watch?v=...)" 
+                    />
+                    <input 
+                      type="text" 
+                      className="input-field" 
+                      style={{ fontSize: '0.85rem', padding: '0.4rem 0.6rem' }}
+                      value={v.description || ''} 
+                      onChange={e => {
+                        const newVideos = [...videos];
+                        newVideos[idx].description = e.target.value;
+                        setVideos(newVideos);
+                      }} 
+                      placeholder="Kurze Beschreibung zum Video (optional)" 
+                    />
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      const newVideos = [...videos];
+                      newVideos.splice(idx, 1);
+                      if (newVideos.length === 0) newVideos.push({ url: '', description: '' });
+                      setVideos(newVideos);
+                    }} 
+                    className="btn-danger" 
+                    style={{ padding: '0.5rem 0.75rem', height: 'auto' }}
+                  >×</button>
+                  {idx === videos.length - 1 && (
+                    <button 
+                      type="button" 
+                      onClick={() => setVideos([...videos, { url: '', description: '' }])} 
+                      className="btn-primary" 
+                      style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.5rem 0.75rem', height: 'auto' }}
+                    >+</button>
+                  )}
+                </div>
+              ))}
+              {videos.length === 0 && (
+                <button 
+                  type="button" 
+                  onClick={() => setVideos([{ url: '', description: '' }])} 
+                  className="btn-primary" 
+                  style={{ backgroundColor: 'var(--bg-secondary)', width: '100%' }}
+                >
+                  + Video hinzufügen
+                </button>
               )}
             </div>
           </div>

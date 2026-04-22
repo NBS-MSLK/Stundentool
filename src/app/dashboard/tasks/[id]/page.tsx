@@ -26,6 +26,10 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
   const [myNote, setMyNote] = useState('');
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isProposing, setIsProposing] = useState(false);
+  const [newProposalDate, setNewProposalDate] = useState('');
+  const [newProposalStartTime, setNewProposalStartTime] = useState('08:00');
+  const [newProposalEndTime, setNewProposalEndTime] = useState('12:00');
   const router = useRouter();
 
   useEffect(() => {
@@ -70,7 +74,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
     await fetch(`/api/tasks/${taskId}/step`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stepId, isCompleted: !isCompleted })
+      body: JSON.stringify({ stepId, isCompleted: !isCompleted, userRole: user.role, userName: user.name })
     });
     fetchTask(user);
   };
@@ -156,6 +160,48 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
     fetchTask(user);
   };
 
+  const handleCreateProposal = async () => {
+    if (!newProposalDate || !newProposalStartTime || !newProposalEndTime) return;
+    
+    const pd = new Date(`${newProposalDate}T${newProposalStartTime}`);
+    const now = new Date();
+    const diffMs = pd.getTime() - now.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+
+    if (diffHours < 24) {
+      alert('Terminvorschläge sollten 24h Vorlaufzeit haben!');
+      return;
+    }
+
+    if (parseInt(newProposalStartTime) >= parseInt(newProposalEndTime)) {
+      alert('Die Startzeit muss zwingend vor der Endzeit liegen!');
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/tasks/${taskId}/proposals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: newProposalDate, startTime: newProposalStartTime, endTime: newProposalEndTime })
+      });
+      const data = await res.json();
+      if (data.proposal) {
+        await fetch(`/api/tasks/${taskId}/proposals/${data.proposal.id}/vote`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, userName: user.name, vote: 'YES' })
+        });
+        setIsProposing(false);
+        setNewProposalDate('');
+        setNewProposalStartTime('08:00');
+        setNewProposalEndTime('12:00');
+        fetchTask(user);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   if (loading || !user) return <div className="container">Lade...</div>;
   if (!task) return <div className="container">Aufgabe nicht gefunden.</div>;
 
@@ -163,6 +209,18 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
   const isSubscribed = task.subscribers?.some((s: any) => s.id === user.id);
   const canEdit = user.role === 'ADMIN' || user.id === task.creatorId;
   const existingNote = task.notes?.find((n:any) => n.userId === user.id);
+
+  const getYoutubeEmbedUrl = (url: string) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
+  };
+
+  const videos = (task.videos || []).map((v: any) => ({
+    ...v,
+    embedUrl: getYoutubeEmbedUrl(v.url)
+  })).filter((v: any) => v.embedUrl);
 
   return (
     <div className="container">
@@ -231,6 +289,8 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
            </div>
         )}
 
+
+
         {task.description && (
           <div style={{ marginTop: '1.5rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
             {renderTextWithLinks(task.description)}
@@ -238,64 +298,133 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
         )}
       </div>
 
-      {/* Date Proposals Section */}
-      {!task.dueDate && task.dateProposals?.length > 0 && (
-        <div className="glass-card" style={{ marginBottom: '2rem', border: '2px solid var(--accent-primary)' }}>
-          <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--accent-primary)' }}>📆 Terminvorschläge – Bitte abstimmen</h2>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            {task.dateProposals.map((p: any) => {
-              const myVote = p.votes?.find((v:any) => v.userId === user.id)?.vote;
-              const totalYes = p.votes?.filter((v:any) => v.vote === 'YES').length || 0;
-              const totalMaybe = p.votes?.filter((v:any) => v.vote === 'MAYBE').length || 0;
-              const totalNo = p.votes?.filter((v:any) => v.vote === 'NO').length || 0;
-              
-              return (
-                <div key={p.id} style={{ 
-                  flex: '1 1 200px', 
-                  backgroundColor: 'var(--bg-primary)', 
-                  padding: '1rem', 
-                  borderRadius: 'var(--radius-md)', 
-                  border: myVote ? `2px solid ${myVote === 'YES' ? '#52c41a' : myVote === 'NO' ? '#ff4d4f' : '#faad14'}` : '1px solid var(--bg-hover)'
-                }}>
-                  <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.2rem' }}>
-                    {new Date(p.date).toLocaleDateString('de-DE')}
+      {videos.length > 0 && (
+        <div className="glass-card" style={{ marginBottom: '2rem' }}>
+          <h2 style={{ fontSize: '1.2rem', marginBottom: '1.5rem' }}>🎥 Hilfreiche Videos</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {videos.map((v: any, idx: number) => (
+              <div key={v.id || idx} style={{ width: '100%', maxWidth: '800px' }}>
+                {v.description && (
+                  <div style={{ marginBottom: '0.75rem', fontWeight: 500, fontSize: '1.05rem', color: 'var(--text-primary)' }}>
+                    {v.description}
                   </div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                    {p.startTime || '08:00'} - {p.endTime || '12:00'} Uhr
-                  </div>
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '1rem' }}>
-                    <button 
-                      onClick={() => handleVote(p.id, 'NO')}
-                      className="btn-primary"
-                      style={{ flex: 1, backgroundColor: myVote === 'NO' ? '#ff4d4f' : 'transparent', color: myVote === 'NO' ? 'white' : 'var(--text-primary)', border: '1px solid #ff4d4f', padding: '0.5rem', height: 'auto' }}
-                      title="Kann nicht"
-                    >❌ {totalNo}</button>
-                    <button 
-                      onClick={() => handleVote(p.id, 'MAYBE')}
-                      className="btn-primary"
-                      style={{ flex: 1, backgroundColor: myVote === 'MAYBE' ? '#faad14' : 'transparent', color: myVote === 'MAYBE' ? 'white' : 'var(--text-primary)', border: '1px solid #faad14', padding: '0.5rem', height: 'auto' }}
-                      title="Vielleicht"
-                    >❓ {totalMaybe}</button>
-                    <button 
-                      onClick={() => handleVote(p.id, 'YES')}
-                      className="btn-primary"
-                      style={{ flex: 1, backgroundColor: myVote === 'YES' ? '#52c41a' : 'transparent', color: myVote === 'YES' ? 'white' : 'var(--text-primary)', border: '1px solid #52c41a', padding: '0.5rem', height: 'auto' }}
-                      title="Bin dabei"
-                    >✅ {totalYes}</button>
-                  </div>
-                  
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                    {p.votes?.map((v:any) => (
-                      <div key={v.id}>
-                        {v.vote === 'YES' ? '✅' : v.vote === 'MAYBE' ? '❓' : '❌'} {v.userName}
-                      </div>
-                    ))}
-                  </div>
+                )}
+                <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 'var(--radius-md)', border: '1px solid var(--bg-hover)' }}>
+                  <iframe 
+                    src={v.embedUrl} 
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }} 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                  />
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
+        </div>
+      )}
+
+      {/* Date Proposals Section */}
+      {!task.dueDate && (
+        <div className="glass-card" style={{ marginBottom: '2rem', border: '2px solid var(--accent-primary)' }}>
+          <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--accent-primary)' }}>📆 Terminvorschläge</h2>
+          
+          {task.dateProposals?.length > 0 ? (
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+              {task.dateProposals.map((p: any) => {
+                const myVote = p.votes?.find((v:any) => v.userId === user.id)?.vote;
+                const totalYes = p.votes?.filter((v:any) => v.vote === 'YES').length || 0;
+                const totalMaybe = p.votes?.filter((v:any) => v.vote === 'MAYBE').length || 0;
+                const totalNo = p.votes?.filter((v:any) => v.vote === 'NO').length || 0;
+                
+                return (
+                  <div key={p.id} style={{ 
+                    flex: '1 1 200px', 
+                    backgroundColor: 'var(--bg-primary)', 
+                    padding: '1rem', 
+                    borderRadius: 'var(--radius-md)', 
+                    border: myVote ? `2px solid ${myVote === 'YES' ? '#52c41a' : myVote === 'NO' ? '#ff4d4f' : '#faad14'}` : '1px solid var(--bg-hover)'
+                  }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.2rem' }}>
+                      {new Date(p.date).toLocaleDateString('de-DE')}
+                    </div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                      {p.startTime || '08:00'} - {p.endTime || '12:00'} Uhr
+                    </div>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '1rem' }}>
+                      <button 
+                        onClick={() => handleVote(p.id, 'NO')}
+                        className="btn-primary"
+                        style={{ flex: 1, backgroundColor: myVote === 'NO' ? '#ff4d4f' : 'transparent', color: myVote === 'NO' ? 'white' : 'var(--text-primary)', border: '1px solid #ff4d4f', padding: '0.5rem', height: 'auto' }}
+                        title="Kann nicht"
+                      >❌ {totalNo}</button>
+                      <button 
+                        onClick={() => handleVote(p.id, 'MAYBE')}
+                        className="btn-primary"
+                        style={{ flex: 1, backgroundColor: myVote === 'MAYBE' ? '#faad14' : 'transparent', color: myVote === 'MAYBE' ? 'white' : 'var(--text-primary)', border: '1px solid #faad14', padding: '0.5rem', height: 'auto' }}
+                        title="Vielleicht"
+                      >❓ {totalMaybe}</button>
+                      <button 
+                        onClick={() => handleVote(p.id, 'YES')}
+                        className="btn-primary"
+                        style={{ flex: 1, backgroundColor: myVote === 'YES' ? '#52c41a' : 'transparent', color: myVote === 'YES' ? 'white' : 'var(--text-primary)', border: '1px solid #52c41a', padding: '0.5rem', height: 'auto' }}
+                        title="Bin dabei"
+                      >✅ {totalYes}</button>
+                    </div>
+                    
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                      {p.votes?.map((v:any) => (
+                        <div key={v.id}>
+                          {v.vote === 'YES' ? '✅' : v.vote === 'MAYBE' ? '❓' : '❌'} {v.userName}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontStyle: 'italic' }}>
+              Noch keine Terminvorschläge vorhanden. Füge einen hinzu, um die Abstimmung zu starten!
+            </div>
+          )}
+
+          {/* Add Proposal Form */}
+          {isProposing ? (
+            <div style={{ padding: '1.5rem', backgroundColor: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--bg-hover)' }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Neuen Termin vorschlagen</h3>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                <div style={{ flex: 1, minWidth: '150px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Datum</label>
+                  <input type="date" value={newProposalDate} onChange={e => setNewProposalDate(e.target.value)} className="input-field" />
+                </div>
+                <div style={{ width: '100px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Von</label>
+                  <select value={newProposalStartTime} onChange={e => setNewProposalStartTime(e.target.value)} className="input-field">
+                    {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'].map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div style={{ width: '100px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Bis</label>
+                  <select value={newProposalEndTime} onChange={e => setNewProposalEndTime(e.target.value)} className="input-field">
+                    {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'].map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button onClick={handleCreateProposal} className="btn-primary" style={{ backgroundColor: 'var(--success)', padding: '0.6rem 1.2rem' }}>Speichern</button>
+                  <button onClick={() => setIsProposing(false)} className="btn-primary" style={{ backgroundColor: 'var(--text-secondary)', padding: '0.6rem 1.2rem' }}>Abbrechen</button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <button 
+              onClick={() => setIsProposing(true)}
+              className="btn-primary"
+              style={{ width: '100%', padding: '1rem', background: 'transparent', border: '1px dashed var(--accent-primary)', color: 'var(--accent-primary)', fontWeight: 'bold' }}
+            >
+              + Neuen Terminvorschlag hinzufügen
+            </button>
+          )}
         </div>
       )}
 

@@ -10,6 +10,7 @@ export default function NewTask() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [videos, setVideos] = useState([{ url: '', description: '' }]);
   const [estimatedHours, setEstimatedHours] = useState('');
   const [creatorIsContact, setCreatorIsContact] = useState(true);
   
@@ -54,6 +55,7 @@ export default function NewTask() {
           estimatedHours: estimatedHours || null,
           creatorIsContact,
           proposedDates: targetDates,
+          videos: videos.filter(v => v.url.trim()),
           steps: filteredSteps,
           materials: filteredMaterials
         })
@@ -70,6 +72,16 @@ export default function NewTask() {
 
   const addDateProposal = () => {
     if (tempDate) {
+      const pd = new Date(`${tempDate}T${tempStartTime}`);
+      const now = new Date();
+      const diffMs = pd.getTime() - now.getTime();
+      const diffHours = diffMs / (1000 * 60 * 60);
+
+      if (diffHours < 24) {
+        alert('Terminvorschläge sollten 24h Vorlaufzeit haben!');
+        return;
+      }
+
       if (parseInt(tempStartTime) >= parseInt(tempEndTime)) {
         alert('Die Startzeit muss zwingend vor der Endzeit liegen!');
         return;
@@ -145,6 +157,62 @@ export default function NewTask() {
                   flexShrink: 0
                 }} />
               )}
+            </div>
+          </div>
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--bg-secondary)', margin: '1rem 0' }} />
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Hilfreiche Videos (YouTube)</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {videos.map((v, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <input 
+                      type="url" 
+                      className="input-field" 
+                      value={v.url} 
+                      onChange={e => {
+                        const newVideos = [...videos];
+                        newVideos[idx].url = e.target.value;
+                        setVideos(newVideos);
+                      }} 
+                      placeholder="YouTube URL (z.B. https://www.youtube.com/watch?v=...)" 
+                    />
+                    <input 
+                      type="text" 
+                      className="input-field" 
+                      style={{ fontSize: '0.85rem', padding: '0.4rem 0.6rem' }}
+                      value={v.description} 
+                      onChange={e => {
+                        const newVideos = [...videos];
+                        newVideos[idx].description = e.target.value;
+                        setVideos(newVideos);
+                      }} 
+                      placeholder="Kurze Beschreibung zum Video (optional)" 
+                    />
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      const newVideos = [...videos];
+                      newVideos.splice(idx, 1);
+                      if (newVideos.length === 0) newVideos.push({ url: '', description: '' });
+                      setVideos(newVideos);
+                    }} 
+                    className="btn-danger" 
+                    style={{ padding: '0.5rem 0.75rem', height: 'auto' }}
+                  >×</button>
+                  {idx === videos.length - 1 && (
+                    <button 
+                      type="button" 
+                      onClick={() => setVideos([...videos, { url: '', description: '' }])} 
+                      className="btn-primary" 
+                      style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.5rem 0.75rem', height: 'auto' }}
+                    >+</button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 

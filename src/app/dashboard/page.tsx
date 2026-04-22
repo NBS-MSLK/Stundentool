@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ACTIVITIES } from '@/lib/activities';
 import confetti from 'canvas-confetti';
 import TaskManager from './components/TaskManager';
+import Webheimat from './components/Webheimat';
 
 type User = { id: string, name: string, role: string };
 type TimeEntry = { 
@@ -26,7 +27,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ systemActiveHours: 0, systemArchivedHours: 0, hardcodedBaseHours: 619, totalGoalHours: 2700 });
   const [selectedActivity, setSelectedActivity] = useState('');
-  const [activeTab, setActiveTab] = useState<'STUNDEN' | 'TASKS'>('TASKS');
+  const [activeTab, setActiveTab] = useState<'WEBHEIMAT' | 'STUNDEN' | 'TASKS'>('WEBHEIMAT');
   
   const [elapsedString, setElapsedString] = useState('00:00:00');
 
@@ -152,6 +153,11 @@ export default function Dashboard() {
 
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--bg-secondary)', paddingBottom: '0.5rem', overflowX: 'auto' }}>
         <button 
+          onClick={() => setActiveTab('WEBHEIMAT')} 
+          style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'WEBHEIMAT' ? '3px solid var(--accent-primary)' : '3px solid transparent', color: activeTab === 'WEBHEIMAT' ? 'white' : 'var(--text-secondary)', fontWeight: activeTab === 'WEBHEIMAT' ? 'bold' : 'normal', cursor: 'pointer', fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
+          Webheimat
+        </button>
+        <button 
           onClick={() => setActiveTab('TASKS')} 
           style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'TASKS' ? '3px solid var(--accent-primary)' : '3px solid transparent', color: activeTab === 'TASKS' ? 'white' : 'var(--text-secondary)', fontWeight: activeTab === 'TASKS' ? 'bold' : 'normal', cursor: 'pointer', fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
           MS-Taskmanager
@@ -163,47 +169,13 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {activeTab === 'TASKS' ? (
+      {activeTab === 'WEBHEIMAT' ? (
+        <Webheimat user={user} stats={stats} />
+      ) : activeTab === 'TASKS' ? (
         <TaskManager user={user} />
       ) : (
         <>
-          <div className="glass-card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span>Projekt-Förderwert</span>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '1.2rem', color: '#ffd700', textShadow: '0 0 10px rgba(255,215,0,0.3)' }}>
-              {((stats.hardcodedBaseHours + stats.systemArchivedHours + stats.systemActiveHours) * 20).toLocaleString('de-DE')} € / {(stats.totalGoalHours * 20).toLocaleString('de-DE')} €
-            </span>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}>
-              ({stats.hardcodedBaseHours + stats.systemArchivedHours + stats.systemActiveHours} / {stats.totalGoalHours} Stunden)
-            </div>
-          </div>
-        </div>
-        <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
-          <div 
-            style={{ width: `${((stats.hardcodedBaseHours + stats.systemArchivedHours) / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--success)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold', transition: 'width 0.5s ease-in-out' }} 
-            title="Eingereicht / Archiviert"
-          >
-            {((stats.hardcodedBaseHours + stats.systemArchivedHours) / stats.totalGoalHours) * 100 > 10 && `${((stats.hardcodedBaseHours + stats.systemArchivedHours) * 20).toLocaleString('de-DE')} €`}
-          </div>
-          <div 
-            style={{ width: `${(stats.systemActiveHours / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--accent-primary)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold', transition: 'width 0.5s ease-in-out' }} 
-            title="Offen / Neu"
-          >
-             {(stats.systemActiveHours / stats.totalGoalHours) * 100 > 5 && `${(stats.systemActiveHours * 20).toLocaleString('de-DE')} €`}
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></div>
-            Bereits eingereicht: {((stats.hardcodedBaseHours + stats.systemArchivedHours) * 20).toLocaleString('de-DE')} € ({stats.hardcodedBaseHours + stats.systemArchivedHours}h)
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)' }}></div>
-            Offener Förderwert: {(stats.systemActiveHours * 20).toLocaleString('de-DE')} € ({stats.systemActiveHours}h)
-          </div>
-        </div>
-      </div>
+
 
       <div className="glass-card" style={{ textAlign: 'center', marginBottom: '2rem', padding: '3rem 1rem' }}>
         <div style={{ fontSize: '3.5rem', fontWeight: 'bold', marginBottom: '2rem', fontVariantNumeric: 'tabular-nums', letterSpacing: '2px' }}>

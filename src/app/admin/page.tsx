@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import WebheimatAdmin from './components/WebheimatAdmin';
 
 export default function AdminView() {
   const [entries, setEntries] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState('AKTUELL'); // AKTUELL, ARCHIV, BENUTZER
+  const [activeTab, setActiveTab] = useState('WEBHEIMAT'); // WEBHEIMAT, AKTUELL, ARCHIV, BENUTZER
   const [passwords, setPasswords] = useState<{[key: string]: string}>({});
   const [newUserName, setNewUserName] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
@@ -102,20 +103,25 @@ export default function AdminView() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1>Admin Übersicht</h1>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <Link href="/report?all=true" className="btn-primary" style={{ whiteSpace: 'nowrap' }}>Gesamten Bericht drucken (Nur Aktuelle)</Link>
           <Link href="/dashboard" className="btn-primary" style={{ backgroundColor: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Zurück zum Dashboard</Link>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <button onClick={() => setActiveTab('WEBHEIMAT')} className="btn-primary" style={{ backgroundColor: activeTab === 'WEBHEIMAT' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>Webheimat</button>
         <button onClick={() => setActiveTab('AKTUELL')} className="btn-primary" style={{ backgroundColor: activeTab === 'AKTUELL' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>Offene Einträge</button>
         <button onClick={() => setActiveTab('ARCHIV')} className="btn-primary" style={{ backgroundColor: activeTab === 'ARCHIV' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>Archiv</button>
         <button onClick={() => setActiveTab('BENUTZER')} className="btn-primary" style={{ backgroundColor: activeTab === 'BENUTZER' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>Benutzerverwaltung</button>
       </div>
 
+      {activeTab === 'WEBHEIMAT' && <WebheimatAdmin user={user} />}
+
       {(activeTab === 'AKTUELL' || activeTab === 'ARCHIV') && (
         <div className="glass-card" style={{ overflowX: 'auto' }}>
-          <h2 style={{ marginBottom: '1rem' }}>{activeTab === 'AKTUELL' ? 'Offene Einträge' : 'Archivierte Einträge'}</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h2 style={{ margin: 0 }}>{activeTab === 'AKTUELL' ? 'Offene Einträge' : 'Archivierte Einträge'}</h2>
+            <Link href="/report?all=true" className="btn-primary" style={{ whiteSpace: 'nowrap' }}>Stundenzettel drucken</Link>
+          </div>
           <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>

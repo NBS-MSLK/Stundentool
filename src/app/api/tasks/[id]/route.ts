@@ -15,7 +15,8 @@ export async function GET(request: Request, context: unknown) {
         subscribers: true,
         dateProposals: {
           include: { votes: true }
-        }
+        },
+        videos: true
       }
     });
     if (!task) return NextResponse.json({ error: 'Task not found' }, { status: 404 });
@@ -30,7 +31,7 @@ export async function PUT(request: Request, context: unknown) {
   try {
     const oldTask = await prisma.task.findUnique({ where: { id } });
     const body = await request.json();
-    const { status, title, description, imageUrl, estimatedHours, creatorIsContact, steps, materials, proposedDates } = body;
+    const { status, title, description, imageUrl, videos, estimatedHours, creatorIsContact, steps, materials, proposedDates } = body;
     // Anmerkung: Wir lesen dueDate aus dem Body nicht mehr ein, oder behalten es für die API bei, aber das Edit-Form sendet proposedDates
 
     const dataToUpdate: any = {};
@@ -40,6 +41,19 @@ export async function PUT(request: Request, context: unknown) {
     if (imageUrl !== undefined) dataToUpdate.imageUrl = imageUrl;
     if (estimatedHours !== undefined) dataToUpdate.estimatedHours = estimatedHours;
     if (creatorIsContact !== undefined) dataToUpdate.creatorIsContact = creatorIsContact;
+
+    if (videos) {
+      dataToUpdate.videos = {
+        deleteMany: { id: { notIn: videos.filter((v:any) => v.id).map((v:any) => v.id) } },
+        update: videos.filter((v:any) => v.id).map((v:any) => ({
+          where: { id: v.id },
+          data: { url: v.url, description: v.description }
+        })),
+        create: videos.filter((v:any) => !v.id).map((v:any) => ({
+          url: v.url, description: v.description
+        }))
+      };
+    }
 
     if (proposedDates) {
       dataToUpdate.dateProposals = {
@@ -83,7 +97,7 @@ export async function PUT(request: Request, context: unknown) {
     const task = await prisma.task.update({
       where: { id },
       data: dataToUpdate,
-      include: { steps: true, materials: true, volunteers: true, dateProposals: true, subscribers: true }
+      include: { steps: true, materials: true, volunteers: true, dateProposals: true, subscribers: true, videos: true }
     });
 
     if (oldTask && status && oldTask.status !== status) {

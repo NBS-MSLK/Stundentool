@@ -73,6 +73,16 @@ export default function TaskManager({ user }: { user: any }) {
   const handleCreateProposal = async (taskId: string) => {
     if (!newProposalDate || !newProposalStartTime || !newProposalEndTime) return;
     
+    const pd = new Date(`${newProposalDate}T${newProposalStartTime}`);
+    const now = new Date();
+    const diffMs = pd.getTime() - now.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+
+    if (diffHours < 24) {
+      alert('Terminvorschläge sollten 24h Vorlaufzeit haben!');
+      return;
+    }
+
     if (parseInt(newProposalStartTime) >= parseInt(newProposalEndTime)) {
       alert('Die Startzeit muss zwingend vor der Endzeit liegen!');
       return;
@@ -126,17 +136,29 @@ export default function TaskManager({ user }: { user: any }) {
               
               return (
                 <div key={task.id} className="glass-card" style={{ padding: '0', borderLeft: '4px solid #8a2be2', backgroundColor: 'rgba(138, 43, 226, 0.05)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                  <Link href={`/dashboard/tasks/${task.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '1rem', alignItems: 'center', padding: '1rem' }}>
-                    <div style={{ fontSize: '2rem' }}>⏰</div>
-                    <div>
-                      <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{task.title}</div>
-                      <div style={{ color: '#8a2be2', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                        Am {new Date(task.dueDate).toLocaleDateString('de-DE')}
-                        {diffDays > 0 && ` (In ${diffDays} Tagen!)`}
-                        {diffDays === 0 && ` (HEUTE!)`}
-                        {diffDays < 0 && ` (War vor ${Math.abs(diffDays)} Tagen)`}
+                  <Link href={`/dashboard/tasks/${task.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+                      <div style={{ fontSize: '2rem' }}>⏰</div>
+                      <div>
+                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{task.title}</div>
+                        <div style={{ color: '#8a2be2', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                          Am {new Date(task.dueDate).toLocaleDateString('de-DE')}
+                          {diffDays > 0 && ` (In ${diffDays} Tagen!)`}
+                          {diffDays === 0 && ` (HEUTE!)`}
+                          {diffDays < 0 && ` (War vor ${Math.abs(diffDays)} Tagen)`}
+                        </div>
                       </div>
                     </div>
+
+                    {task.imageUrl ? (
+                      <div style={{ padding: '0.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center' }}>
+                        <img src={task.imageUrl} alt="Vorschau" style={{ width: '100%', height: '120px', objectFit: 'contain', aspectRatio: '1/1' }} />
+                      </div>
+                    ) : (
+                      <div style={{ height: '80px', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                        Kein Bild
+                      </div>
+                    )}
                   </Link>
                   <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--bg-hover)', backgroundColor: 'var(--bg-primary)' }}>
                     <div style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Mithilfe:</div>
@@ -199,7 +221,7 @@ export default function TaskManager({ user }: { user: any }) {
               </div>
             </Link>
 
-            {task.dateProposals?.length > 0 && !task.dueDate ? (
+            {task.dateProposals?.length > 0 && !task.dueDate && (
               <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--bg-hover)', backgroundColor: 'var(--bg-primary)' }}>
                 <div style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Terminvorschläge:</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -218,31 +240,10 @@ export default function TaskManager({ user }: { user: any }) {
                   })}
                 </div>
               </div>
-            ) : (
-              <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--bg-hover)', backgroundColor: 'var(--bg-primary)' }}>
-                <div style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Mithilfe:</div>
-                <div style={{ display: 'flex', gap: '0.2rem' }}>
-                  <button 
-                    onClick={(e) => { e.preventDefault(); handleRemoveVolunteer(task.id); }}
-                    style={{ flex: 1, padding: '0.3rem', background: !task.volunteers?.some((v: any) => v.userId === user.id) ? '#ff4d4f' : 'transparent', border: '1px solid #ff4d4f', borderRadius: '2px', cursor: 'pointer' }}
-                    title="Ich kann gar nicht"
-                  >❌</button>
-                  <button 
-                    onClick={(e) => { e.preventDefault(); handleVolunteer(task.id, 'MAYBE'); }}
-                    style={{ flex: 1, padding: '0.3rem', background: task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'MAYBE' ? '#faad14' : 'transparent', border: '1px solid #faad14', borderRadius: '2px', cursor: 'pointer' }}
-                    title="Vielleicht / Unter Vorbehalt"
-                  >❓</button>
-                  <button 
-                    onClick={(e) => { e.preventDefault(); handleVolunteer(task.id, 'HELPER'); }}
-                    style={{ flex: 1, padding: '0.3rem', background: task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'HELPER' || task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'CONTACT' ? '#52c41a' : 'transparent', border: '1px solid #52c41a', borderRadius: '2px', cursor: 'pointer' }}
-                    title="Ich bin sicher dabei"
-                  >✅</button>
-                </div>
-              </div>
             )}
-            
+
             {!task.dueDate && (
-              <div style={{ padding: '0 1rem 0.75rem 1rem', backgroundColor: 'var(--bg-primary)' }}>
+              <div style={{ padding: '0 1rem 0.75rem 1rem', backgroundColor: 'var(--bg-primary)', borderTop: task.dateProposals?.length === 0 ? '1px solid var(--bg-hover)' : 'none', paddingTop: task.dateProposals?.length === 0 ? '0.75rem' : '0' }}>
                 {proposingTaskId === task.id ? (
                   <div style={{ padding: '0.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '4px', cursor: 'default' }}>
                     <input type="date" value={newProposalDate} onChange={e => setNewProposalDate(e.target.value)} className="input-field" style={{ marginBottom: '0.5rem', padding: '0.3rem', width: '100%', fontSize: '0.8rem' }} />

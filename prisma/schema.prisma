@@ -21,6 +21,8 @@ model User {
   taskDateVotes    TaskDateVote[]
   taskNotes        TaskNote[]
   subscribedTasks  Task[]          @relation("TaskSubscribers")
+  newsPosts        NewsPost[]      @relation("UserNewsPosts")
+  pollVotes        PollVote[]
   createdAt        DateTime        @default(now())
 }
 
@@ -57,6 +59,7 @@ model Task {
   volunteers      TaskVolunteer[]
   dateProposals   TaskDateProposal[]
   notes           TaskNote[]
+  videos          TaskVideo[]
   subscribers     User[]          @relation("TaskSubscribers")
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -127,4 +130,71 @@ model TaskNote {
   updatedAt     DateTime  @updatedAt
   
   @@unique([taskId, userId])
+}
+
+model TaskVideo {
+  id          String   @id @default(uuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  url         String
+  description String?
+}
+
+model FundingStatus {
+  id                String    @id @default("singleton")
+  totalAmount       Float     @default(125409.53)
+  disbursedAmount   Float     @default(14643.72)
+  submittedAmount   Float     @default(13558.31)
+  lastSubmittedDate DateTime?
+}
+
+model NewsPost {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  imageUrl  String?
+  authorId  String
+  author    User     @relation("UserNewsPosts", fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Poll {
+  id          String       @id @default(uuid())
+  question    String
+  isAnonymous Boolean      @default(false)
+  isActive    Boolean      @default(true)
+  isArchived  Boolean      @default(false)
+  options     PollOption[]
+  votes       PollVote[]
+  createdAt   DateTime     @default(now())
+}
+
+model PollOption {
+  id      String     @id @default(uuid())
+  pollId  String
+  poll    Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  text    String
+  votes   PollVote[]
+}
+
+model PollVote {
+  id        String     @id @default(uuid())
+  pollId    String
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  optionId  String
+  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userName  String
+  createdAt DateTime   @default(now())
+
+  @@unique([pollId, userId])
+}
+
+model FAQ {
+  id        String   @id @default(uuid())
+  question  String
+  answer    String
+  order     Int      @default(0)
 }
