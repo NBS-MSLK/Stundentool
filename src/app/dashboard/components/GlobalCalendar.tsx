@@ -91,11 +91,14 @@ export default function GlobalCalendar({ tasks, user, refetch }: { tasks: any[],
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {dayProposals.map((item, idx) => {
                   if (item.type === 'FIXED') {
+                    const matchingProposal = item.task.dateProposals?.find((p: any) => new Date(p.date).getTime() === new Date(item.task.dueDate).getTime());
+                    const timeString = matchingProposal ? `${matchingProposal.startTime} - ${matchingProposal.endTime} Uhr` : 'Fester Termin';
+                    
                     return (
                       <Link key={idx} href={`/dashboard/tasks/${item.taskId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                         <div style={{ backgroundColor: 'rgba(82, 196, 26, 0.2)', padding: '0.3rem', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid #52c41a' }}>
                           <div style={{ fontWeight: 'bold', color: '#52c41a', lineHeight: 1.2 }}>✅ {item.taskTitle}</div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Fester Termin</div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{timeString}</div>
                         </div>
                       </Link>
                     );

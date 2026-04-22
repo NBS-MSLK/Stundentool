@@ -133,6 +133,8 @@ export default function TaskManager({ user }: { user: any }) {
             {scheduledTasks.map(task => {
               const diffMs = new Date(task.dueDate).getTime() - new Date().getTime();
               const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+              const matchingProposal = task.dateProposals?.find((p: any) => new Date(p.date).getTime() === new Date(task.dueDate).getTime());
+              const timeString = matchingProposal ? ` (${matchingProposal.startTime} - ${matchingProposal.endTime} Uhr)` : '';
               
               return (
                 <div key={task.id} className="glass-card" style={{ padding: '0', borderLeft: '4px solid #8a2be2', backgroundColor: 'rgba(138, 43, 226, 0.05)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -142,7 +144,7 @@ export default function TaskManager({ user }: { user: any }) {
                       <div>
                         <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{task.title}</div>
                         <div style={{ color: '#8a2be2', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                          Am {new Date(task.dueDate).toLocaleDateString('de-DE')}
+                          Am {new Date(task.dueDate).toLocaleDateString('de-DE')}{timeString}
                           {diffDays > 0 && ` (In ${diffDays} Tagen!)`}
                           {diffDays === 0 && ` (HEUTE!)`}
                           {diffDays < 0 && ` (War vor ${Math.abs(diffDays)} Tagen)`}

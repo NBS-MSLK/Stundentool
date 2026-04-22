@@ -262,11 +262,15 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
               Erstellt von {task.creatorName} | Status: <span style={{ fontWeight: 'bold', color: task.status === 'DONE' ? 'var(--success)' : task.status === 'IN_PROGRESS' || task.status === 'SCHEDULED' ? 'var(--warning)' : 'inherit' }}>{task.status}</span>
               {task.estimatedHours !== null && <span> | Rest-Aufwand: {task.estimatedHours}h</span>}
             </div>
-            {task.dueDate && (
-              <div style={{ marginTop: '0.8rem', padding: '0.4rem 0.8rem', backgroundColor: 'var(--success)', color: '#fff', borderRadius: 'var(--radius-sm)', display: 'inline-block', fontWeight: 'bold', fontSize: '1.1rem' }}>
-                📆 Termin: {new Date(task.dueDate).toLocaleDateString('de-DE')}
-              </div>
-            )}
+            {task.dueDate && (() => {
+              const matchingProposal = task.dateProposals?.find((p: any) => new Date(p.date).getTime() === new Date(task.dueDate).getTime());
+              const timeString = matchingProposal ? ` (${matchingProposal.startTime} - ${matchingProposal.endTime} Uhr)` : '';
+              return (
+                <div style={{ marginTop: '0.8rem', padding: '0.4rem 0.8rem', backgroundColor: 'var(--success)', color: '#fff', borderRadius: 'var(--radius-sm)', display: 'inline-block', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                  📆 Termin: {new Date(task.dueDate).toLocaleDateString('de-DE')}{timeString}
+                </div>
+              );
+            })()}
           </div>
           <select 
             value={task.status} 
