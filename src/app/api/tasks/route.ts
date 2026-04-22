@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { sendTaskNotification } from '@/lib/mailer';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -77,6 +78,12 @@ export async function POST(request: Request) {
         }
       });
     }
+
+    sendTaskNotification(
+      task.id,
+      `Neuer Arbeitsdienst: ${task.title}`,
+      `Hallo,\n\nes wurde ein neuer Arbeitsdienst eingetragen: "${task.title}".\n\nErsteller: ${task.creatorName}\n\nSchau dir die Details direkt im Stundentool an!`
+    );
 
     return NextResponse.json({ task });
   } catch (error: any) {

@@ -6,6 +6,8 @@ export default function PasswordChange() {
   const [user, setUser] = useState<any>(null);
   const [password, setPassword] = useState('');
   const [showInHighscore, setShowInHighscore] = useState(true);
+  const [email, setEmail] = useState('');
+  const [emailPref, setEmailPref] = useState('NONE');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
@@ -21,6 +23,8 @@ export default function PasswordChange() {
       fetch(`/api/users/${parsedUser.id}`).then(res => res.json()).then(data => {
         if (data.user) {
           setShowInHighscore(data.user.showInHighscore);
+          if (data.user.email) setEmail(data.user.email);
+          if (data.user.emailPref) setEmailPref(data.user.emailPref);
         }
       });
     }
@@ -32,7 +36,10 @@ export default function PasswordChange() {
     setLoading(true);
     setMessage('');
     try {
-      const dataObj: any = { showInHighscore };
+      const dataObj: any = { showInHighscore, emailPref };
+      if (email.trim()) dataObj.email = email.trim();
+      else dataObj.email = null;
+
       if (password.trim()) {
         dataObj.password = password.trim();
       }
@@ -70,14 +77,44 @@ export default function PasswordChange() {
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Passwort ändern (Optional)</label>
             <input 
-            type="password" 
-            placeholder="Neues Passwort..." 
-            className="input-field" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
-          />
+              type="password" 
+              placeholder="Neues Passwort..." 
+              className="input-field" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+            />
           </div>
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--bg-hover)', margin: '0.5rem 0' }} />
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>E-Mail-Adresse für Benachrichtigungen</label>
+            <input 
+              type="email" 
+              placeholder="deine@email.de" 
+              className="input-field" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Wann möchtest du informiert werden?</label>
+            <select 
+              className="input-field" 
+              value={emailPref} 
+              onChange={(e) => setEmailPref(e.target.value)}
+              disabled={loading}
+            >
+              <option value="NONE">Gar nicht (Aus)</option>
+              <option value="SPECIFIC">Nur für gezielt abonnierte Arbeiten ("Glocke")</option>
+              <option value="ALL">Immer (bei jedem Status-Update & jeder neuen Arbeit)</option>
+            </select>
+          </div>
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--bg-hover)', margin: '0.5rem 0' }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem', marginBottom: '0.5rem' }}>
             <input 

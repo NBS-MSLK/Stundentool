@@ -22,6 +22,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
 
   const [task, setTask] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
+  const [dbUser, setDbUser] = useState<any>(null);
   const [myNote, setMyNote] = useState('');
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -33,11 +34,16 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
       router.push('/');
       return;
     }
-    setUser(JSON.parse(userJson));
-    fetchTask();
+    const u = JSON.parse(userJson);
+    setUser(u);
+    // Fetch user details from DB to know their emailPref
+    fetch(`/api/users/${u.id}`).then(res => res.json()).then(data => {
+      if (data.user) setDbUser(data.user);
+    });
+    fetchTask(u);
   }, [taskId, router]);
 
-  const fetchTask = async () => {
+  const fetchTask = async (u: any) => {
     try {
       const res = await fetch(`/api/tasks/${taskId}`);
       const data = await res.json();
@@ -66,7 +72,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ stepId, isCompleted: !isCompleted })
     });
-    fetchTask();
+    fetchTask(user);
   };
 
   const handleVote = async (proposalId: string, vote: string) => {
@@ -75,7 +81,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user.id, userName: user.name, vote })
     });
-    fetchTask();
+    fetchTask(user);
   };
 
   const handleToggleMaterial = async (materialId: string, isAcquired: boolean) => {
@@ -84,7 +90,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ materialId, isAcquired: !isAcquired })
     });
-    fetchTask();
+    fetchTask(user);
   };
 
   const handleVolunteer = async (role: string) => {
@@ -93,12 +99,12 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user.id, userName: user.name, role })
     });
-    fetchTask();
+    fetchTask(user);
   };
 
   const handleRemoveVolunteer = async () => {
     await fetch(`/api/tasks/${taskId}/volunteer?userId=${user.id}`, { method: 'DELETE' });
-    fetchTask();
+    fetchTask(user);
   };
 
   const handleUpdateStatus = async (status: string) => {
@@ -107,7 +113,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
     });
-    fetchTask();
+    fetchTask(user);
   };
 
   const handleUpdateHours = async () => {
@@ -126,7 +132,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ estimatedHours: sum })
     });
-    fetchTask();
+    fetchTask(user);
     alert(`Noch offener Aufwand wurde auf ${sum}h (Rest-Stunden) aktualisiert!`);
   };
 
@@ -138,13 +144,23 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
       body: JSON.stringify({ userId: user.id, userName: user.name, content: myNote })
     });
     setIsEditingNote(false);
-    fetchTask();
+    fetchTask(user);
+  };
+
+  const handleToggleSubscription = async (subscribe: boolean) => {
+    await fetch(`/api/tasks/${taskId}/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.id, subscribe })
+    });
+    fetchTask(user);
   };
 
   if (loading || !user) return <div className="container">Lade...</div>;
   if (!task) return <div className="container">Aufgabe nicht gefunden.</div>;
 
   const isVolunteered = task.volunteers?.some((v: any) => v.userId === user.id);
+  const isSubscribed = task.subscribers?.some((s: any) => s.id === user.id);
   const canEdit = user.role === 'ADMIN' || user.id === task.creatorId;
   const existingNote = task.notes?.find((n:any) => n.userId === user.id);
 
@@ -157,6 +173,15 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
              <Link href={`/dashboard/tasks/${taskId}/edit`} className="btn-primary" style={{ backgroundColor: 'transparent', color: 'var(--accent-primary)', border: '1px solid var(--accent-primary)' }}>
                ✏️ Bearbeiten
              </Link>
+          )}
+          {dbUser?.emailPref === 'SPECIFIC' && (
+             <button 
+               onClick={() => handleToggleSubscription(!isSubscribed)} 
+               className="btn-primary" 
+               style={{ backgroundColor: isSubscribed ? 'var(--warning)' : 'transparent', color: isSubscribed ? 'black' : 'var(--text-secondary)', border: `1px solid ${isSubscribed ? 'var(--warning)' : 'var(--text-secondary)'}`, padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}
+             >
+               {isSubscribed ? '🔕 Nicht mehr abonnieren' : '🔔 Updates abonnieren'}
+             </button>
           )}
         </div>
         <button 

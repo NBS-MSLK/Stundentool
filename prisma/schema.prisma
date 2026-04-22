@@ -13,11 +13,14 @@ model User {
   password         String          @default("")
   role             String          @default("USER") // "USER" or "ADMIN"
   showInHighscore  Boolean         @default(true)
+  email            String?
+  emailPref        String          @default("NONE") // "ALL", "NONE", "SPECIFIC"
   entries          TimeEntry[]
   tasksCreated     Task[]          @relation("UserTasksCreated")
   taskVolunteering TaskVolunteer[]
   taskDateVotes    TaskDateVote[]
   taskNotes        TaskNote[]
+  subscribedTasks  Task[]          @relation("TaskSubscribers")
   createdAt        DateTime        @default(now())
 }
 
@@ -54,6 +57,7 @@ model Task {
   volunteers      TaskVolunteer[]
   dateProposals   TaskDateProposal[]
   notes           TaskNote[]
+  subscribers     User[]          @relation("TaskSubscribers")
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 }
