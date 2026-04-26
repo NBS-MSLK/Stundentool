@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { sendGeneralNotification } from '@/lib/mailer';
 
 const prisma = new PrismaClient();
 
@@ -27,6 +28,14 @@ export async function POST(request: Request) {
     const news = await prisma.newsPost.create({
       data: { title, content, imageUrl, authorId }
     });
+    
+    await sendGeneralNotification(
+      'NEWS',
+      `Neue Nachricht: ${title}`,
+      `Es gibt eine neue Nachricht im MakerSpace:\n\n${title}\n\n${content}`,
+      'https://stundentool-production.up.railway.app/dashboard'
+    );
+
     return NextResponse.json({ news });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

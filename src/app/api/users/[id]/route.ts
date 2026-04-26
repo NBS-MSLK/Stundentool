@@ -23,13 +23,16 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
     const bodyText = await req.text();
     console.log('[DEBUG] user update body:', bodyText);
     const body = JSON.parse(bodyText);
-    const { password, showInHighscore, email, emailPref } = body;
+    const { password, showInHighscore, email, emailPref, notifyHeadlines, notifyNews, notifyPolls } = body;
 
     const data: any = {};
     if (password !== undefined) data.password = password;
     if (showInHighscore !== undefined) data.showInHighscore = showInHighscore;
     if (email !== undefined) data.email = email;
     if (emailPref !== undefined) data.emailPref = emailPref;
+    if (notifyHeadlines !== undefined) data.notifyHeadlines = notifyHeadlines;
+    if (notifyNews !== undefined) data.notifyNews = notifyNews;
+    if (notifyPolls !== undefined) data.notifyPolls = notifyPolls;
 
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: 'No data to update' }, { status: 400 });

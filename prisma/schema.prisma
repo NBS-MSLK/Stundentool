@@ -15,6 +15,9 @@ model User {
   showInHighscore  Boolean         @default(true)
   email            String?
   emailPref        String          @default("NONE") // "ALL", "NONE", "SPECIFIC"
+  notifyHeadlines  Boolean         @default(true)
+  notifyNews       Boolean         @default(true)
+  notifyPolls      Boolean         @default(true)
   entries          TimeEntry[]
   tasksCreated     Task[]          @relation("UserTasksCreated")
   taskVolunteering TaskVolunteer[]
@@ -22,6 +25,7 @@ model User {
   taskNotes        TaskNote[]
   subscribedTasks  Task[]          @relation("TaskSubscribers")
   newsPosts        NewsPost[]      @relation("UserNewsPosts")
+  headlines        Headline[]      @relation("UserHeadlines")
   pollVotes        PollVote[]
   createdAt        DateTime        @default(now())
 }
@@ -157,6 +161,14 @@ model NewsPost {
   author    User     @relation("UserNewsPosts", fields: [authorId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Headline {
+  id        String   @id @default(uuid())
+  content   String
+  authorId  String
+  author    User     @relation("UserHeadlines", fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 model Poll {

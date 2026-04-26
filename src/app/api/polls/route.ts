@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { sendGeneralNotification } from '@/lib/mailer';
 
 const prisma = new PrismaClient();
 
@@ -37,6 +38,14 @@ export async function POST(request: Request) {
       },
       include: { options: true }
     });
+    
+    await sendGeneralNotification(
+      'POLL',
+      'Neue Umfrage im MakerSpace',
+      `Es gibt eine neue Umfrage:\n\n${question}`,
+      'https://stundentool-production.up.railway.app/dashboard'
+    );
+
     return NextResponse.json({ poll });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -19,22 +19,28 @@ export default function WebheimatAdmin({ user }: { user: any }) {
   const [faqs, setFaqs] = useState<any[]>([]);
   const [newFaq, setNewFaq] = useState({ question: '', answer: '', order: 0 });
 
+  // Headlines State
+  const [headlines, setHeadlines] = useState<any[]>([]);
+  const [newHeadline, setNewHeadline] = useState({ content: '' });
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const [fRes, nRes, pRes, faqRes] = await Promise.all([
+      const [fRes, nRes, pRes, faqRes, hRes] = await Promise.all([
         fetch('/api/funding').then(r => r.json()),
         fetch('/api/news').then(r => r.json()),
         fetch('/api/polls').then(r => r.json()),
-        fetch('/api/faqs').then(r => r.json())
+        fetch('/api/faqs').then(r => r.json()),
+        fetch('/api/headlines').then(r => r.json())
       ]);
       if (fRes.funding) setFunding(fRes.funding);
       if (nRes.news) setNews(nRes.news);
       if (pRes.polls) setPolls(pRes.polls);
       if (faqRes.faqs) setFaqs(faqRes.faqs);
+      if (hRes.headlines) setHeadlines(hRes.headlines);
     } catch (e) {
       console.error(e);
     }
@@ -125,11 +131,30 @@ export default function WebheimatAdmin({ user }: { user: any }) {
     fetchData();
   };
 
+  // --- Headline Actions ---
+  const handleCreateHeadline = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await fetch('/api/headlines', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...newHeadline, authorId: user.id })
+    });
+    setNewHeadline({ content: '' });
+    fetchData();
+  };
+
+  const handleDeleteHeadline = async (id: string) => {
+    if (!confirm('Kurzmeldung wirklich löschen?')) return;
+    await fetch(`/api/headlines/${id}`, { method: 'DELETE' });
+    fetchData();
+  };
+
   return (
     <div className="glass-card" style={{ marginTop: '1rem' }}>
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', flexWrap: 'wrap' }}>
         <button onClick={() => setActiveSubTab('FUNDING')} className="btn-primary" style={{ backgroundColor: activeSubTab === 'FUNDING' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>Fördermittel</button>
         <button onClick={() => setActiveSubTab('NEWS')} className="btn-primary" style={{ backgroundColor: activeSubTab === 'NEWS' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>Nachrichten</button>
+        <button onClick={() => setActiveSubTab('HEADLINES')} className="btn-primary" style={{ backgroundColor: activeSubTab === 'HEADLINES' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>Kurzmeldungen</button>
         <button onClick={() => setActiveSubTab('POLLS')} className="btn-primary" style={{ backgroundColor: activeSubTab === 'POLLS' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>Umfragen</button>
         <button onClick={() => setActiveSubTab('FAQS')} className="btn-primary" style={{ backgroundColor: activeSubTab === 'FAQS' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>FAQs</button>
       </div>
@@ -284,6 +309,27 @@ export default function WebheimatAdmin({ user }: { user: any }) {
               </div>
               <p style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>{faq.answer}</p>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Sortierung: {faq.order}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeSubTab === 'HEADLINES' && (
+        <div>
+          <h2 style={{ marginBottom: '1rem' }}>Neue Kurzmeldung verfassen</h2>
+          <form onSubmit={handleCreateHeadline} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', maxWidth: '600px' }}>
+            <input type="text" className="input-field" placeholder="Kurzer Text (z.B. 'Werkbank ist aufgebaut')" value={newHeadline.content} onChange={e => setNewHeadline({...newHeadline, content: e.target.value})} required maxLength={150} />
+            <button type="submit" className="btn-success" style={{ width: 'fit-content', padding: '0.5rem 1.2rem', fontSize: '1rem' }}>Kurzmeldung veröffentlichen</button>
+          </form>
+          
+          <h3 style={{ marginBottom: '1rem' }}>Aktuelle Kurzmeldungen</h3>
+          {headlines.map(h => (
+            <div key={h.id} style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <p style={{ margin: 0, fontWeight: 'bold', fontSize: '1.1rem' }}>{h.content}</p>
+                <button onClick={() => handleDeleteHeadline(h.id)} className="btn-danger" style={{ padding: '0.3rem 0.7rem', height: 'auto', fontSize: '0.85rem' }}>Löschen</button>
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Von {h.author?.name} am {new Date(h.createdAt).toLocaleDateString()}</div>
             </div>
           ))}
         </div>

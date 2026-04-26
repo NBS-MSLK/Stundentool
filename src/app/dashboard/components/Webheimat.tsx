@@ -4,13 +4,25 @@ import GlobalCalendar from './GlobalCalendar';
 
 export default function Webheimat({ user, stats }: { user: any, stats: any }) {
   const [funding, setFunding] = useState<any>(null);
+  const [headlines, setHeadlines] = useState<any[]>([]);
   const [news, setNews] = useState<any[]>([]);
   const [polls, setPolls] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [expandedNews, setExpandedNews] = useState<{[key: string]: boolean}>({});
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+  const [currentHeadlineIndex, setCurrentHeadlineIndex] = useState(0);
   const [expandedFaq, setExpandedFaq] = useState<{[key: string]: boolean}>({});
+
+  useEffect(() => {
+    const count = Math.min(headlines.length, 3);
+    if (count > 1) {
+      const timer = setInterval(() => {
+        setCurrentHeadlineIndex((prev) => (prev + 1) % count);
+      }, 5000);
+      return () => clearInterval(timer);
+    }
+  }, [headlines.length]);
 
   useEffect(() => {
     if (news.length > 0 && currentNewsIndex >= news.length) {
@@ -21,14 +33,16 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [fRes, nRes, pRes, faqRes, tasksRes] = await Promise.all([
+        const [fRes, hRes, nRes, pRes, faqRes, tasksRes] = await Promise.all([
           fetch('/api/funding').then(r => r.json()),
+          fetch('/api/headlines').then(r => r.json()),
           fetch('/api/news').then(r => r.json()),
           fetch('/api/polls').then(r => r.json()),
           fetch('/api/faqs').then(r => r.json()),
           fetch('/api/tasks').then(r => r.json())
         ]);
         if (fRes.funding) setFunding(fRes.funding);
+        if (hRes.headlines) setHeadlines(hRes.headlines);
         if (nRes.news) setNews(nRes.news);
         if (pRes.polls) setPolls(pRes.polls.filter((p:any) => p.isActive && !p.isArchived));
         if (faqRes.faqs) setFaqs(faqRes.faqs);
@@ -80,9 +94,71 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
     return `vor ${weeks} Wochen${days > 0 ? ` und ${days} Tagen` : ''}`;
   };
 
+  const latestHeadlines = headlines.slice(0, 3);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
+      {/* 0. Kurzmeldungen (Headlines) */}
+      {latestHeadlines.length > 0 && (
+        <div style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '0.8rem 1rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', position: 'relative' }}>
+          <div style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px', backgroundColor: 'rgba(0,0,0,0.2)', padding: '0.3rem 0.6rem', borderRadius: '4px', flexShrink: 0 }}>
+            Aktuell
+          </div>
+          
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+            
+            {latestHeadlines.length > 1 && (
+              <button 
+                onClick={() => setCurrentHeadlineIndex(prev => prev === 0 ? latestHeadlines.length - 1 : prev - 1)}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', padding: '0 0.5rem', fontSize: '1.2rem', display: 'flex', alignItems: 'center' }}
+              >
+                &#8249;
+              </button>
+            )}
+
+            <div style={{ flex: 1, textAlign: 'center', padding: '0 0.5rem', overflow: 'hidden' }}>
+              <span key={currentHeadlineIndex} style={{ fontSize: '1rem', whiteSpace: 'nowrap', display: 'inline-block', animation: 'fadeIn 0.5s ease-in-out' }}>
+                {latestHeadlines[currentHeadlineIndex]?.content}
+              </span>
+            </div>
+
+            {latestHeadlines.length > 1 && (
+              <button 
+                onClick={() => setCurrentHeadlineIndex(prev => (prev + 1) % latestHeadlines.length)}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', padding: '0 0.5rem', fontSize: '1.2rem', display: 'flex', alignItems: 'center' }}
+              >
+                &#8250;
+              </button>
+            )}
+          </div>
+
+          {latestHeadlines.length > 1 && (
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+              {latestHeadlines.map((_, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => setCurrentHeadlineIndex(idx)}
+                  style={{ 
+                    width: '8px', 
+                    height: '8px', 
+                    borderRadius: '50%', 
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    backgroundColor: idx === currentHeadlineIndex ? 'white' : 'rgba(255,255,255,0.4)',
+                    transition: 'background-color 0.3s'
+                  }}
+                />
+              ))}
+            </div>
+          )}
+          <a href="/dashboard/headlines" style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', textDecoration: 'underline', marginLeft: '0.5rem', flexShrink: 0 }}>
+            Alle anzeigen
+          </a>
+        </div>
+      )}
+
       {/* 1. Fördergeld-Statusbalken */}
       {funding && (
         <div className="glass-card">
@@ -335,9 +411,8 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
             src="https://www.instagram.com/makerspace_luebbecke/embed" 
             width="100%" 
             height="480" 
-            frameBorder={0} 
             scrolling="no" 
-            allowTransparency={true}
+            allowtransparency="true"
             style={{ border: 'none', overflow: 'hidden', borderRadius: 'var(--radius-md)', maxWidth: '500px' }}
           ></iframe>
         </div>
