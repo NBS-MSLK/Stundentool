@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { sendGeneralNotification } from '@/lib/mailer';
+import { logActivity } from '@/lib/activityLogger';
 
 const prisma = new PrismaClient();
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -44,6 +47,13 @@ export async function POST(request: Request) {
       'Neue Umfrage im MakerSpace',
       `Es gibt eine neue Umfrage:\n\n${question}`,
       'https://stundentool-production.up.railway.app/dashboard'
+    );
+
+    await logActivity(
+      'POLL_CREATE',
+      `Eine neue Umfrage wurde erstellt: "${question}"`,
+      null,
+      'Admin'
     );
 
     return NextResponse.json({ poll });

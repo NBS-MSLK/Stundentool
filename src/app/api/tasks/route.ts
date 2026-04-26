@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendTaskNotification } from '@/lib/mailer';
+import { logActivity } from '@/lib/activityLogger';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -111,6 +112,13 @@ export async function POST(request: Request) {
       task.id,
       `Neuer Arbeitsdienst: ${task.title}`,
       mailText
+    );
+
+    await logActivity(
+      'TASK_CREATE',
+      `${task.creatorName} hat den Arbeitsdienst "${task.title}" erstellt.`,
+      creatorId,
+      creatorName
     );
 
     return NextResponse.json({ task });

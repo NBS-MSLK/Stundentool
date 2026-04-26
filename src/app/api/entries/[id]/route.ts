@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { logActivity } from '@/lib/activityLogger';
 
 export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
@@ -41,7 +42,26 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
     const entry = await prisma.timeEntry.update({
       where: { id },
       data: dataToUpdate,
+      include: { user: true }
     });
+
+    if (isConfirmed === true && entry.endTime) {
+      const diffMs = new Date(entry.endTime).getTime() - new Date(entry.startTime).getTime();
+      const hours = (diffMs / (1000 * 60 * 60)).toFixed(1);
+      await logActivity(
+        'TIME_ENTRY',
+        `${entry.user.name} hat ${hours} Stunden bestätigt/eingetragen. (${entry.activity || 'Keine Aktivität angegeben'})`,
+        entry.user.id,
+        entry.user.name
+      );
+    } else if (isArchived === true) {
+      await logActivity(
+        'TIME_ARCHIVE',
+        `Zeit-Eintrag von ${entry.user.name} wurde als geprüft archiviert.`,
+        entry.user.id,
+        entry.user.name
+      );
+    }
 
     return NextResponse.json({ entry });
   } catch (error) {
@@ -53,6 +73,15 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
   try {
     const params = await props.params;
     const { id } = params;
+    const entry = await prisma.timeEntry.findUnique({ where: { id }, include: { user: true } });
+    if (entry) {
+      await logActivity(
+        'TIME_DELETE',
+        `Zeit-Eintrag von ${entry.user.name} wurde gelöscht.`,
+        entry.user.id,
+        entry.user.name
+      );
+    }
     await prisma.timeEntry.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendGeneralNotification } from '@/lib/mailer';
+import { logActivity } from '@/lib/activityLogger';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {
@@ -31,6 +34,14 @@ export async function POST(req: Request) {
       'Neue Kurzmeldung im MakerSpace',
       `Es gibt eine neue Kurzmeldung:\n\n"${content}"`,
       'https://stundentool-production.up.railway.app/dashboard'
+    );
+
+    const user = await prisma.user.findUnique({ where: { id: authorId }});
+    await logActivity(
+      'HEADLINE_CREATE',
+      `${user?.name || 'Jemand'} hat eine Kurzmeldung verfasst: "${content}"`,
+      authorId,
+      user?.name
     );
 
     return NextResponse.json({ headline: newHeadline });

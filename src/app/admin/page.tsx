@@ -7,8 +7,9 @@ import WebheimatAdmin from './components/WebheimatAdmin';
 export default function AdminView() {
   const [entries, setEntries] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState('WEBHEIMAT'); // WEBHEIMAT, AKTUELL, ARCHIV, BENUTZER
+  const [activeTab, setActiveTab] = useState('WEBHEIMAT'); // WEBHEIMAT, AKTUELL, ARCHIV, BENUTZER, LOGBUCH
   const [passwords, setPasswords] = useState<{[key: string]: string}>({});
   const [newUserName, setNewUserName] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
@@ -27,6 +28,12 @@ export default function AdminView() {
     });
   };
 
+  const fetchLogs = () => {
+    fetch(`/api/logs`).then(res => res.json()).then(data => {
+      if (data.logs) setLogs(data.logs);
+    });
+  };
+
   useEffect(() => {
     const userJson = localStorage.getItem('user');
     if (!userJson) {
@@ -37,6 +44,7 @@ export default function AdminView() {
     setUser(u);
     fetchEntries();
     fetchUsers();
+    fetchLogs();
   }, [router]);
 
   const toggleArchive = async (id: string, currentStatus: boolean) => {
@@ -112,6 +120,7 @@ export default function AdminView() {
         <button onClick={() => setActiveTab('AKTUELL')} className="btn-primary" style={{ backgroundColor: activeTab === 'AKTUELL' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>Offene Einträge</button>
         <button onClick={() => setActiveTab('ARCHIV')} className="btn-primary" style={{ backgroundColor: activeTab === 'ARCHIV' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>Archiv</button>
         <button onClick={() => setActiveTab('BENUTZER')} className="btn-primary" style={{ backgroundColor: activeTab === 'BENUTZER' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>Benutzerverwaltung</button>
+        <button onClick={() => setActiveTab('LOGBUCH')} className="btn-primary" style={{ backgroundColor: activeTab === 'LOGBUCH' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>Logbuch</button>
       </div>
 
       {activeTab === 'WEBHEIMAT' && <WebheimatAdmin user={user} />}
@@ -257,6 +266,47 @@ export default function AdminView() {
                   </td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === 'LOGBUCH' && (
+        <div className="glass-card" style={{ overflowX: 'auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 style={{ margin: 0 }}>Aktivitäten-Logbuch</h2>
+            <button onClick={fetchLogs} className="btn-primary" style={{ backgroundColor: 'var(--text-secondary)', padding: '0.4rem 1rem', fontSize: '0.9rem' }}>Aktualisieren</button>
+          </div>
+          
+          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ padding: '1rem' }}>Datum & Uhrzeit</th>
+                <th style={{ padding: '1rem' }}>Nutzer</th>
+                <th style={{ padding: '1rem' }}>Aktion</th>
+                <th style={{ padding: '1rem' }}>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {logs.map(log => (
+                <tr key={log.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>
+                    {new Date(log.createdAt).toLocaleDateString('de-DE')} um {new Date(log.createdAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  </td>
+                  <td style={{ padding: '1rem', fontWeight: 600 }}>{log.userName || '-'}</td>
+                  <td style={{ padding: '1rem' }}>
+                    <span style={{ backgroundColor: 'var(--bg-primary)', padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.85rem' }}>
+                      {log.action}
+                    </span>
+                  </td>
+                  <td style={{ padding: '1rem' }}>{log.details}</td>
+                </tr>
+              ))}
+              {logs.length === 0 && (
+                <tr>
+                  <td colSpan={4} style={{ padding: '1rem', textAlign: 'center' }}>Keine Logs vorhanden.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

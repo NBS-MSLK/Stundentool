@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { logActivity } from '@/lib/activityLogger';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -56,7 +57,17 @@ export async function POST(req: Request) {
         isManualEntry: true,
         note
       },
+      include: { user: true }
     });
+
+    const hours = (diffMs / (1000 * 60 * 60)).toFixed(1);
+    await logActivity(
+      'TIME_ENTRY',
+      `${entry.user.name} hat ${hours} Stunden eingetragen. (${activity || 'Keine Aktivität angegeben'})`,
+      userId,
+      entry.user.name
+    );
+
     return NextResponse.json({ entry });
   } catch (error) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
