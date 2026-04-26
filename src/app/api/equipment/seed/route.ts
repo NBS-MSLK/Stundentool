@@ -11,411 +11,129 @@ export async function GET() {
       return NextResponse.json({ error: 'No ADMIN user found, please create one first.' }, { status: 400 });
     }
 
-    // Check if we already have the categories to avoid duplication
+    // Falls das alte, falsche Seed-Skript verwendet wurde, räumen wir diese 4 Kategorien kurz auf
+    const badCat = await prisma.equipmentCategory.findFirst({ where: { title: '1. Maschinen' } });
+    if (badCat) {
+      await prisma.equipmentCategory.deleteMany({
+         where: { title: { in: ['1. Maschinen', '2. Siebdruck-Set', '3. Einrichtung Holzwerkstatt', '4. Möbel'] } }
+      });
+    }
+
+    // Check if we already have the correct categories to avoid duplication
     const existing = await prisma.equipmentCategory.findFirst({
-      where: { title: '1. Maschinen' }
+      where: { title: '1. Handgeführte CNC' }
     });
 
     if (existing) {
       return NextResponse.json({ message: 'Daten scheinen schon vorhanden zu sein. Abbruch, um Duplikate zu vermeiden.' });
     }
 
-    // Categories
-    const catMaschinen = await prisma.equipmentCategory.create({ data: { title: '1. Maschinen', creatorId: adminUser.id } });
-    const catSiebdruck = await prisma.equipmentCategory.create({ data: { title: '2. Siebdruck-Set', creatorId: adminUser.id } });
-    const catHolz = await prisma.equipmentCategory.create({ data: { title: '3. Einrichtung Holzwerkstatt', creatorId: adminUser.id } });
-    const catMoebel = await prisma.equipmentCategory.create({ data: { title: '4. Möbel', creatorId: adminUser.id } });
-
-    // 1. Maschinen
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMaschinen.id,
-        title: 'Shaper Origin + Workstation + Plate',
-        description: 'Handgeführte CNC-Maschine. Mobil einsetzbar.',
-        price: 4569.60,
-        buyLink: 'https://www.shapertools.com/de-de/',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED',
-        materials: {
-          create: [
-            { name: 'SHAPER Tape (10x)', quantity: 1, pricePerUnit: 226.10, buyLink: '' },
-            { name: 'Spannzangen-Set', quantity: 1, pricePerUnit: 208.25, buyLink: '' },
-            { name: 'Basis Fräser-Sets (5x)', quantity: 1, pricePerUnit: 565.25, buyLink: '' },
-            { name: 'Shaper Trace', quantity: 1, pricePerUnit: 117.81, buyLink: '' },
-            { name: 'Software: Shaper Studio', quantity: 1, pricePerUnit: 350.00, buyLink: '' }
-          ]
+    // Helper to create category and initial suggestion
+    async function addEquipment(
+      catName: string, 
+      title: string, 
+      price: number, 
+      buyLink: string, 
+      description: string, 
+      materials: {name: string, quantity: number, price: number, link: string}[] = []
+    ) {
+      const category = await prisma.equipmentCategory.create({ data: { title: catName, creatorId: adminUser!.id } });
+      await prisma.equipmentSuggestion.create({
+        data: {
+          categoryId: category.id,
+          title: title,
+          description: description,
+          price: price,
+          buyLink: buyLink,
+          creatorId: adminUser!.id,
+          creatorName: adminUser!.name,
+          status: 'PROPOSED',
+          materials: {
+            create: materials.map(m => ({
+              name: m.name,
+              quantity: m.quantity,
+              pricePerUnit: m.price,
+              buyLink: m.link
+            }))
+          }
         }
-      }
-    });
+      });
+    }
 
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMaschinen.id,
-        title: '3D-Drucker: Bambu Lab X1 Carbon + AMS (3x)',
-        description: 'Eingehauster Core-XY-3D-Drucker mit Multimaterial/-color-System.',
-        price: 4197.00,
-        buyLink: 'https://eu.store.bambulab.com/de/products/x1-carbon',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED',
-        materials: {
-          create: [
-            { name: 'Druckplatten (3x)', quantity: 1, pricePerUnit: 103.17, buyLink: '' },
-            { name: 'Filament (50kg)', quantity: 1, pricePerUnit: 849.50, buyLink: '' },
-            { name: 'AMS-Hub', quantity: 1, pricePerUnit: 54.99, buyLink: '' },
-            { name: 'Filament Trockner', quantity: 1, pricePerUnit: 65.00, buyLink: '' },
-            { name: 'Hotends mit Düse (3x)', quantity: 1, pricePerUnit: 248.97, buyLink: '' }
-          ]
-        }
-      }
-    });
+    // 1-8
+    await addEquipment('1. Handgeführte CNC', 'Shaper Origin + Workstation + Plate', 4569.60, 'https://www.shapertools.com/de-de/', 'Handgeführte CNC-Maschine.', [
+      { name: 'SHAPER Tape (10x)', quantity: 1, price: 226.10, link: 'https://www.shapertools.com/de-de/shapertape' },
+      { name: 'Spannzangen-Set', quantity: 1, price: 208.25, link: 'https://www.shapertools.com/de-de/collet-kit' },
+      { name: 'Basis Fräser-Sets (5x)', quantity: 1, price: 565.25, link: 'https://www.shapertools.com/de-de/cutters' },
+      { name: 'Shaper Trace', quantity: 1, price: 117.81, link: 'https://www.shapertools.com/de-de/trace' },
+      { name: 'Software: Shaper Studio', quantity: 1, price: 350.00, link: 'https://www.shapertools.com/de-de/studio' }
+    ]);
+    await addEquipment('2. 3D-Drucker', '3x Bambu Lab X1 Carbon + AMS', 4197.00, 'https://eu.store.bambulab.com/de/products/x1-carbon', 'Core-XY-3D-Drucker.', [
+      { name: 'Druckplatten (3x)', quantity: 1, price: 103.17, link: 'https://eu.store.bambulab.com/de/products/bambu-textured-pei-plate' },
+      { name: 'Filament (50kg)', quantity: 1, price: 849.50, link: 'https://eu.store.bambulab.com/de/collections/bambu-pla' },
+      { name: 'AMS-Hub', quantity: 1, price: 54.99, link: 'https://eu.store.bambulab.com/de/products/bambu-ams-hub' },
+      { name: 'Filament Trockner', quantity: 1, price: 65.00, link: 'https://www.3djake.de/sunlu/filadryer-s2?sai=12286' },
+      { name: 'Hotends mit Düse (3x)', quantity: 1, price: 248.97, link: 'https://eu.store.bambulab.com/de/products/all-in-one-hotends-bundle' }
+    ]);
+    await addEquipment('3. Große CNC-Maschine', 'Inventables X-Carve', 3299.00, 'https://www.mybotshop.de/Inventables-X-Carve-CNC-Milling-Machine', 'Portalfräse.', [
+      { name: 'Bitset Holz/Alu', quantity: 1, price: 194.85, link: 'https://www.reichelt.de/cnc-x-carve-bitset-fuer-holz-kunststoff-aluminium-inv-mbs-in-03-p286987.html' },
+      { name: 'Gravierbits-Set', quantity: 1, price: 209.85, link: 'https://www.reichelt.de/cnc-x-carve-bitset-fuer-gravierungen-inv-mbs-in-04-p286988.html' },
+      { name: 'Kegelfräser 1/4', quantity: 1, price: 122.85, link: '' },
+      { name: 'Kegelfräser 1/8', quantity: 1, price: 152.85, link: '' }
+    ]);
+    await addEquipment('4. Lasercutter', 'xTool P2 55W', 5979.00, 'https://de.xtool.com/products/xtool-p2-55w-co2-laser-cutter', 'CO2 Laser Cutter.', []);
+    await addEquipment('5. Resin 3D-Drucker', 'Anycubic Photon Mono M5s Pro', 1009.00, 'https://de.anycubic.com/', 'Resin 3D-Drucker.', [
+      { name: 'Resin (20x)', quantity: 1, price: 431.80, link: 'https://www.amazon.de/ANYCUBIC-Photopolymer-Genauigkeit-Hervorragender-Flie%C3%9Ff%C3%A4higkeit/dp/B07K8GBT9W/' }
+    ]);
+    await addEquipment('6. Kleine CNC-Maschine', 'Makera Carvera', 5632.81, 'https://www.makera.com/products/carvera', 'Desktop CNC.', []);
+    await addEquipment('7. Schneidplotter', 'Mimaki CG-130 AR', 3290.00, 'https://www.msl-shop.de/mimaki-cg-ar-schneideplotterserie', 'Profi-Schneidplotter.', [{ name: 'Material', quantity: 1, price: 200.00, link: '' }]);
+    await addEquipment('8. Siebdruck', 'Siebdruck-Set & Transferpresse', 0, '', 'T-Shirt-Druck.', [
+      { name: 'Siebdruck-Set 4-farbig', quantity: 1, price: 499.00, link: 'https://www.siebdruck-versand.de/siebdruck-set-fuer-mehrfarbigen-siebdruck' },
+      { name: 'Transferpresse Secabo TC7 SMART', quantity: 1, price: 1385.99, link: 'https://www.siebdruck-versand.de/transferpresse-fuer-transferdrucke-secabo' }
+    ]);
 
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMaschinen.id,
-        title: 'große CNC-Maschine: Inventables X-Carve',
-        description: 'Einsteigerfreundliche Portalfräse für Holz, Alu und Kunststoffe.',
-        price: 3299.00,
-        buyLink: 'https://www.mybotshop.de/Inventables-X-Carve-CNC-Milling-Machine',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED',
-        materials: {
-          create: [
-            { name: 'Bitset für Holz, etc. (3x)', quantity: 1, pricePerUnit: 194.85, buyLink: '' },
-            { name: 'Gravierbits-Set (3x)', quantity: 1, pricePerUnit: 209.85, buyLink: '' },
-            { name: 'Kegelfräser 1/4 (3x)', quantity: 1, pricePerUnit: 122.85, buyLink: '' },
-            { name: 'Kegelfräser 1/8 (3x)', quantity: 1, pricePerUnit: 152.85, buyLink: '' }
-          ]
-        }
-      }
-    });
+    // 9. Holzwerkstatt - Split into individual categories
+    await addEquipment('9.1 Holz: Kappsäge', 'Einhell TC-SM 2131/1 Dual', 115.94, 'https://www.manomano.de/p/einhell-zug-kapp-gehrungssaege-4300390-tc-sm-2131-2-dual', 'Zug-Kapp-Gehrungssäge.');
+    await addEquipment('9.2 Holz: Bandsäge', 'Scheppach HBS30', 129.00, 'https://www.amazon.de/dp/B00J22Z1W2', 'Kompakte Bandsäge.');
+    await addEquipment('9.3 Holz: Dickenhobel', 'Metabo DH 330', 410.00, 'https://www.hornbach.de/p/dickenhobel-metabo-dh-330/', 'Dickenhobel für präzises Arbeiten.');
+    await addEquipment('9.4 Holz: Standbohrmaschine', 'Einhell Standbohrmaschine', 126.13, 'https://www.amazon.de/dp/B0987TDJPK', 'Für präzise Bohrungen.');
+    await addEquipment('9.5 Holz: Tischkreissäge', 'Festool TKS 80 EBS ST 840-Set', 3973.95, 'https://www.bauportal24h.de/festool-tischkreissaege-tks-80', 'Profi-Tischkreissäge mit SawStop-Technologie.');
+    await addEquipment('9.6 Holz: Schleifmaschine', 'Scheppach BTS900', 119.00, 'https://www.manomano.de/p/scheppach-band-und-tellerschleifer-bts900-150-mm-schleifteller-370-w-9632731', 'Band- und Tellerschleifer.');
+    await addEquipment('9.7 Holz: Stichsäge', 'Metabo STE 100', 120.50, 'https://www.bachgmbh.de/Stichsaege-STE-100-Quick-Set-601100900-Metabo', 'Elektronische Stichsäge.');
+    await addEquipment('9.8 Holz: Handkreissäge', 'Bosch GKS 190', 129.00, 'https://www.hornbach.de/p/handkreissaege-bosch-professional-gks-190-inkl-kreissaegeblatt-optiline-wood-190-x-30-x-2-0-mm-16-zaehne/6097608/', 'Handliche Kreissäge.');
+    await addEquipment('9.9 Holz: Akkuschrauber', 'Bosch GSR 18V-55 Pro', 268.99, 'https://www.manomano.de/p/bosch-professional-bosch-akku-bohrschrauber-gsr-18v-110-c-mit-2-x-akku-procore18v-40-ah-und-l-boxx-75280802', 'Profi-Akkuschrauber.');
+    await addEquipment('9.10 Holz: Schlagbohrmaschine', 'Einhell RT-ID 65', 49.95, 'https://www.voelkner.de/products/666639/Einhell-RT-ID-65-1-1-Gang-Schlagbohrmaschine-650W-inkl.-Koffer.html', 'Schlagbohrmaschine.');
+    await addEquipment('9.11 Holz: Elektrohobel', 'Bosch PHO 2000', 95.85, 'https://www.hornbach.de/p/hobel-bosch-pho-2000-inkl-hobelmesser/5636689/', 'Elektrohobel.');
+    await addEquipment('9.12 Holz: Drechselbank', 'Holzmann D 460FXL', 324.89, 'https://www.voelkner.de/products/201655/Holzmann-Maschinen-D460FXL230V-Holz-Drehmaschine-550-770W.html', 'Drechselbank für Holzarbeiten.');
 
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMaschinen.id,
-        title: 'Lasercutter: xTool P2 55W',
-        description: 'Zum Schneiden von Acryl, Pappe und Holz.',
-        price: 5979.00,
-        buyLink: 'https://de.xtool.com/products/xtool-p2-55w-co2-laser-cutter',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMaschinen.id,
-        title: 'SLS-3D-Drucker: Anycubic Photon Mono M5s Pro',
-        description: 'SLS-Drucker auf Basis von Kunstharz.',
-        price: 1009.00,
-        buyLink: 'https://de.anycubic.com/',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED',
-        materials: {
-          create: [
-            { name: 'Resin (20x)', quantity: 1, pricePerUnit: 431.80, buyLink: '' }
-          ]
-        }
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMaschinen.id,
-        title: 'kleine CNC-Maschine: Makera Carvera',
-        description: 'Vielseitige CNC-Maschine für Leiterplatten (PCBs) und mehr.',
-        price: 5632.81,
-        buyLink: 'https://www.makera.com/products/carvera',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMaschinen.id,
-        title: 'Schneidplotter: Mimaki CG-130 AR',
-        description: 'Professioneller Schneidplotter.',
-        price: 3290.00,
-        buyLink: 'https://www.msl-shop.de/',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED',
-        materials: {
-          create: [
-            { name: 'Material', quantity: 1, pricePerUnit: 200.00, buyLink: '' }
-          ]
-        }
-      }
-    });
-
-    // 2. Siebdruck-Set
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catSiebdruck.id,
-        title: 'Siebdruck-Set 4-farbig',
-        description: 'Für T-Shirt-Druck und Papier.',
-        price: 499.00,
-        buyLink: 'https://www.siebdruck-versand.de/',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catSiebdruck.id,
-        title: 'Transferpresse: Secabo TC7 SMART',
-        description: 'Zum Einbacken von Siebdruck.',
-        price: 1385.99,
-        buyLink: 'https://www.siebdruck-versand.de/',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    // 3. Einrichtung Holzwerkstatt
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Kappsäge (Einhell TC-SM 2131/1 Dual)',
-        description: 'Zug-Kapp-Gehrungssäge',
-        price: 115.94,
-        buyLink: 'https://www.manomano.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Bandsäge (Scheppach HBS30)',
-        description: '',
-        price: 129.00,
-        buyLink: 'https://www.amazon.de/',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Dickenhobel (Metabo DH 330)',
-        description: '',
-        price: 410.00,
-        buyLink: 'https://www.hornbach.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Standbohrmaschine (Einhell)',
-        description: '',
-        price: 126.13,
-        buyLink: 'https://www.amazon.de/',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Tischkreissäge (Festool TKS 80 EBS ST 840-Set)',
-        description: 'Mit Saw-Stop!',
-        price: 3973.95,
-        buyLink: 'https://www.bauportal24h.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Band- und Tellerschleifer (Scheppach BTS900)',
-        description: '',
-        price: 119.00,
-        buyLink: 'https://www.manomano.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Stichsäge (Metabo STE 100)',
-        description: '',
-        price: 120.50,
-        buyLink: 'https://www.manomano.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Handkreissäge (Bosch Professional GKS 190)',
-        description: '',
-        price: 129.00,
-        buyLink: 'https://www.bauhaus.info',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Akkuschrauber (Bosch GSR 18V-55 Pro)',
-        description: '',
-        price: 268.99,
-        buyLink: 'https://www.manomano.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Schlagbohrmaschine (Einhell RT-ID 65)',
-        description: '',
-        price: 49.95,
-        buyLink: 'https://www.voelkner.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PURCHASED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Elektrohobel (Bosch PHO 2000)',
-        description: '',
-        price: 95.85,
-        buyLink: 'https://www.hornbach.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catHolz.id,
-        title: 'Drechselbank (Holzmann D 460FXL)',
-        description: '',
-        price: 324.89,
-        buyLink: 'https://www.voelkner.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    // 4. Möbel
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMoebel.id,
-        title: 'Tische (6x) FlexMax',
-        description: '',
-        price: 1331.70,
-        buyLink: 'https://www.betzold.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMoebel.id,
-        title: 'Stühle (10x) Work',
-        description: '',
-        price: 1319.50,
-        buyLink: 'https://www.betzold.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMoebel.id,
-        title: 'Laptop-Locker Orgami Energy',
-        description: '',
-        price: 1196.00,
-        buyLink: 'https://www.backwinkel.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMoebel.id,
-        title: 'Gefahrenstoffschrank (Asecos)',
-        description: '',
-        price: 537.00,
-        buyLink: 'https://www.denios.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMoebel.id,
-        title: 'Werkbank Nordic Plus',
-        description: '',
-        price: 440.00,
-        buyLink: 'https://www.toom.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
-
-    await prisma.equipmentSuggestion.create({
-      data: {
-        categoryId: catMoebel.id,
-        title: 'Schließfachschrank Ole',
-        description: '',
-        price: 521.50,
-        buyLink: 'https://www.inwerk-bueromoebel.de',
-        creatorId: adminUser.id,
-        creatorName: adminUser.name,
-        status: 'PROPOSED'
-      }
-    });
+    // 10-17
+    await addEquipment('10. Möbel', 'Möbel für den MakerSpace', 0, '', 'Einrichtung.', [
+      { name: 'Tische (6x)', quantity: 1, price: 1331.70, link: '' },
+      { name: 'Stühle (10x)', quantity: 1, price: 1319.50, link: '' },
+      { name: 'Laptop-Locker', quantity: 1, price: 1196.00, link: '' },
+      { name: 'Gefahrenstoffschrank', quantity: 1, price: 537.00, link: '' },
+      { name: 'Werkbank', quantity: 1, price: 440.00, link: '' },
+      { name: 'Schließfachschrank', quantity: 1, price: 521.50, link: '' }
+    ]);
+    await addEquipment('11. Filament-Recycler', 'Original Desktop Filament Extruder MK2', 899.00, 'https://www.artme-3d.de', 'Recycler.', []);
+    await addEquipment('12. Computer', 'Laptops', 0, '', 'IT-Ausstattung.', [
+      { name: 'High-End-Laptop', quantity: 1, price: 2699.00, link: '' },
+      { name: 'Kurs-Geräte (5x)', quantity: 1, price: 2995.00, link: '' }
+    ]);
+    await addEquipment('13. Elektrotechnik', 'Elektrotechnik-Set', 0, '', 'Lötstation etc.', [
+      { name: 'Lötstation (Ersa)', quantity: 1, price: 3104.98, link: '' },
+      { name: 'Oszilloskop', quantity: 1, price: 415.00, link: '' },
+      { name: 'Multimeter', quantity: 1, price: 114.98, link: '' },
+      { name: 'Labornetzgerät', quantity: 1, price: 134.99, link: '' },
+      { name: 'Punktschweißgerät', quantity: 1, price: 129.99, link: '' }
+    ]);
+    await addEquipment('14. Nähmaschinen', 'Brother KD 40S (5x)', 897.00, '', 'Nähmaschinen.', []);
+    await addEquipment('15. Präsentationstechnik', 'Samsung QLED 85"', 1678.00, '', 'Smart TV.', []);
+    await addEquipment('16. Vereinsleben', 'Küche & Co', 0, '', 'Kühlschrank etc.', [
+      { name: 'Kühlschrank', quantity: 1, price: 571.00, link: '' },
+      { name: 'Kaffeevollautomat', quantity: 1, price: 399.99, link: '' }
+    ]);
+    await addEquipment('17. Software & Abos', 'Adobe & Co', 1650.00, '', 'Abonnements.', []);
 
     // Setup budget if it does not exist
     const currentBudget = await prisma.equipmentBudget.findUnique({ where: { id: 'singleton' } });
@@ -425,7 +143,7 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({ message: 'Datenbank erfolgreich gefüllt!' });
+    return NextResponse.json({ message: 'Datenbank erfolgreich mit allen 17+ Kategorien gefüllt!' });
 
   } catch (error: any) {
     console.error(error);
