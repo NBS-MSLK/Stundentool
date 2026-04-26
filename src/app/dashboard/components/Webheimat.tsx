@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import GlobalCalendar from './GlobalCalendar';
 
 export default function Webheimat({ user, stats }: { user: any, stats: any }) {
+  const [activeTab, setActiveTab] = useState('OVERVIEW');
   const [funding, setFunding] = useState<any>(null);
   const [headlines, setHeadlines] = useState<any[]>([]);
   const [news, setNews] = useState<any[]>([]);
@@ -100,26 +101,53 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
-      {/* 0. Kurzmeldungen (Headlines) */}
+        <>
+          {/* 0. Kurzmeldungen (Headlines) */}
       {latestHeadlines.length > 0 && (
-        <div style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '0.8rem 1rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', position: 'relative' }}>
-          <div style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px', backgroundColor: 'rgba(0,0,0,0.2)', padding: '0.3rem 0.6rem', borderRadius: '4px', flexShrink: 0 }}>
-            Aktuell
+        <div style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '0.8rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', position: 'relative' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px', backgroundColor: 'rgba(0,0,0,0.2)', padding: '0.3rem 0.6rem', borderRadius: '4px', flexShrink: 0 }}>
+              Aktuell
+            </div>
+            
+            {latestHeadlines.length > 1 && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '0 1rem' }}>
+                {latestHeadlines.map((_, idx) => (
+                  <button 
+                    key={idx}
+                    onClick={() => setCurrentHeadlineIndex(idx)}
+                    style={{ 
+                      width: '8px', 
+                      height: '8px', 
+                      borderRadius: '50%', 
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      backgroundColor: idx === currentHeadlineIndex ? 'white' : 'rgba(255,255,255,0.4)',
+                      transition: 'background-color 0.3s'
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
+            <a href="/dashboard/headlines" style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', textDecoration: 'underline', flexShrink: 0 }}>
+              Alle anzeigen
+            </a>
           </div>
           
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-            
+          <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {latestHeadlines.length > 1 && (
               <button 
                 onClick={() => setCurrentHeadlineIndex(prev => prev === 0 ? latestHeadlines.length - 1 : prev - 1)}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', padding: '0 0.5rem', fontSize: '1.2rem', display: 'flex', alignItems: 'center' }}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', padding: '0 0.5rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center' }}
               >
                 &#8249;
               </button>
             )}
 
-            <div style={{ flex: 1, textAlign: 'center', padding: '0 0.5rem', overflow: 'hidden' }}>
-              <span key={currentHeadlineIndex} style={{ fontSize: '1rem', whiteSpace: 'nowrap', display: 'inline-block', animation: 'fadeIn 0.5s ease-in-out' }}>
+            <div style={{ flex: 1, textAlign: 'center', padding: '0 0.5rem' }}>
+              <span key={currentHeadlineIndex} style={{ fontSize: '1rem', whiteSpace: 'normal', display: 'inline-block', animation: 'fadeIn 0.5s ease-in-out', lineHeight: 1.5 }}>
                 {latestHeadlines[currentHeadlineIndex]?.content}
               </span>
             </div>
@@ -127,36 +155,12 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
             {latestHeadlines.length > 1 && (
               <button 
                 onClick={() => setCurrentHeadlineIndex(prev => (prev + 1) % latestHeadlines.length)}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', padding: '0 0.5rem', fontSize: '1.2rem', display: 'flex', alignItems: 'center' }}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', padding: '0 0.5rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center' }}
               >
                 &#8250;
               </button>
             )}
           </div>
-
-          {latestHeadlines.length > 1 && (
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
-              {latestHeadlines.map((_, idx) => (
-                <button 
-                  key={idx}
-                  onClick={() => setCurrentHeadlineIndex(idx)}
-                  style={{ 
-                    width: '8px', 
-                    height: '8px', 
-                    borderRadius: '50%', 
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                    backgroundColor: idx === currentHeadlineIndex ? 'white' : 'rgba(255,255,255,0.4)',
-                    transition: 'background-color 0.3s'
-                  }}
-                />
-              ))}
-            </div>
-          )}
-          <a href="/dashboard/headlines" style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', textDecoration: 'underline', marginLeft: '0.5rem', flexShrink: 0 }}>
-            Alle anzeigen
-          </a>
         </div>
       )}
 
@@ -446,6 +450,8 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         </div>
       )}
       
+      </>
+
       <div style={{ paddingBottom: '3rem' }}></div>
     </div>
   );

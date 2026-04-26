@@ -1,0 +1,1086 @@
+Kostenaufstellung
+(Stand: 26. April 2025)
+Anschaffungen MakerSpace
+Maschinen
+Shaper Origin + Workstation + Plate
+Beschreibung: 
+Handgeführte CNC-Maschine und damit ein „Exot“. Sehr bekannt in „Makerkreisen“ durch DIY-Youtube-Formate, jedoch aufgrund des hohen Preises selten in der Heimwerkstatt zu finden. Ist mobil einsetzbar und kann für große und kleine Projekte eingesetzt werden. Verbrauchsmaterial ist neben den Fräsköpfen ein Klebeband mit QR-Code ähnlichen Zeichen, wodurch
+Preis der Maschine
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Shaptertools (Hersteller)
+4.569,60 €
+Gerät, Arbeitsfläche und Platte. HiHierBundle beim Hersteller 
+Origin + Workstation = Your Precision Workshop (shapertools.com)
+Koch-Mannes Maschinen Handels GmbH
+4.569,60 €
+Gerät, Arbeitsfläche und Platte. Stellvertretend für mehrere Webshops, die alle dieselben Preise des Herstellers übernommen haben.
+SHAPER Origin + Workstation + Plate-709SO2EN_1 (koch-mannes.de)
+Preise für benötigtes Zubehör
+SHAPER Tape
+Angebot von
+Preis (1x)
+Preis (10x)
+Anmerkung
+URL
+Shapertools
+22,61 €
+226,10 €
+Verbrauchsmaterial
+ShaperTape
+Koch-Mannes Maschinen 
+22,61 €
+226,10 €
+Verbrauchsmaterial
+SHAPER Tape
+Spannzangen-Set
+Angebot von
+Preis
+URL
+Shapertools
+208,25 €
+Spannzangen-Set
+Koch-Mannes Maschinen 
+208,25 €
+SHAPER Spannzangenset
+Basis Fräser-Set
+Angebot von
+Preis (1x)
+Preis (5x)
+Anmerkung
+URL
+Shapertools
+113,05 €
+565,25 €
+Verschleißteil
+Basis Fräser-Set
+Koch-Mannes Maschinen 
+113,05
+565,25 €
+Verschleißteil
+SHAPER Fräser-Set Basis
+Shaper Trace
+Angebot von
+Preis 
+Anmerkung
+URL
+Shapertools
+117,81 €
+Rahmen, um Zeichnungen in CAD zu übertragen
+Shaper Trace 
+Koch-Mannes Maschinen 
+117,81 €
+s.o.
+SHAPER Trace
+Software: Shaper Studio
+Angebot von
+Preis 
+Anmerkung
+URL
+Shapertools
+350,00 €
+Dauerhafte Lizenz für die Software
+Shaper Studio
+Zusammenfassung:
+Bezeichnung
+Preis
+Gerät, Arbeitsfläche und Platte
+4.569,60 €
+Shaper Tapes
+226,10 €
+Spannzangen-Set
+208,25 €
+Basis Fräser-Sets 
+565,25 €
+Shaper Trace-Rahmen
+117,81 €
+Shaper Studio-Software
+350,00 €
+Gesamt
+6037,01 €
+Shaper Origin im Bundle mit der Arbeitsfläche und Platte
+3617,60 €+ 535,50 € + 416,50 € = 4569,50 €
+Shaper Tape
+19,22 € * 10 = 192,19 € (Sale bis 21.2., danach wieder bei 22,61 € Einzeln und 226,10 € für 10 Stück)
+Spannzangen-Set
+Im Sale bis 21.2., regulär 208,25 €
+Basis Fräser-Set
+Im Sale bis 21.2., regulär einzeln 113,05 € und 565,25 € für 5 Stück. 
+Shaper Trace
+Shaper Studio
+3D-Drucker: Bambu Lab X1 Carbon + AMS (3x)
+Beschreibung: 
+Eingehauster Core-XY-3D-Drucker mit Multimaterial/-color-System. Viele Komfortfunktionen.   Momentan der Go-To-3D-Drucker im Consumer-Bereich. 
+Drei Geräte für eine optimale Ausstattung des MakerSpaces sinnvoll, da Druckteile häufig einiges an Zeit in Anspruch nehmen, sich so Projekte schneller umsetzen lassen und die Wartezeit auf eine freie Maschine reduziert wird. 
+Preis der Maschine
+Angebot von
+Preis
+Preis (3x)
+Name / Anmerkung
+URL
+Bambu Lab
+1.399,00 €
+4.197,00 €
+X1C mit AMS
+Bestellung beim Hersteller schließt eine 6-monatige Vorteilsmitgliedschaft ein.
+eu.store.bambulab.com/de/products/x1-carbon
+3Dmensionals
+1.549,00 €
+4.647,00 €
+Stellvertretend für verschiedene Webshops, die diesen Preis anbieten (OVP des Herstellers).
+https://www.3dmensionals.de/bambu-lab-x1-carbon-combo-3d-drucker-2776
+Preise für benötigtes Zubehör
+Druckplatte: doppelseitig texturierte PEI Platte
+Verbessert die Haftung. Erforderlich für manche Materialien wie TPU (weicher Kunststoff) und sorgt für ein schönes Finish der Drucke auf der Unterseite. 
+Angebot von
+Preis 
+Preis (3x)
+Anmerkung
+URL
+Bambu Lab
+34,39 €
+103,17 €
+Wenn mit Drucker gekauft, ansonsten 39,99 €
+Bambu Lab X1-Carbon Combo 3D-Drucker | Bambu Lab EU
+3Dmensionals
+40,98 €
+122,94 €
+Bambu Lab Textured PEI Plate für X1 / P1P | 3Dmensionals
+Filament
+Angebot von
+Preis (1x)
+Preis (50x)
+Anmerkung
+URL
+Bambu Lab
+16,99 €*
+849,50 €
+Verbrauchsmaterial (PLA). Spulen werden vom Gerät automatisch erkannt.
+Shop PLA at Bambu Lab EU | Bambu Lab EU
+Sunlu
+12,16 – 14,03 €
+608 – 701,50 €
+Billig-Verbrauchsmaterial (PLA). Spulen werden vom Gerät nicht automatisch erkannt.
+SUNLU PLA Plus series 3D Printer Filaments - PLA filament Bundle Sales
+Material 4 Print
+23,93 €
+1.196,50 €
+Verbrauchsmaterial (PLA). Regional: aus Löhne. Möglicherweise Rabatt aushandelbar. Spulen werden vom Gerät nicht automatisch erkannt.
+https://www.material4print.de
+/filament/pla
+* mit Vorteilsmitgliedschaft, wenn wir die Drucker beim Hersteller bestellen. 
+AMS-Hub
+Erlaubt das Drucken mit bis zu 16 Farben. Bei 3-AMS-Systemen für unseren MakerSpace 12 Farben. 
+Angebot von
+Preis 
+Anmerkung
+URL
+Bambu Lab
+54,99 €
+Hersteller
+Bambu Lab AMS Hub
+IGO3D
+54,99
+Bambu Lab AMS Hub | IGO3D
+Filament Trockner
+Stellt eine gute Druckfähigkeit wieder her. 
+Angebot von
+Preis 
+Anmerkung
+URL
+3DJake
+65,00 €
+SUNLU FilaDryer S2
+https://www.3djake.de/sunlu/filadryer-s2?sai=12286
+3Dmensionals
+69,90 €
+s.o.
+Hotends mit Düse
+Verschiedene Größen der Düse für verschiedenes Material
+Angebot von
+Preis 
+Preis (3x)
+Anmerkung
+URL
+Bambu Lab 
+82,99 €
+248,97 €
+Hotend mit Düse in 0,2mm, 0,6mm und 0,8mm
+eu.store.bambulab.com/de/products/all-in-one-hotends-bundle
+OKM3D
+31,99 € (für EINE)
+287,91
+Preis für EINE Düse, ohne Bundle, daher den Preis insgesamt beachten
+Bambu Lab Complete hotend 
+Zusammenfassung
+Bezeichnung
+Preis
+Drucker (Bambu Lab X1C mit AMS) 3x
+4.197,00 €
+Druckplatten (3x)
+103,17 €
+Filament (50 kg) von Bambu Lab, da diverse Vorteile
+849,50 €
+AMS-Hub
+54,99 €
+Filament-Trockner
+65,00 €
+Hotends mit Düse (3x)
+248,97 €
+Gesamt
+5.518,63 €
+Bambu Lab X1C
+Druckplatten
+Filament
+AMS Hub
+Filamenttrockner
+Hotends
+„große CNC-Maschine“: Inventables X-Carve 
+Beschreibung:
+Einsteigerfreundliche Portalfräse für Holz, Alu und Kunststoffe. Zusammen mit der hauseigenen Software Easel eine weit verbreitete Hobby-Lösung. 
+Preis der Maschine (Versand eingerechnet):
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Reichelt
+3.299,00 €
+NICHT VERFÜGBAR!
+ Makita Spindel (bessere Leistung)
+X-CARVE V2 MAK: CNC-Fräse, X-Carve 1000 mm, Makita 
+MyBotShop
+3.399,00 €
+Makita Spindel (bessere Leistung). 
+Inventables X-Carve CNC Milling Machine | 
+Preise für benötigtes Zubehör
+Bitset für Holz, Kunststoff und Aluminium
+Angebot von
+Preis
+Preis 3x
+Name / Anmerkung
+URL
+Reichelt
+64,95 €
+194,85 €
+Verschleißmaterial
+https://www.reichelt.de/cnc-x-carve-bitset-fuer-holz-kunststoff-aluminium-inv-mbs-in-03-p286987.html
+MyBotShop
+64,95 €
+194,85 €
+Verschleißmaterial
+Inventables Bits for Wood, Plastic &amp; Alu | MYBOTSHOP.DE, 64,95 €
+Gravierbits-Set
+Angebot von
+Preis
+Preis 3x
+Name / Anmerkung
+URL
+Reichelt
+69,95 €
+209,85 €
+Verschleißmaterial
+https://www.reichelt.de/cnc-x-carve-bitset-fuer-gravierungen-inv-mbs-in-04-p286988.html
+MyBotShop
+69,95 €
+209,85 €
+Verschleißmaterial
+Inventables Bit Set for Engraving 
+Bits fürs Kegelfräsen (V-Carving) 1/4
+Angebot von
+Preis
+Preis 3x
+Name / Anmerkung
+URL
+MyBotShop
+40,95 €
+122,85 €
+Verschleißmaterial
+Inventables 1/4 Bit Set for V-Carving
+Nur von diesem Shop angeboten. 
+Bits fürs Kegelfräsen (V-Carving) 1/8
+Angebot von
+Preis
+Preis 3x
+Name / Anmerkung
+URL
+MyBotShop
+50,95 €
+152,85 €
+Verschleißmaterial
+Inventables 1/8 Bit Set for V-Carving 
+Nur von diesem Shop angeboten. 
+Zusammenfassung
+Bezeichnung
+Preis
+X-Carve 
+3.299,99 €
+Bitset für Holz, etc.
+194,85 €
+Gravierbit-Set
+209,85 €
+Kegelfräser ¼
+122,85 €
+Kegelfräser 1/8 
+152,85 €
+Gesamt
+3.985,39 €
+X-Carve 2
+Bitset
+Gravierbitset
+Kegelbitset 1/4
+Kegelbitset 1/8
+Lasercutter: xTool P2 55W 
+Beschreibung: 
+Zum Schneiden von Acryl, Pappe und Holz, ebenso zum gravieren von allen Oberflächen. Der 55W CO2-Laser hat genug Power für alle Aufgaben, ist für den Hobby-Bereich gedacht und einfach zu bedienen. 
+Preis der Maschine
+Angebot von
+Preis
+Name / Anmerkung
+URL
+xTool
+5.979 €
+Hersteller. Bundle mit verschiedenen Extras.
+P2 55W CO2-Laserschneider (xtool.com)
+3Dprima
+7.025 €
+Maschine mit gleichen Extras
+https://www.3dprima.com/de/3d-drucker-3d-druck/vakkumformen/lasergravierer/xtool-p2-55w-co2-desktop-laser-cutter/a-29197
+Edu.de
+6.306,90 €
+Maschine ohne Extras.
+Makeblock Laserbox “xTool P2” | EDU.de
+Lieferumfang: 
+RA2 Pro: 4-in-1-Rotation hilft bei der Bearbeitung verschiedener Objekte.
+Fördervorrichtung (Basic Set, 99cm): Graviere alles, was bis zu 3 m lang ist, ohne Unterbrechungen in deinem Design.
+Erhöhung: Signifikantes Upgrade der Gravurstärke.
+Abluftfilter: Schaffe einen leisen und sicheren Arbeitsbereich mit einer Reinigungsrate von 99,97 %.
+Feuerschutzset: Automatische Branderkennung, Feuerlöschen.
+SLS-3D-Drucker: Anycubic Photon Mono M5s Pro
+Beschreibung:
+SLS-Drucker sind 3D-Drucker auf der Basis von Kunstharz (Resin), die mit UV-Licht ausgehärtet werden. Sie sind deutlich schneller als „normale“ FDM-3D-Drucker und haben eine sehr gute Auflösung. Sehr beliebt für Figuren. Die Drucke müssen anschließend noch gewaschen und ausgehärtet werden. Das Hantieren mit den chemischen Flüssigkeiten ist gewöhnungsbedürftig. Dieser Drucker ist einsteigerfreundlich und hat einen Filter, damit wir ihn im MakerSpace einsetzen können
+Preis der Maschine mit Wachstation:
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Anycubic 
+1.009,00 €
+Hersteller. Bundle mit Waschstation und 2kg Resin
+Photon Mono M7 Max: Größer, Besser, Grenzenlos | Jetzt Kaufen!
+Amazon
+1.078,00 €
+Maschine und Waschstation einzeln.
+https://www.amazon.de/dp/B0DHCPNX1Q/?smid=AEBX97EXEL5H
+ und 
+ANYCUBIC Wash &amp; Cure Max Maschine
+Resin (Verbrauchsmaterial)
+Angebot von
+Preis (1x)
+Preis (20x)
+URL
+Anycubic
+21,59 € 
+431,80 €
+Farbiges UV Resin 1L - ANYCUBIC 3D Drucker – ANYCUBIC-DE
+Amazon
+24,64 €
+492,80 €
+https://www.amazon.de/ANYCUBIC-Photopolymer-Genauigkeit-Hervorragender-Flie%C3%9Ff%C3%A4higkeit/dp/B07K8GBT9W/
+Zusammenfassung
+Bezeichnung
+Preis
+Anycubic Photon M5s Pro mit Wash &amp; Cure Max
+1.009,00 €
+Resin (20x)
+431,80 €
+Gesamt
+1.440,80 €
+Anycubic Photon Mono M7 Max
+Resin
+„kleine“ CNC-Maschine: Makera Carvera 
+Beschreibung:
+Vielseitige CNC-Maschine die auf Einfachheit Wert legt. Bringt alles mit, um im MakerSpace Leiterplatten (PCBs) herzustellen. Die Maschine kann außerdem Lasern, Gravieren und Fräsen. Wechselt dafür die Werkzeugköpfe selbstständig, was den Vorgang sehr vereinfacht. 
+Dieses Modell ist sehr neu und nur über den Webshop des Herstellers zu bekommen.,
+Preis für die Maschine und sinnvollem Zubehör:
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Makera
+5.632,81 €
+Maschine mit Laser-Schutzklappe, Modul für die 4. Achse, PCB-Set und Ersatzsensor
+Carvera: The Smartest Desktop CNC Machine | Makera
+Schneidplotter: 
+Beschreibung:
+Mit Schneidplottern lassen sich Sticker, T-Shirts, Wandtattoos und vieles mehr herstellen. Dieses Gerät ist mit maßgeschneiderter Software sehr einsteigerfreundlich und weit über dem Niveau von Amazon-Schneidplottern für wenige hundert Euro.
+Preis für die Maschine:
+Angebot von
+Preis
+Name / Anmerkung
+URL
+MSL Shop
+3290,00 €
+Mimaki CG-130 AR
+MIMAKI CG-AR Schneideplotterserie (NEU) - MSLSHOP
+Plotterboerse
+3300,00 €
+s.o.
+Mimaki CG-130AR | Schneideplotter - Plotterboerse.com
+Material
+Für das Material setzen wir Pauschal 200,00 € an. 
+Zusammenfassung:
+Bezeichnung
+Preis
+Schneidplotter
+3290,00 €
+Material
+200,00 €
+Gesamt
+3490,00 €
+Schneidplotter MIMAKI CG 130AR
+Siebdruck-Set 4-farbig
+Beschreibung:
+Siebdruck kann für T-Shirt-Druck aber auch für Drucke auf Papier und Karton genutzt werden. Auf die Rahmen wird UV-Emulsion aufgetragen, anschließend teilweise belichtet, dann die Emulsion ausgewaschen. In den fertigen Rahmen wird Farbe gegeben und mit dem Rakel ins Gewebe gedrückt und anschließend mit einer Transferpresse eingebacken.
+Für den Siebdruck sind viele verschiedene Dinge und Materialien notwendig, daher ist es sinnvoll auf ein Set zu setzen für den MakerSpace.
+Preis für ein Siebdruck-Set
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Siebdruck-versand
+499,00 €
+4-FARB SIEBDRUCK SET MIT DIY-SIEBDRUCKKARUSSELL
+Siebdruck Set für mehrfarbigen Siebdruck - Siebdruckversand 
+Siebdruckland
+499,00 €
+SIEBDRUCK SET 4 FARBEN TEXTIL A3+
+Siebdruck Set 4 Farben Textildruck (siebdruckland.de)
+Preis für eine Transferpresse
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Siebdruck-versand
+1.385,99 €
+SECABO TC7 SMART MODULARE TRANSFERPRESSE 40CM X 50CM
+Transferpresse für Transferdrucke Secabo - Siebdruckversand 
+ColorMatch
+1.510,00
+Secabo TC7 SMART Energy Saver modulare Transferpresse 40cm x 50cm
+Secabo TC7 SMART Energy Saver modulare Transferpresse 40cm x 50cm (colormatch.org)
+Zusammenfassung
+Bezeichnung
+Preis
+Siebdruckset
+499,00 €
+Transferpresse
+1.385,99 €
+Gesamt
+1.884,99
+ €
+Siebdruckset
+Transferpresse
+Einrichtung Holzwerkstatt
+Beschreibung:
+Für die Holzwerkstatt werden übliche Maschinen benötigt: Kappsäge, Bandsäge, Dickenhobel, Standbohrmaschine, Kreissäge, Bandschleifer und einige batteriebetriebene Varianten für den mobilen Einsatz. 
+Preis Kappsäge:
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Mein Heimwerker-markt
+116,49 €
+Einhell Zug-Kapp-Gehrungssäge TC-SM 2131/1 Dual mit Laserfunktion
+Einhell Zug-Kapp-Gehrungssäge » TC-SM 2131/1 Dual «
+ManoMano
+115,94 €
+s.o.
+Einhell Zug-Kapp-Gehrungssäge 4300390 TC-SM 2131/2 Dual 
+Preis Bandsäge
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Amazon
+135,00 €
+Scheppach HBS30 Bandsäge
+Scheppach HBS30 Bandsäge 
+Norma24
+129,00 €
+s.o.
+Scheppach Bandsäge HBS30 | Norma24
+Preis Dickenhobel
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Manomano
+423,00 €
+Metabo DH 330 
+https://www.manomano.de/p/metabo-200033000-dickenhobel-dh-330-6089126
+Hornbach
+410,00 €
+s.o.
+https://www.hornbach.de/p/dickenhobel-metabo-dh-330/
+Preis Standbohrmaschine
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Amazon
+126,13 €
+Einhell Säulenbohrmaschine
+https://www.amazon.de/dp/B0987TDJPK
+Kaufland
+146,14 €
+s.o.
+Einhell Säulenbohrmaschine TC-BD 500 | Kaufland.de
+Preis Tischkreissäge
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Bauportal24h
+3.973,95 €
+Festool Tischkreissäge TKS 80 EBS ST 840-Set
+- mit Saw-Stop! - 
+Festool Tischkreissäge TKS 80 EBS ST 840-Set | Akkustichsägen | Akkuwerkzeuge | Werkzeuge | Sortiment | Bauportal24h
+Fleischmann
+3.980,00 €
+s.o.
+NEU Tischkreissäge TKS 80 EBS ST 840-Set, 578108 m. neuem Schiebetisch. versandbereit | Tischkreissägen | Sägen | Festool | Fleischmann Werkzeuge
+Preis Band- und Tellerschleifer
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Lefeld
+119,00 €
+Scheppach Band- und Tellerschleifer BTS900
+Scheppach Band- und Tellerschleifer BTS900 150mm Weiterentwicklung des BTS800 Lefeld Werkzeug
+ManoMano
+121,17 €
+s.o.
+https://www.manomano.de/p/scheppach-band-und-tellerschleifer-bts900-150-mm-schleifteller-370-w-9632731
+Preis Stichsäge
+Angebot von
+Preis
+Name / Anmerkung
+URL
+ManoMano
+120,50 €
+Metabo STE 100 im Koffer
+Stichsäge STE 100 Quick Set (601100900) Metabo (manomano.de)
+Bach Fachmarkt
+120,50 €
+s.o.
+https://www.bachgmbh.de/Stichsaege-STE-100-Quick-Set-601100900-Metabo
+Preis Handkreissäge
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Bauhaus
+129,00 €
+Bosch Professional Handkreissäge GKS 190
+https://www.bauhaus.info/handkreissaegen/bosch-professional-handkreissaege-gks-190/p/24789415
+Hornbach
+129,00 €
+s.o.
+https://www.hornbach.de/p/handkreissaege-bosch-professional-gks-190-inkl-kreissaegeblatt-optiline-wood-190-x-30-x-2-0-mm-16-zaehne/6097608/
+Preis Akkuschrauber
+Angebot von
+Preis
+Name / Anmerkung
+URL
+ManoMano
+268,99 €
+Bosch GSR 18V-55 Pro mit einem Akku, Ladegerät und Koffer
+https://www.manomano.de/p/bosch-professional-bosch-akku-bohrschrauber-gsr-18v-110-c-mit-2-x-akku-procore18v-40-ah-und-l-boxx-75280802
+FGR Hagen
+309,40 €
+s.o.
+www.fgr-hagen.de
+Preis Bohrmaschine
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Voelkner
+49,95 €
+Einhell RT-ID 65 mit Koffer
+https://www.voelkner.de/products/666639/Einhell-RT-ID-65-1-1-Gang-Schlagbohrmaschine-650W-inkl.-Koffer.html
+Galaxus
+52,99 €
+s.o.
+https://www.galaxus.de/de/s4/product/einhell-rt-id-65-netzbetrieb-bohrmaschine-akkuschrauber-2435396
+Preis Elektrohobel
+Angebot von
+Preis
+Name / Anmerkung
+URL
+ManoMano
+108,86 €
+Bosch Hobelmaschine PHO 200
+https://www.manomano.de/p/bosch-hobel-pho-2000-75279205?model_id=55781117
+Hornbach
+95,85 €
+s.o.
+https://www.hornbach.de/p/hobel-bosch-pho-2000-inkl-hobelmesser/5636689/
+Preis Drechselbank
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Voelkner
+324,89 €
+Holzmann D 460FXL
+https://www.voelkner.de/products/201655/Holzmann-Maschinen-D460FXL230V-Holz-Drehmaschine-550-770W.html
+Globus Baumarkt
+339,00 €
+s.o.
+https://www.globus-baumarkt.de/p/holzmann-drechselbank-d460fxl_230v-stufenlose-geschwindigkeits-einstellung-0761140641
+Zusammenfassung
+Bezeichnung
+Preis
+Kappsäge
+115,94 €
+Bandsäge
+129,00 €
+Dickenhobel
+410,00 €
+Standbohrmaschine
+126,13 €
+Tischkreissäge mit Saw-Stop
+3.973,95 €
+Band- und Tellerschleifer
+119,00 €
+Stichsäge
+120,50 €
+Handkreissäge
+129,00 €
+Akkuschrauber
+268,99 €
+Bohrmaschine
+49,95 €
+Elektrohobel
+95,85 €
+Drechselbank
+324,89 €
+Gesamt
+5.863,20
+ €
+Kappsäge
+Bandsäge
+Dickenhobel
+Standbohrmaschine
+Tischkreissäge
+Band- und Tellerschleifern
+Stichsäge
+Handkreissäge
+Akkuschrauber
+Schlagbohrmaschine
+Elektrohobel
+Drehmaschine
+Möbel
+Beschreibung:
+Der MakerSpace soll neben einer Werkstatt auch ein Raum der Begegnung sein, bei dem sich Menschen über ihre Projekte austauschen und gemeinsam daran arbeiten können. Außerdem sind Spezialmöbel zur Aufbewahrung von Wertgegenständen und Chemikalien (z.B. Resin für den 3D-Druck oder Isopropanol als Reinigungsmittel) notwendig. 
+Tische
+Angebot von
+Preis
+Preis (6x)
+Name / Anmerkung
+URL
+Betzold
+230,95 €
+1.385,70 €
+FlexMax Quadrattisch, 80x80
+FlexMax Quadrattisch | betzold.de
+Roth Schulmöbel
+221,95 €
+1.331,70 €
+Stack-o-Flex Quadrattisch und höhenverstellbar
+Stack o Flex Quadrattisch, höhenverstellbar &amp; stapelbar | COGP-17583
+Stühle
+Angebot von
+Preis
+Preis (10x)
+Name / Anmerkung
+URL
+Betzold
+131,95 €
+1.319,50 €
+Höhenverstellbarer Drehstuhl mit Kunststoffsitzschale
+Schalenstuhl „Work“, mit Polster und Reihenverbinder | betzold.de
+Roth Schulmöbel
+197,99 €
+1.979,90 €
+s.o.
+https://www.roth-schulmoebel.de/Stuhl-Belice/COGP-86583
+Laptop-Locker
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Backwinkel
+1.196,00 €
+Orgami Laptop-Locker Engery
+Orgami Laptop-Locker Energy | betzold.de
+Betzold
+1.196,00 €
+s.o.
+Laptop-Locker Energy und Standard günstig online kaufen bei BACKWINKEL
+Gefahrenstoffschrank
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Schäfershop
+818,00 €
+Chemiekalienschrank, Flügeltür, Sicherheitsgelb
+https://www.schaefer-shop.de/p/chemikalienschrank-asecos-cf-classic-fluegeltuer-anschlag-rechts-b-600-x-t-500-x-h-1950-mm
+Denios
+537,00 €
+Chemikalienschrank Easy CS 103
+Chemikalienschrank Easy CS 103, mit Flügeltüren, incl. Bodenwanne und 3 E-Böden (denios.de)
+Werkbank
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Toom
+440,00 €
+Werbank „Nordic Plus 1450“
+Werkbank 'Nordic Plus 1450' 147 x 63 x 86 cm (toom.de)
+OBI
+629,99 €
+Sjöbergs Multifunktionsbank MFB 1060
+Sjöbergs Multifunktionsbank MFB 1060 kaufen bei OBI
+Schließfachschrank
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Inwerk Büromöbel
+1624,35 €
+Schließfachschrank Ole mit Metallsockel. 3x4 – 1350 x 600 mm
+Schließfachschrank Ole | Inwerk Büromöbel
+Lüllmann
+521,50 €
+XL Wertfachschrank 
+XL Wertfachschrank 120 cm, 12 Fächer | Lüllmann®
+Zusammenfassung
+Bezeichnung
+Preis
+Tische (6x)
+1.331,70 €
+Stühle (10x)
+1.319,50 €
+Laptop-Locker
+1.196,00 €
+Gefahrenstoffschrank
+537,00 €
+Werkbank
+440,00 €
+Schließfachschrank
+521,50 €
+Gesamt
+5.345,70 €
+Tische
+Stühle
+Laptop-Locker
+Gefahrenstoffschrank
+Werkbank
+Schließfachschrank
+Filament-Recycler
+Beschreibung:
+Fehldrucke im 3D-Drucke sind nicht auszuschließen. Außerdem fällt gerade bei mehrfarbigen Drucken Ausschuss statt. Mit diesem Recycler kann das Filament recycelt werden. Solche Geräte helfen nicht nur der Umwelt, sondern sind im Heimanwenderbereich praktisch nicht anzutreffen. Somit eine großartige Ergänzung für den MakerSpace. 
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Artme 3D
+899,00 €
+Einziger Anbieter 
+Original Desktop Filament Extruder MK2 mit 2 Extrusionsschrauben 
+Computer
+Beschreibung:
+Zur Erstellung von 3D-Skizzen, Programmierung und Ansteuerung der Maschinen sind Computer notwendig. Hierfür bieten sich Laptops an. Neben einem leistungsstärken Gerät sollten mehrere Laptops für Kurse verfügbar sein.
+High-End-Laptop
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Wortmann
+2.699,00 €
+Terra Mobile Gamer Elite  
+TERRA MOBILE GAMER ELITE 5v3 i9-14900HX W11P | WORTMANN AG - IT Made in Germany
+Dell
+2738,99 €
+Alienware m18 R2 Gaminglaptop
+Alienware m18 Gaminglaptop mit Intel-Prozessor der 14. Generation | Dell Deutschland
+Kurs-Geräte
+Angebot von
+Preis
+Preis (5x)
+Name / Anmerkung
+URL
+Dell
+698,00 €
+3.490,00 €
+Inspiron 15 3525
+Inspiron 3525 38,1 cm (15")-Laptop (AMD): Inspiron-Laptops | Dell Deutschland
+Wortmann
+599,00 €
+2.995,00 €
+Terra Mobile 1516U
+TERRA MOBILE 1516U i3-1215U W11 | WORTMANN AG - IT Made in Germany
+Zusammenfassung
+Bezeichnung
+Preis
+High-End-Laptop
+2.699,00 €
+Kurs-Geräte
+2.995,00 €
+Gesamt
+5.694,00 €
+High-End-Gerät
+Kurs-Gerät
+Elektrotechnik
+Beschreibung:
+Um Arbeiten an Elektrotechnik durchzuführen ist eine gute Ausstattung notwendig.,
+Lötstation
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Conrad
+3.149,00 €
+Ersa Löt-/Entlöststation
+Ersa 0ICV4005AICXV Löt-/Entlötstation 500 W 150 - 450 °C kaufen (conrad.de)
+voelkner
+3.104,98 €
+s.o.
+https://www.voelkner.de/products/7774030/Ersa-0ICV4005AICXV-Loet-Entloetstation-500W-150-450C.html
+Oszilloskop
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Conrad
+415,00 €
+Voltcraft DSO-2154 Digital-Oszilloskop
+VOLTCRAFT DSO-2154 Digital-Oszilloskop 150 MHz 4-Kanal 1 GSa/s 80 kpts 8 Bit Digital-Speicher (DSO) 1 St. kaufen (conrad.de)
+voelkner
+483,02 €
+s.o.
+https://www.voelkner.de/products/8895830/VOLTCRAFT-DSO-2154-Digital-Oszilloskop-150-MHz-4-Kanal-1-GSa-s-80-kpts-8-Bit-Digital-Speicher-DSO-1-St.html
+Multimeter
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Conrad
+114,98 €
+Voltcraft MT-52
+VOLTCRAFT MT-52 Hand-Multimeter digital Umwelt-Messfunktion CAT III 600 V Anzeige (Counts): 4000 kaufen (conrad.de)
+voelkner
+114,98 €
+https://www.voelkner.de/products/185743/VOLTCRAFT-MT-52-Hand-Multimeter-digital-Umwelt-Messfunktion-CAT-III-600V-Anzeige-Counts-4000.html
+Labornetzgerät
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Conrad
+134,99 €
+Voltcraft LPS1305
+VOLTCRAFT LPS1305 Labornetzgerät, einstellbar 0 - 30 V/DC 0 - 5 A 150 W Anzahl Ausgänge 1 x kaufen (conrad.de)
+Voelkner
+134,99 €
+s.o.
+https://www.voelkner.de/products/7571816/VOLTCRAFT-Labornetzgeraet-einstellbar-LPS1305-0.html
+Akku-Punktschweißgerät
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Kaufland
+129,99
+VEVOR Akku-Punktschweißgerät, 788H
+VEVOR Akku-Punktschweißgerät, 788H | Kaufland.de
+Vevor
+132,99 €
+s.o.
+VEVOR Akku-Punktschweißgerät 788H Pulsschweißgerät &amp; Akkuladegerät 2 Schweißmodi | VEVOR DE
+Zusammenfassung
+Bezeichnung
+Preis
+Lötstation
+3.104,98 €
+Oszilloskop
+415,00 €
+Multimeter
+114,98 €
+Labornetzgerät
+134,99 €
+Punktschweißgerät
+129,99 €
+Gesamt
+3.899,94 €
+Lötstation
+Oszilloskop
+Multimeter
+Labornetzgerät
+Punktschweißgerät
+Nähmaschinen
+Beschreibung:
+Für Arbeiten mit Textilien und Workshops sollen Nähmaschinen und Material angeschafft werden.
+Angebot von
+Preis
+Preis (5x)
+Name / Anmerkung
+URL
+Amazon
+299,00 €
+897,00 €
+Brother KD 40S
+Brother KD 40S Little Angel Computer Nähmaschine : Amazon.de: Küche, Haushalt &amp; Wohnen
+Otto
+299,00 €
+897,00 €
+s.o.
+Brother Computer-Nähmaschine KD40S "little Angel", 40 Programme, Junge Nähmaschine, ausgestattet wie eine "Große", 40 Stiche, 5 Ein-Stufen Knopflocharten (otto.de)
+Nähmaschine
+Präsentationstechnik
+Beschreibung:
+Ein großer Fernseher im vorderen Bereich dient mit der Bildübertragung über AppleTV oder Chromecast als Präsentationsfläche oder per Kabel als Monitor zum gemeinsamen Arbeiten. Er braucht dafür eine gute Auflösung und eine gewisse Größe.
+Angebot von
+Preis
+Name / Anmerkung
+URL
+TON-DOSE
+1.599,00 €
+Samsung QLED Q85Q60C
+Samsung Q80D 85 Zoll QLED 4K UHD SmartTV 85Q80D (2024) | TD15913
+SatKing
+1.789,00 €
+s.o.
+Samsung Q80D QLED UHD 4K Smart TV (2024)
+Präsentationstechnik
+Vereinsleben
+Beschreibung:
+Um das Vereinsleben genießen zu können und ungezwungen in den Austausch zu gehen, wollen wir durch eine kleine Küche und Geräte die Aufenthaltsqualität im MakerSpace steigern. Die Küchenelemente wollen wir dafür über die „Deutsche Stiftung für Engagement und Ehrenamt“ fördern lassen. Einige Annehmlichkeiten jedoch über das LEADER-Programm.
+Kühlschrank (groß, verglast)
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Gastro-Cool
+571,00 €
+Displaykühlschrank
+ECO STAR Plus - Super Sparsam - Ressourcen Schonend - Displaykühlschrank - GCDC400
+Glastürkühl-schrank
+737,00 €
+Glastürkühlschrank
+KBS Gastrotechnik Glastürkühlschrank CD 350 schwarz | 350 ltr | Umluftkühlung | Türanschlag wechselbar
+Kaffeevollautomat
+Angebot von
+Preis
+Name / Anmerkung
+URL
+Amazon
+399,99 €
+PHILIPS 2300 Series Kaffeevollautomat
+Amazon.de: PHILIPS 2300 Series Kaffeevollautomat - 4 Getränke, Modernes Farb-Touchscreen-Display, LatteGo-Milchsystem, SilentBrew, 100% Keramikmahlwerk, AquaClean Filter. Mattschwarz (EP2330/10)
+Kaufland
+399,99 €
+PHILIPS 2300 Series Kaffeevollautomat
+Philips Kaffeevollautomat Serie 2200, 2 | Kaufland.de
+Zusammenfassung
+Bezeichnung
+Preis
+Kühlschrank
+571,00 €
+Kaffeevollautomat
+399,99 €
+Gesamt
+970,99 €
+Kühlschrank
+Kaffeeautomat
+Software 
+Beschreibung:
+Fast alle Softwarehersteller setzen mittlerweile auf Abo-Modelle. Um Kurse in den Bereichen Grafikdesign (z.B. für den Siebdruck) oder Programmierung (große Hilfe: ChatGPT4) anbieten zu können, benötigen wird die Finanzierung dieser Abos über einen längeren Zeitraum. Das Make-Magazin ist für einen MakerSpace darüber hinaus ein Muss für Projektideen und Austausch. Außerdem ist im Abo der Zugriff auf alle bisherigen Ausgaben inklusive.  
+Angebot von
+Preis
+Preis 
+(5 Jahre)
+Name / Anmerkung
+URL
+Adobe
+330,00 € (Jahr)
+1.650 €
+Adobe Creative Cloud, für Bildungs-einrichtungen (ein Gerät)
+Preise und Abos | Adobe Creative Cloud
+Zusammenfassung Maschinen
+Nr. 
+Bezeichnung
+Preis
+1
+Shaper Origin
+ 6.037,01 €
+2
+Bambu Lab X1C mit AMS (3x)
+5.518,63 €
+3
+xCarve Portalfräse
+3.985,39
+€
+4
+Lasercutter
+5.999,00 €
+5
+Resin 3D-Drucker
+1.440,80 €
+6
+„kleine“ CNC-Maschine
+5.632,81 €
+7
+Schneidplotter
+3.490,00 €
+8
+Siebdruck
+1.884,99 €
+9
+Holzwerkstatt
+5.863,20
+€
+10
+Möbel
+5.345,70
+€
+11
+Filament-Recycler
+899,00 €
+12
+Computer
+5.694,00 €
+13
+Elektrotechnik
+3.899,94 €
+14
+Nähmaschinen
+897,00 €
+15
+Präsentationstechnik
+1.678,00 €
+16
+Vereinsleben
+970,99 €
+17
+Abos
+1650,00 €
+Gesamt
+60.886,46 €

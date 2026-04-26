@@ -23,6 +23,11 @@ export default function WebheimatAdmin({ user }: { user: any }) {
   const [headlines, setHeadlines] = useState<any[]>([]);
   const [newHeadline, setNewHeadline] = useState({ content: '' });
 
+  // Equipment State
+  const [equipmentBudget, setEquipmentBudget] = useState<any>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [newCategoryTitle, setNewCategoryTitle] = useState('');
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -30,18 +35,21 @@ export default function WebheimatAdmin({ user }: { user: any }) {
   const fetchData = async () => {
     try {
       const fetchOpts = { cache: 'no-store' as RequestCache };
-      const [fRes, nRes, pRes, faqRes, hRes] = await Promise.all([
+      const [fRes, nRes, pRes, faqRes, hRes, eqRes] = await Promise.all([
         fetch('/api/funding', fetchOpts).then(r => r.json()),
         fetch('/api/news', fetchOpts).then(r => r.json()),
         fetch('/api/polls', fetchOpts).then(r => r.json()),
         fetch('/api/faqs', fetchOpts).then(r => r.json()),
-        fetch('/api/headlines', fetchOpts).then(r => r.json())
+        fetch('/api/headlines', fetchOpts).then(r => r.json()),
+        fetch('/api/equipment', fetchOpts).then(r => r.json())
       ]);
       if (fRes.funding) setFunding(fRes.funding);
       if (nRes.news) setNews(nRes.news);
       if (pRes.polls) setPolls(pRes.polls);
       if (faqRes.faqs) setFaqs(faqRes.faqs);
       if (hRes.headlines) setHeadlines(hRes.headlines);
+      if (eqRes.budget) setEquipmentBudget(eqRes.budget);
+      if (eqRes.categories) setCategories(eqRes.categories);
     } catch (e) {
       console.error(e);
     }
@@ -158,6 +166,7 @@ export default function WebheimatAdmin({ user }: { user: any }) {
         <button onClick={() => setActiveSubTab('HEADLINES')} className="btn-primary" style={{ backgroundColor: activeSubTab === 'HEADLINES' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>Kurzmeldungen</button>
         <button onClick={() => setActiveSubTab('POLLS')} className="btn-primary" style={{ backgroundColor: activeSubTab === 'POLLS' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>Umfragen</button>
         <button onClick={() => setActiveSubTab('FAQS')} className="btn-primary" style={{ backgroundColor: activeSubTab === 'FAQS' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>FAQs</button>
+        <button onClick={() => setActiveSubTab('EQUIPMENT')} className="btn-primary" style={{ backgroundColor: activeSubTab === 'EQUIPMENT' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>Anschaffungen</button>
       </div>
 
       {activeSubTab === 'FUNDING' && funding && (
@@ -182,6 +191,97 @@ export default function WebheimatAdmin({ user }: { user: any }) {
             </div>
             <button onClick={handleSaveFunding} className="btn-success" style={{ marginTop: '1rem', width: 'fit-content', padding: '0.5rem 1.2rem', fontSize: '1rem' }}>Speichern</button>
           </div>
+        </div>
+      )}
+
+      {activeSubTab === 'EQUIPMENT' && equipmentBudget && (
+        <div>
+          <h2 style={{ marginBottom: '1rem' }}>Anschaffungen & Budget</h2>
+          <div style={{ display: 'grid', gap: '1rem', maxWidth: '400px', marginBottom: '2rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Gesamtbudget Equipment (€)</label>
+              <input type="number" step="0.01" className="input-field" value={equipmentBudget.totalAmount} onChange={e => setEquipmentBudget({...equipmentBudget, totalAmount: e.target.value})} />
+            </div>
+            <button onClick={async () => {
+              await fetch('/api/equipment/budget', {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(equipmentBudget)
+              });
+              alert('Equipment-Budget gespeichert!');
+            }} className="btn-success" style={{ width: 'fit-content', padding: '0.5rem 1.2rem', fontSize: '1rem' }}>Budget Speichern</button>
+          </div>
+
+          <h3 style={{ marginBottom: '1rem' }}>Neue Kategorie / Gerät anlegen</h3>
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            await fetch('/api/equipment', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: newCategoryTitle })
+            });
+            setNewCategoryTitle('');
+            fetchData();
+          }} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', maxWidth: '600px' }}>
+            <input type="text" className="input-field" placeholder="Kategoriename (z.B. '3D-Drucker')" value={newCategoryTitle} onChange={e => setNewCategoryTitle(e.target.value)} required />
+            <button type="submit" className="btn-success" style={{ padding: '0.5rem 1.2rem', fontSize: '1rem', whiteSpace: 'nowrap' }}>Hinzufügen</button>
+          </form>
+
+          <h3 style={{ marginBottom: '1rem' }}>Bestehende Kategorien</h3>
+          {categories.map(cat => (
+            <div key={cat.id} style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <strong style={{ fontSize: '1.1rem' }}>{cat.title}</strong>
+                <button onClick={async () => {
+                  if (!confirm('Kategorie wirklich löschen?')) return;
+                  await fetch(`/api/equipment/${cat.id}`, { method: 'DELETE' });
+                  fetchData();
+                }} className="btn-danger" style={{ padding: '0.3rem 0.7rem', height: 'auto', fontSize: '0.85rem' }}>Kategorie Löschen</button>
+              </div>
+              <div style={{ marginTop: '1rem' }}>
+                {cat.suggestions.length === 0 ? <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Keine Vorschläge in dieser Kategorie.</p> : (
+                  <table style={{ width: '100%', fontSize: '0.9rem', textAlign: 'left', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <th style={{ padding: '0.5rem' }}>Titel</th>
+                        <th style={{ padding: '0.5rem' }}>Preis</th>
+                        <th style={{ padding: '0.5rem' }}>Status</th>
+                        <th style={{ padding: '0.5rem' }}>Aktion</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cat.suggestions.map((s: any) => (
+                        <tr key={s.id} style={{ borderBottom: '1px solid var(--bg-secondary)' }}>
+                          <td style={{ padding: '0.5rem' }}>{s.title}</td>
+                          <td style={{ padding: '0.5rem' }}>{s.price} €</td>
+                          <td style={{ padding: '0.5rem' }}>
+                            <select 
+                              value={s.status} 
+                              onChange={async (e) => {
+                                await fetch(`/api/equipment/suggestions/${s.id}`, {
+                                  method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: e.target.value })
+                                });
+                                fetchData();
+                              }}
+                              style={{ padding: '0.3rem', borderRadius: '4px', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                            >
+                              <option value="PROPOSED">Vorgeschlagen</option>
+                              <option value="APPROVED">Angenommen</option>
+                              <option value="REJECTED">Abgelehnt</option>
+                              <option value="PURCHASED">Angeschafft</option>
+                            </select>
+                          </td>
+                          <td style={{ padding: '0.5rem' }}>
+                            <button onClick={async () => {
+                              if (!confirm('Vorschlag wirklich löschen?')) return;
+                              await fetch(`/api/equipment/suggestions/${s.id}`, { method: 'DELETE' });
+                              fetchData();
+                            }} className="btn-danger" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem', height: 'auto' }}>Löschen</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

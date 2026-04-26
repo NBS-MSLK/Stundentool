@@ -6,6 +6,7 @@ import { ACTIVITIES } from '@/lib/activities';
 import confetti from 'canvas-confetti';
 import TaskManager from './components/TaskManager';
 import Webheimat from './components/Webheimat';
+import EquipmentSection from './components/EquipmentSection';
 
 type User = { id: string, name: string, role: string };
 type TimeEntry = { 
@@ -27,7 +28,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ systemActiveHours: 0, systemArchivedHours: 0, hardcodedBaseHours: 619, totalGoalHours: 2700 });
   const [selectedActivity, setSelectedActivity] = useState('');
-  const [activeTab, setActiveTab] = useState<'WEBHEIMAT' | 'STUNDEN' | 'TASKS'>('WEBHEIMAT');
+  const [activeTab, setActiveTab] = useState<'WEBHEIMAT' | 'STUNDEN' | 'TASKS' | 'EQUIPMENT'>('WEBHEIMAT');
   
   const [elapsedString, setElapsedString] = useState('00:00:00');
 
@@ -42,6 +43,12 @@ export default function Dashboard() {
     const u = JSON.parse(userJson);
     setUser(u);
     fetchData(u.id);
+
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'EQUIPMENT' || tab === 'TASKS' || tab === 'STUNDEN' || tab === 'WEBHEIMAT') {
+      setActiveTab(tab as any);
+    }
   }, [router]);
 
   const fetchData = async (userId: string) => {
@@ -167,12 +174,19 @@ export default function Dashboard() {
           style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'STUNDEN' ? '3px solid var(--accent-primary)' : '3px solid transparent', color: activeTab === 'STUNDEN' ? 'white' : 'var(--text-secondary)', fontWeight: activeTab === 'STUNDEN' ? 'bold' : 'normal', cursor: 'pointer', fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
           Zeiterfassung
         </button>
+        <button 
+          onClick={() => setActiveTab('EQUIPMENT')} 
+          style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'EQUIPMENT' ? '3px solid var(--accent-primary)' : '3px solid transparent', color: activeTab === 'EQUIPMENT' ? 'white' : 'var(--text-secondary)', fontWeight: activeTab === 'EQUIPMENT' ? 'bold' : 'normal', cursor: 'pointer', fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
+          Anschaffungen
+        </button>
       </div>
 
       {activeTab === 'WEBHEIMAT' ? (
         <Webheimat user={user} stats={stats} />
       ) : activeTab === 'TASKS' ? (
         <TaskManager user={user} />
+      ) : activeTab === 'EQUIPMENT' ? (
+        <EquipmentSection user={user} />
       ) : (
         <>
 

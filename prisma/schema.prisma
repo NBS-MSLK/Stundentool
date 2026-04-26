@@ -27,6 +27,10 @@ model User {
   newsPosts        NewsPost[]      @relation("UserNewsPosts")
   headlines        Headline[]      @relation("UserHeadlines")
   pollVotes        PollVote[]
+  equipmentCreated EquipmentSuggestion[] @relation("UserEquipmentCreated")
+  equipmentVotes   EquipmentVote[]       @relation("UserEquipmentVotes")
+  priorityVote     EquipmentPriorityVote? @relation("UserPriorityVote")
+  equipmentNotes   EquipmentNote[]       @relation("UserEquipmentNotes")
   createdAt        DateTime        @default(now())
 }
 
@@ -218,4 +222,82 @@ model ActivityLog {
   action    String
   details   String
   createdAt DateTime @default(now())
+}
+
+model EquipmentBudget {
+  id          String   @id @default("singleton")
+  totalAmount Float    @default(0)
+}
+
+model EquipmentCategory {
+  id              String          @id @default(uuid())
+  title           String          
+  description     String?
+  creatorId       String?
+  suggestions     EquipmentSuggestion[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model EquipmentSuggestion {
+  id              String          @id @default(uuid())
+  categoryId      String
+  category        EquipmentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  title           String          
+  description     String?
+  creatorId       String
+  creator         User            @relation("UserEquipmentCreated", fields: [creatorId], references: [id])
+  creatorName     String      
+  imageUrl        String?         
+  buyLink         String?         
+  price           Float           @default(0) 
+  status          String          @default("PROPOSED") 
+  materials       EquipmentMaterial[] 
+  votes           EquipmentVote[]
+  notes           EquipmentNote[]
+  priorityVotes   EquipmentPriorityVote[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model EquipmentMaterial {
+  id            String    @id @default(uuid())
+  suggestionId  String
+  suggestion    EquipmentSuggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  name          String
+  buyLink       String?
+  quantity      Int       @default(1)
+  pricePerUnit  Float     @default(0)
+}
+
+model EquipmentVote {
+  id            String    @id @default(uuid())
+  suggestionId  String
+  suggestion    EquipmentSuggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation("UserEquipmentVotes", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+
+  @@unique([suggestionId, userId]) 
+}
+
+model EquipmentPriorityVote {
+  id            String    @id @default(uuid())
+  suggestionId  String
+  suggestion    EquipmentSuggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  userId        String    @unique
+  user          User      @relation("UserPriorityVote", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+}
+
+model EquipmentNote {
+  id            String    @id @default(uuid())
+  suggestionId  String
+  suggestion    EquipmentSuggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation("UserEquipmentNotes", fields: [userId], references: [id], onDelete: Cascade)
+  userName      String
+  content       String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
