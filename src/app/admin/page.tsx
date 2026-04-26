@@ -276,7 +276,7 @@ export default function AdminView() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
               <h2 style={{ margin: 0 }}>Aktivitäten-Logbuch</h2>
-              <span style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>v1.0.1</span>
+              <span style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>v1.0.2</span>
             </div>
             <button onClick={fetchLogs} className="btn-primary" style={{ backgroundColor: 'var(--text-secondary)', padding: '0.4rem 1rem', fontSize: '0.9rem' }}>Aktualisieren</button>
           </div>
