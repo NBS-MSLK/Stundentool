@@ -29,12 +29,13 @@ export default function WebheimatAdmin({ user }: { user: any }) {
 
   const fetchData = async () => {
     try {
+      const fetchOpts = { cache: 'no-store' as RequestCache };
       const [fRes, nRes, pRes, faqRes, hRes] = await Promise.all([
-        fetch('/api/funding').then(r => r.json()),
-        fetch('/api/news').then(r => r.json()),
-        fetch('/api/polls').then(r => r.json()),
-        fetch('/api/faqs').then(r => r.json()),
-        fetch('/api/headlines').then(r => r.json())
+        fetch('/api/funding', fetchOpts).then(r => r.json()),
+        fetch('/api/news', fetchOpts).then(r => r.json()),
+        fetch('/api/polls', fetchOpts).then(r => r.json()),
+        fetch('/api/faqs', fetchOpts).then(r => r.json()),
+        fetch('/api/headlines', fetchOpts).then(r => r.json())
       ]);
       if (fRes.funding) setFunding(fRes.funding);
       if (nRes.news) setNews(nRes.news);

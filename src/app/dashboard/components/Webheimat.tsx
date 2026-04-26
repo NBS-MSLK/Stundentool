@@ -33,13 +33,14 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const fetchOpts = { cache: 'no-store' as RequestCache };
         const [fRes, hRes, nRes, pRes, faqRes, tasksRes] = await Promise.all([
-          fetch('/api/funding').then(r => r.json()),
-          fetch('/api/headlines').then(r => r.json()),
-          fetch('/api/news').then(r => r.json()),
-          fetch('/api/polls').then(r => r.json()),
-          fetch('/api/faqs').then(r => r.json()),
-          fetch('/api/tasks').then(r => r.json())
+          fetch('/api/funding', fetchOpts).then(r => r.json()),
+          fetch('/api/headlines', fetchOpts).then(r => r.json()),
+          fetch('/api/news', fetchOpts).then(r => r.json()),
+          fetch('/api/polls', fetchOpts).then(r => r.json()),
+          fetch('/api/faqs', fetchOpts).then(r => r.json()),
+          fetch('/api/tasks', fetchOpts).then(r => r.json())
         ]);
         if (fRes.funding) setFunding(fRes.funding);
         if (hRes.headlines) setHeadlines(hRes.headlines);
@@ -56,7 +57,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
 
   const fetchTasks = async () => {
     try {
-      const res = await fetch('/api/tasks');
+      const res = await fetch('/api/tasks', { cache: 'no-store' });
       const data = await res.json();
       if (data.tasks) setTasks(data.tasks);
     } catch (e) {
