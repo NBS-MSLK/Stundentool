@@ -412,7 +412,6 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
             width="100%" 
             height="480" 
             scrolling="no" 
-            allowtransparency="true"
             style={{ border: 'none', overflow: 'hidden', borderRadius: 'var(--radius-md)', maxWidth: '500px' }}
           ></iframe>
         </div>
