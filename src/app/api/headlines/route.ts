@@ -29,12 +29,13 @@ export async function POST(req: Request) {
     });
     
     // We can also trigger notifications here if needed
-    await sendGeneralNotification(
+    // Send notification in background to not block UI
+    sendGeneralNotification(
       'HEADLINE',
       'Neue Kurzmeldung im MakerSpace',
       `Es gibt eine neue Kurzmeldung:\n\n"${content}"`,
       'https://stundentool-production.up.railway.app/dashboard'
-    );
+    ).catch(console.error);
 
     const user = await prisma.user.findUnique({ where: { id: authorId }});
     await logActivity(

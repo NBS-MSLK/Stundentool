@@ -32,12 +32,12 @@ export async function POST(request: Request) {
       data: { title, content, imageUrl, authorId }
     });
     
-    await sendGeneralNotification(
+    sendGeneralNotification(
       'NEWS',
       `Neue Nachricht: ${title}`,
       `Es gibt eine neue Nachricht im MakerSpace:\n\n${title}\n\n${content}`,
       'https://stundentool-production.up.railway.app/dashboard'
-    );
+    ).catch(console.error);
 
     const user = await prisma.user.findUnique({ where: { id: authorId }});
     await logActivity(

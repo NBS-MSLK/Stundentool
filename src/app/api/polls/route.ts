@@ -42,12 +42,12 @@ export async function POST(request: Request) {
       include: { options: true }
     });
     
-    await sendGeneralNotification(
+    sendGeneralNotification(
       'POLL',
       'Neue Umfrage im MakerSpace',
       `Es gibt eine neue Umfrage:\n\n${question}`,
       'https://stundentool-production.up.railway.app/dashboard'
-    );
+    ).catch(console.error);
 
     await logActivity(
       'POLL_CREATE',

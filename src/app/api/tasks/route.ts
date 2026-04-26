@@ -112,7 +112,7 @@ export async function POST(request: Request) {
       task.id,
       `Neuer Arbeitsdienst: ${task.title}`,
       mailText
-    );
+    ).catch(console.error);
 
     await logActivity(
       'TASK_CREATE',
