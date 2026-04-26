@@ -5,6 +5,7 @@ import Link from 'next/link';
 export default function EquipmentSection({ user }: { user: any }) {
   const [budget, setBudget] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [newSuggestionTitle, setNewSuggestionTitle] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
@@ -41,6 +42,8 @@ export default function EquipmentSection({ user }: { user: any }) {
       if (data.categories) setCategories(data.categories);
     } catch (e) {
       console.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -82,7 +85,8 @@ export default function EquipmentSection({ user }: { user: any }) {
     fetchData();
   };
 
-  if (!budget || categories.length === 0) return <div>Lade Equipment...</div>;
+  if (loading) return <div>Lade Equipment...</div>;
+  if (!budget) return <div>Fehler beim Laden des Budgets.</div>;
 
   // Calculate budget components
   let spentAmount = 0;
