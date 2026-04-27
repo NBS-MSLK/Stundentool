@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const adminUser = await prisma.user.findFirst({
       where: { role: 'ADMIN' }
@@ -19,13 +19,22 @@ export async function GET() {
       });
     }
 
-    // Check if we already have the correct categories to avoid duplication
-    const existing = await prisma.equipmentCategory.findFirst({
-      where: { title: '1. Handgeführte CNC' }
-    });
+    const searchParams = request.nextUrl.searchParams;
+    const force = searchParams.get('force') === 'true';
 
-    if (existing) {
-      return NextResponse.json({ message: 'Daten scheinen schon vorhanden zu sein. Abbruch, um Duplikate zu vermeiden.' });
+    if (force) {
+      // Wenn ?force=true übergeben wird, löschen wir alle bisherigen Equipment-Daten
+      await prisma.equipmentSuggestion.deleteMany();
+      await prisma.equipmentCategory.deleteMany();
+    } else {
+      // Check if we already have the correct categories to avoid duplication
+      const existing = await prisma.equipmentCategory.findFirst({
+        where: { title: '1. Handgeführte CNC' }
+      });
+
+      if (existing) {
+        return NextResponse.json({ message: 'Daten scheinen schon vorhanden zu sein. Hänge ?force=true an die URL an, um alle alten Daten zu überschreiben.' });
+      }
     }
 
     // Helper to create category and initial suggestion
@@ -107,32 +116,26 @@ export async function GET() {
     await addEquipment('9.12 Holz: Drechselbank', 'Holzmann D 460FXL', 324.89, 'https://www.voelkner.de/products/201655/Holzmann-Maschinen-D460FXL230V-Holz-Drehmaschine-550-770W.html', 'Drechselbank für Holzarbeiten.');
 
     // 10-17
-    await addEquipment('10. Möbel', 'Möbel für den MakerSpace', 0, '', 'Einrichtung.', [
-      { name: 'Tische (6x)', quantity: 1, price: 1331.70, link: '' },
-      { name: 'Stühle (10x)', quantity: 1, price: 1319.50, link: '' },
-      { name: 'Laptop-Locker', quantity: 1, price: 1196.00, link: '' },
-      { name: 'Gefahrenstoffschrank', quantity: 1, price: 537.00, link: '' },
-      { name: 'Werkbank', quantity: 1, price: 440.00, link: '' },
-      { name: 'Schließfachschrank', quantity: 1, price: 521.50, link: '' }
-    ]);
+    await addEquipment('10.1 Möbel: Tische', 'Stack-o-Flex Quadrattisch (6x)', 1331.70, 'https://www.roth-schulmoebel.de', 'Höhenverstellbar und stapelbar.');
+    await addEquipment('10.2 Möbel: Stühle', 'Schalenstuhl „Work“ (10x)', 1319.50, 'https://www.betzold.de', 'Höhenverstellbarer Drehstuhl mit Kunststoffsitzschale.');
+    await addEquipment('10.3 Möbel: Laptop-Locker', 'Orgami Laptop-Locker Energy', 1196.00, 'https://www.backwinkel.de', 'Zum sicheren Verstauen und Laden von Laptops.');
+    await addEquipment('10.4 Möbel: Gefahrenstoffschrank', 'Chemikalienschrank Easy CS 103', 537.00, 'https://www.denios.de', 'Mit Flügeltüren und Bodenwanne.');
+    await addEquipment('10.5 Möbel: Werkbank', 'Werkbank „Nordic Plus 1450“', 440.00, 'https://toom.de', 'Robuste Werkbank 147 x 63 x 86 cm.');
+    await addEquipment('10.6 Möbel: Schließfachschrank', 'XL Wertfachschrank 120 cm', 521.50, 'https://www.luellmann.com', 'Schließfachschrank mit 12 Fächern.');
     await addEquipment('11. Filament-Recycler', 'Original Desktop Filament Extruder MK2', 899.00, 'https://www.artme-3d.de', 'Recycler.', []);
     await addEquipment('12. Computer', 'Laptops', 0, '', 'IT-Ausstattung.', [
       { name: 'High-End-Laptop', quantity: 1, price: 2699.00, link: '' },
       { name: 'Kurs-Geräte (5x)', quantity: 1, price: 2995.00, link: '' }
     ]);
-    await addEquipment('13. Elektrotechnik', 'Elektrotechnik-Set', 0, '', 'Lötstation etc.', [
-      { name: 'Lötstation (Ersa)', quantity: 1, price: 3104.98, link: '' },
-      { name: 'Oszilloskop', quantity: 1, price: 415.00, link: '' },
-      { name: 'Multimeter', quantity: 1, price: 114.98, link: '' },
-      { name: 'Labornetzgerät', quantity: 1, price: 134.99, link: '' },
-      { name: 'Punktschweißgerät', quantity: 1, price: 129.99, link: '' }
-    ]);
+    await addEquipment('13.1 Elektrotechnik: Lötstation', 'Ersa 0ICV4005AICXV', 3104.98, 'https://www.voelkner.de/products/7774030/Ersa-0ICV4005AICXV-Loet-Entloetstation-500W-150-450C.html', 'Löt-/Entlötstation 500 W 150 - 450 °C.');
+    await addEquipment('13.2 Elektrotechnik: Oszilloskop', 'Voltcraft DSO-2154', 415.00, 'https://www.conrad.de', 'Digital-Oszilloskop 150 MHz 4-Kanal.');
+    await addEquipment('13.3 Elektrotechnik: Multimeter', 'Voltcraft MT-52', 114.98, 'https://www.voelkner.de/products/185743/VOLTCRAFT-MT-52-Hand-Multimeter-digital-Umwelt-Messfunktion-CAT-III-600V-Anzeige-Counts-4000.html', 'Hand-Multimeter digital.');
+    await addEquipment('13.4 Elektrotechnik: Labornetzgerät', 'Voltcraft LPS1305', 134.99, 'https://www.voelkner.de/products/7571816/VOLTCRAFT-Labornetzgeraet-einstellbar-LPS1305-0.html', 'Labornetzgerät, einstellbar 0 - 30 V/DC 0 - 5 A.');
+    await addEquipment('13.5 Elektrotechnik: Punktschweißgerät', 'VEVOR Akku-Punktschweißgerät 788H', 129.99, 'https://www.kaufland.de', 'Pulsschweißgerät & Akkuladegerät.');
     await addEquipment('14. Nähmaschinen', 'Brother KD 40S (5x)', 897.00, '', 'Nähmaschinen.', []);
     await addEquipment('15. Präsentationstechnik', 'Samsung QLED 85"', 1678.00, '', 'Smart TV.', []);
-    await addEquipment('16. Vereinsleben', 'Küche & Co', 0, '', 'Kühlschrank etc.', [
-      { name: 'Kühlschrank', quantity: 1, price: 571.00, link: '' },
-      { name: 'Kaffeevollautomat', quantity: 1, price: 399.99, link: '' }
-    ]);
+    await addEquipment('16.1 Vereinsleben: Kühlschrank', 'Gastro-Cool Displaykühlschrank', 571.00, 'https://gastro-cool.com', 'Kühlschrank für Getränke.');
+    await addEquipment('16.2 Vereinsleben: Kaffeevollautomat', 'PHILIPS 2300 Series', 399.99, 'https://www.amazon.de', 'Kaffeevollautomat mit LatteGo-Milchsystem.');
     await addEquipment('17. Software & Abos', 'Adobe & Co', 1650.00, '', 'Abonnements.', []);
 
     // Setup budget if it does not exist
