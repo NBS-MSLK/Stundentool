@@ -202,15 +202,22 @@ export default function EquipmentSection({ user }: { user: any }) {
           if (stars > maxCatStars) maxCatStars = stars;
         });
 
+        const groupNames: Record<string, string> = { '9': 'Holzwerkstatt', '10': 'Möbel', '13': 'Elektrotechnik', '16': 'Vereinsleben' };
+        
         const groups: any[] = [];
         categories.forEach(cat => {
-          if (cat.title.startsWith('9.')) {
-            let group = groups.find(g => g.id === 'group_9');
+          const match = cat.title.match(/^(\d+)\.\d+\s(.*?):\s?(.*)/);
+          if (match) {
+            const groupNum = match[1];
+            const groupName = groupNames[groupNum] || match[2];
+            const subName = match[3];
+            
+            let group = groups.find(g => g.id === `group_${groupNum}`);
             if (!group) {
-              group = { id: 'group_9', isGroup: true, title: '9. Holzwerkstatt', categories: [] };
+              group = { id: `group_${groupNum}`, isGroup: true, title: `${groupNum}. ${groupName}`, categories: [] };
               groups.push(group);
             }
-            group.categories.push({ ...cat, displayTitle: cat.title.replace(/^9\.\d+\sHolz:\s?/, '') });
+            group.categories.push({ ...cat, displayTitle: subName });
           } else {
             groups.push({ id: cat.id, isGroup: false, category: cat, displayTitle: cat.title });
           }
