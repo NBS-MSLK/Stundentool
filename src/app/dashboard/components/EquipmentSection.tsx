@@ -22,6 +22,25 @@ export default function EquipmentSection({ user }: { user: any }) {
   const [newCategoryTitle, setNewCategoryTitle] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
+  // For grouping: adding a new sub-category to a group
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+  const [newGroupSubCategoryTitle, setNewGroupSubCategoryTitle] = useState('');
+
+  const handleCreateGroupSubCategory = async (groupNum: string, groupName: string, subCategoryCount: number) => {
+    if (!newGroupSubCategoryTitle.trim()) return;
+    // e.g., "10.99 Möbel: Whiteboard" - the exact number after dot doesn't matter for grouping regex, but let's make it unique enough
+    const newTitle = `${groupNum}.${subCategoryCount + 1} ${groupName}: ${newGroupSubCategoryTitle}`;
+    
+    await fetch('/api/equipment/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: newTitle, creatorId: user.id })
+    });
+    setNewGroupSubCategoryTitle('');
+    setActiveGroupId(null);
+    fetchData();
+  };
+
   const handleCreateCategory = async () => {
     if (!newCategoryTitle.trim()) return;
     await fetch('/api/equipment/categories', {
@@ -450,6 +469,41 @@ export default function EquipmentSection({ user }: { user: any }) {
                 {isGroupExpanded && (
                   <div style={{ padding: '1rem 1.5rem', backgroundColor: 'rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {group.categories.map((cat: any) => renderCategory(cat, cat.displayTitle))}
+                    
+                    {/* Add new sub-category to this group */}
+                    <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: 'var(--bg-secondary)', border: '2px dashed var(--border-color)', marginTop: '0.5rem' }}>
+                      {activeGroupId === group.id ? (
+                        <div style={{ width: '100%', maxWidth: '400px' }}>
+                          <input 
+                            type="text" 
+                            className="input-field" 
+                            placeholder={`Neues Element für "${group.title}" vorschlagen`} 
+                            value={newGroupSubCategoryTitle} 
+                            onChange={e => setNewGroupSubCategoryTitle(e.target.value)} 
+                            autoFocus
+                          />
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                            <button 
+                              onClick={() => {
+                                const match = group.categories[0]?.title.match(/^(\d+)\.\d+\s(.*?):/);
+                                const groupNum = match ? match[1] : group.title.split('.')[0];
+                                const groupName = match ? match[2] : group.title.substring(group.title.indexOf('.') + 1).trim();
+                                handleCreateGroupSubCategory(groupNum, groupName, group.categories.length);
+                              }} 
+                              className="btn-success" style={{ flex: 1, padding: '0.5rem', fontSize: '0.9rem' }}
+                            >
+                              Speichern
+                            </button>
+                            <button onClick={() => setActiveGroupId(null)} className="btn-danger" style={{ flex: 1, padding: '0.5rem', fontSize: '0.9rem' }}>Abbrechen</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button onClick={() => setActiveGroupId(group.id)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', padding: '0.5rem' }}>
+                          <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>+</span>
+                          <span style={{ fontSize: '1rem', fontWeight: 600 }}>Weiteres Element zu {group.title} hinzufügen</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
