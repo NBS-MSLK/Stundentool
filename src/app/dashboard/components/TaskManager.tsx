@@ -223,7 +223,7 @@ export default function TaskManager({ user }: { user: any }) {
               </div>
             </Link>
 
-            {task.dateProposals?.length > 0 && !task.dueDate && (
+            {task.dateProposals?.length > 0 && (!task.dueDate || task.status === 'OPEN') && (
               <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--bg-hover)', backgroundColor: 'var(--bg-primary)' }}>
                 <div style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Terminvorschläge:</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -244,7 +244,7 @@ export default function TaskManager({ user }: { user: any }) {
               </div>
             )}
 
-            {!task.dueDate && (
+            {(!task.dueDate || task.status === 'OPEN') && (
               <div style={{ padding: '0 1rem 0.75rem 1rem', backgroundColor: 'var(--bg-primary)', borderTop: task.dateProposals?.length === 0 ? '1px solid var(--bg-hover)' : 'none', paddingTop: task.dateProposals?.length === 0 ? '0.75rem' : '0' }}>
                 {proposingTaskId === task.id ? (
                   <div style={{ padding: '0.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '4px', cursor: 'default' }}>
