@@ -35,7 +35,12 @@ export async function PUT(request: Request, context: unknown) {
     // Anmerkung: Wir lesen dueDate aus dem Body nicht mehr ein, oder behalten es für die API bei, aber das Edit-Form sendet proposedDates
 
     const dataToUpdate: any = {};
-    if (status) dataToUpdate.status = status;
+    if (status) {
+      dataToUpdate.status = status;
+      if (status === 'OPEN') {
+        dataToUpdate.dueDate = null;
+      }
+    }
     if (title) dataToUpdate.title = title;
     if (description !== undefined) dataToUpdate.description = description;
     if (imageUrl !== undefined) dataToUpdate.imageUrl = imageUrl;

@@ -262,7 +262,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
               Erstellt von {task.creatorName} | Status: <span style={{ fontWeight: 'bold', color: task.status === 'DONE' ? 'var(--success)' : task.status === 'IN_PROGRESS' || task.status === 'SCHEDULED' ? 'var(--warning)' : 'inherit' }}>{task.status}</span>
               {task.estimatedHours !== null && <span> | Rest-Aufwand: {task.estimatedHours}h</span>}
             </div>
-            {task.dueDate && (() => {
+            {task.dueDate && task.status !== 'OPEN' && (() => {
               const matchingProposal = task.dateProposals?.find((p: any) => new Date(p.date).getTime() === new Date(task.dueDate).getTime());
               const timeString = matchingProposal ? ` (${matchingProposal.startTime} - ${matchingProposal.endTime} Uhr)` : '';
               return (
@@ -328,7 +328,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
       )}
 
       {/* Date Proposals Section */}
-      {!task.dueDate && (
+      {(!task.dueDate || task.status === 'OPEN') && (
         <div className="glass-card" style={{ marginBottom: '2rem', border: '2px solid var(--accent-primary)' }}>
           <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--accent-primary)' }}>📆 Terminvorschläge</h2>
           
