@@ -116,8 +116,13 @@ export default function TaskManager({ user }: { user: any }) {
 
   return (
     <div style={{ marginTop: '1rem' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1rem' }}>Arbeitsdienste</h2>
+      <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0 }}>Arbeitsdienste</h2>
+          <Link href="/admin/shopping-list" className="btn-primary" style={{ backgroundColor: 'var(--accent-primary)', textDecoration: 'none', padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+            🖨️ Einkaufsliste drucken
+          </Link>
+        </div>
         <Link href="/dashboard/tasks/new" style={{ textDecoration: 'none' }}>
            <div className="btn-primary" style={{ width: '100%', padding: '1rem', backgroundColor: 'var(--success)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
              <span style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>Ich weiß, was zu tun ist!</span>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="de"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MAKERSPACE Lübbecke - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#bcc9ca",
+                        "surface-container": "#1a202c",
+                        "outline": "#879394",
+                        "inverse-on-surface": "#2a303d",
+                        "tertiary-fixed-dim": "#ffb2be",
+                        "surface-variant": "#2f3542",
+                        "on-primary-fixed": "#002023",
+                        "on-primary": "#00363b",
+                        "surface-container-high": "#242a36",
+                        "on-tertiary-container": "#890035",
+                        "inverse-primary": "#006971",
+                        "surface": "#0d131f",
+                        "on-secondary-container": "#533c00",
+                        "on-primary-fixed-variant": "#004f55",
+                        "primary": "#6ddbe7",
+                        "primary-container": "#4dbfcb",
+                        "on-tertiary": "#660025",
+                        "secondary": "#f8bd2a",
+                        "secondary-fixed-dim": "#f8bd2a",
+                        "on-background": "#dde2f3",
+                        "outline-variant": "#3d494a",
+                        "on-secondary": "#402d00",
+                        "inverse-surface": "#dde2f3",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "primary-fixed": "#87f3ff",
+                        "tertiary-fixed": "#ffd9de",
+                        "secondary-container": "#d9a200",
+                        "surface-bright": "#333946",
+                        "on-tertiary-fixed": "#400014",
+                        "error": "#ffb4ab",
+                        "surface-tint": "#68d6e3",
+                        "tertiary": "#ffb9c3",
+                        "on-secondary-fixed-variant": "#5c4300",
+                        "primary-fixed-dim": "#68d6e3",
+                        "on-primary-container": "#004a51",
+                        "surface-dim": "#0d131f",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#ff8ea3",
+                        "on-secondary-fixed": "#261a00",
+                        "secondary-fixed": "#ffdfa0",
+                        "on-surface": "#dde2f3",
+                        "surface-container-lowest": "#080e1a",
+                        "surface-container-highest": "#2f3542",
+                        "background": "#0d131f",
+                        "surface-container-low": "#161c27",
+                        "on-tertiary-fixed-variant": "#900038"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "unit": "4px",
+                        "margin": "32px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "gutter": "24px",
+                        "xl": "48px"
+                    },
+                    "fontFamily": {
+                        "label-bold": ["Space Grotesk"],
+                        "headline-xl": ["Space Grotesk"],
+                        "headline-md": ["Space Grotesk"],
+                        "headline-lg": ["Space Grotesk"],
+                        "body-md": ["Space Grotesk"],
+                        "body-lg": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-bold": ["14px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-xl": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hard-shadow-primary {
+            box-shadow: 4px 4px 0px 0px rgba(77, 191, 203, 1);
+        }
+        .hard-shadow-secondary {
+            box-shadow: 4px 4px 0px 0px rgba(249, 178, 51, 1);
+        }
+        .neo-brutal-btn {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .neo-brutal-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 1);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar Shell -->
+<header class="bg-slate-900 text-teal-400 font-['Space_Grotesk'] font-bold uppercase tracking-tight border-b-4 border-slate-800 w-full sticky top-0 z-50 shadow-[4px_4px_0px_0px_rgba(77,191,203,1)] flex justify-between items-center px-6 py-4">
+<div class="text-2xl font-black text-teal-400 italic tracking-tighter">MAKERSPACE</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-yellow-400 border-b-2 border-yellow-400 font-label-bold text-label-bold" href="#">Dashboard</a>
+<a class="text-slate-400 hover:text-white font-label-bold text-label-bold transition-all duration-100" href="#">Equipment</a>
+<a class="text-slate-400 hover:text-white font-label-bold text-label-bold transition-all duration-100" href="#">Inventory</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<input class="bg-slate-800 border-2 border-slate-700 text-on-surface px-4 py-1 rounded-none focus:border-teal-400 outline-none" placeholder="Suche..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-teal-400 hover:bg-slate-800 p-2 transition-all">notifications</button>
+<button class="material-symbols-outlined text-teal-400 hover:bg-slate-800 p-2 transition-all">settings</button>
+<div class="w-10 h-10 rounded-none border-2 border-teal-400 overflow-hidden">
+<img alt="Maker Profile" data-alt="professional headshot of a friendly man in a workshop setting with warm cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_RG3FkDzT_88G88diylqoYuttwz29Z0El08pu9NpyGx8wMzqMqm3buNPi_N07Tw2SanDebeb-yUpgiXSbo_d-lylL2oDETwf5BwpkM1i_Tfr6ayHkyHa_GVk77B3cQQ3dLWiecDF7S1ED8o739x_V57qdW2XokyXwhWgagEevCMaWmTI5FLsnmLqELgU-HkPzxEqwTsi_MX1_Mt32tzSCZsmHhGMTb67s4vZnIzPqZeB6in7BaxlZJE14BQdJM3QJLrWQNP8hAyk"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar Shell -->
+<aside class="hidden lg:flex flex-col w-64 bg-slate-900 border-r-4 border-slate-800 p-4 gap-4 font-['Space_Grotesk'] font-bold uppercase">
+<div class="mb-4">
+<div class="text-xl font-black text-yellow-400">WORKSHOPS</div>
+<div class="text-[10px] text-teal-400 opacity-70">Active Sessions: 12</div>
+</div>
+<nav class="flex flex-col gap-2 flex-1">
+<a class="flex items-center gap-3 p-3 bg-teal-400 text-slate-900 border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(234,179,8,1)] active:scale-95" href="#">
+<span class="material-symbols-outlined">handyman</span>
+<span>Woodshop</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-teal-400 hover:bg-slate-800 hover:translate-x-1 transition-transform border-2 border-transparent hover:border-teal-400" href="#">
+<span class="material-symbols-outlined">precision_manufacturing</span>
+<span>3D Printing</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-teal-400 hover:bg-slate-800 hover:translate-x-1 transition-transform border-2 border-transparent hover:border-teal-400" href="#">
+<span class="material-symbols-outlined">build</span>
+<span>Metalwork</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-teal-400 hover:bg-slate-800 hover:translate-x-1 transition-transform border-2 border-transparent hover:border-teal-400" href="#">
+<span class="material-symbols-outlined">memory</span>
+<span>Electronics</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-teal-400 hover:bg-slate-800 hover:translate-x-1 transition-transform border-2 border-transparent hover:border-teal-400" href="#">
+<span class="material-symbols-outlined">apparel</span>
+<span>Textiles</span>
+</a>
+</nav>
+<button class="bg-secondary text-on-secondary font-black py-3 border-2 border-slate-900 hard-shadow-primary active:translate-y-1 active:shadow-none mb-4">
+                START PROJECT
+            </button>
+<div class="border-t-2 border-slate-800 pt-4 flex flex-col gap-2">
+<a class="flex items-center gap-3 p-2 text-slate-400 hover:text-white text-sm" href="#">
+<span class="material-symbols-outlined text-sm">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 p-2 text-slate-400 hover:text-white text-sm" href="#">
+<span class="material-symbols-outlined text-sm">security</span>
+<span>Safety</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto p-margin bg-surface">
+<div class="max-w-7xl mx-auto space-y-lg">
+<!-- Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-md">
+<div>
+<h1 class="font-headline-xl text-headline-xl text-primary">Willkommen, Nils Beinke-Schulte</h1>
+<p class="text-on-surface-variant font-body-lg">Status-Bericht für MakerSpace Lübbecke e.V.</p>
+</div>
+<div class="flex gap-sm">
+<span class="bg-secondary text-on-secondary px-4 py-1 font-label-bold uppercase border-2 border-slate-900">Pro-Member</span>
+<span class="bg-primary text-on-primary px-4 py-1 font-label-bold uppercase border-2 border-slate-900">Admin</span>
+</div>
+</div>
+<!-- Bento Grid Dashboard -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Funding Status -->
+<div class="md:col-span-8 bg-surface-container border-2 border-primary-container p-lg rounded-xl hard-shadow-secondary flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md text-secondary flex items-center gap-sm">
+<span class="material-symbols-outlined">payments</span> Fördermittel-Status
+                            </h3>
+<span class="text-on-surface font-label-bold">22.4% finanziert</span>
+</div>
+<div class="space-y-sm">
+<div class="flex justify-between text-on-surface-variant font-label-bold">
+<span>28.202,03 €</span>
+<span>125.409,53 €</span>
+</div>
+<div class="h-6 bg-slate-800 border-2 border-slate-700 rounded-full overflow-hidden flex">
+<div class="h-full bg-primary-container border-r-4 border-slate-900" style="width: 22.4%"></div>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant italic">Zuschuss für technische Ausstattung und Brandschutzmaßnahmen.</p>
+</div>
+<!-- Project Value -->
+<div class="md:col-span-4 bg-surface-container-high border-2 border-outline-variant p-lg rounded-xl hard-shadow-primary">
+<h3 class="font-headline-md text-headline-md text-primary mb-md">Projekt-Förderwert</h3>
+<div class="text-center py-4 border-4 border-dashed border-slate-700">
+<div class="text-4xl font-black text-secondary">26.7%</div>
+<div class="text-on-surface font-body-md mt-2">14.420 € / 54.000 €</div>
+</div>
+<div class="mt-4 flex items-center justify-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined">timer</span>
+<span class="text-xs uppercase font-label-bold tracking-widest">Eigenleistung in Stunden</span>
+</div>
+</div>
+<!-- Calendar Section -->
+<div class="md:col-span-5 bg-surface-container border-2 border-on-surface-variant p-lg rounded-xl space-y-md">
+<div class="flex justify-between items-center border-b-2 border-slate-700 pb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface">Kalender &amp; Termine</h3>
+<button class="material-symbols-outlined text-primary">calendar_month</button>
+</div>
+<div class="grid grid-cols-7 gap-2 text-center text-xs font-label-bold text-outline">
+<div>MO</div><div>DI</div><div>MI</div><div>DO</div><div>FR</div><div>SA</div><div>SO</div>
+</div>
+<div class="grid grid-cols-7 gap-2">
+<div class="p-2 text-slate-600">27</div>
+<div class="p-2 text-slate-600">28</div>
+<div class="p-2 text-slate-600">29</div>
+<div class="p-2 bg-secondary text-on-secondary font-black border-2 border-slate-900">30</div>
+<div class="p-2 text-on-surface border border-slate-700">1</div>
+<div class="p-2 text-on-surface border border-slate-700">2</div>
+<div class="p-2 text-on-surface border border-slate-700">3</div>
+</div>
+<div class="bg-slate-800 p-md border-l-4 border-secondary">
+<div class="text-secondary font-black text-xs uppercase">Do 30.4. • 18:00 - 21:00</div>
+<div class="text-on-surface font-body-md">Wand hinten links</div>
+<div class="text-xs text-on-surface-variant">Arbeitseinsatz Trockenbau</div>
+</div>
+</div>
+<!-- News Section -->
+<div class="md:col-span-7 bg-surface-container border-2 border-primary-container p-lg rounded-xl space-y-md overflow-hidden relative">
+<div class="absolute top-4 right-4 text-primary opacity-20 transform rotate-12">
+<span class="material-symbols-outlined !text-6xl">lightbulb</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary">Neueste Nachrichten</h3>
+<div class="flex flex-col sm:flex-row gap-lg">
+<div class="w-full sm:w-1/3 aspect-square border-2 border-slate-700">
+<img alt="Workshop news" class="w-full h-full object-cover" data-alt="industrial workshop interior with tools on walls and technical machinery in bright morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnqXHQfdmGA4c_9-vN9t1nZsQHwrfT5uVGZcnxODQBHAUVTDp_bk9_uSBuQ_hIXQc-6jWqitD9NCeshETZHB8TVoYLMI-11m2e-HZLDa-9UiuYoCGllV3iaELO6HhQhWnnr5NYnv4cKqCrYy_IcFc2PX_RMc9bpkBvqwKFh9Wb4_DGQ2ikKSC3yyKP2PA8u6SzAI8pT4N6dxvN7elOwat0tbWXDkA6JyGAQtVWaaRr4Ce2iX6wg4kBBEfTxYaQst_pXomGjgqhOws"/>
+</div>
+<div class="flex-1 space-y-sm">
+<div class="text-xs text-on-surface-variant font-label-bold uppercase">Stand: 22.4.26</div>
+<h4 class="text-xl font-black text-on-surface">Die nächsten Schritte</h4>
+<p class="text-sm text-on-surface-variant line-clamp-3">Unser Innenausbau schreitet voran. Diese Woche konzentrieren wir uns auf die Elektroinstallation in der Holzwerkstatt und die erste Lieferung der 3D-Drucker...</p>
+<button class="text-primary font-label-bold text-sm underline decoration-2 underline-offset-4 hover:text-secondary">WEITERLESEN</button>
+</div>
+</div>
+</div>
+<!-- Poll Section -->
+<div class="md:col-span-4 bg-surface-container-high border-2 border-secondary p-lg rounded-xl flex flex-col gap-md">
+<h3 class="font-headline-md text-headline-md text-secondary">Aktuelle Umfragen</h3>
+<div class="bg-slate-900 border-2 border-slate-800 p-md">
+<p class="font-body-md text-on-surface mb-md">Gefällt euch unsere Webheimat?</p>
+<div class="space-y-sm">
+<button class="w-full text-left p-3 border-2 border-slate-700 hover:border-primary text-sm flex justify-between items-center group">
+<span>Voll super!</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">radio_button_checked</span>
+</button>
+<button class="w-full text-left p-3 border-2 border-slate-700 hover:border-primary text-sm flex justify-between items-center group">
+<span>Geht so.</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">radio_button_checked</span>
+</button>
+<button class="w-full text-left p-3 border-2 border-slate-700 hover:border-primary text-sm flex justify-between items-center group">
+<span>Finde ich doof.</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">radio_button_checked</span>
+</button>
+<button class="w-full text-left p-3 border-2 border-slate-700 hover:border-primary text-sm flex justify-between items-center group">
+<span>mir egal</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">radio_button_checked</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Instagram Feed -->
+<div class="md:col-span-4 bg-surface-container border-2 border-outline-variant p-lg rounded-xl">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Instagram Feed</h3>
+<span class="text-xs text-on-surface-variant">@makerspace_luebbecke</span>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<div class="aspect-square bg-slate-800 border border-slate-700 overflow-hidden">
+<img alt="Insta 1" class="w-full h-full object-cover" data-alt="close up of a 3d printer nozzle extruding bright teal filament in a modern lab" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoLgBTcIpXBfyLFzkFfQhrvY02YhA6OhN_rpMjwwSIXT9bHugXi9z-AXbg28Nuo4WHb4C-a_3W0CxMSK6uArZ4OL1XolsXWm8OwEn8hSPyfz4rYC1laHgp5U85dVDpoWqFmHAgYf9Sw9aNZPwATx795OoE7Jr3hbyxf2s3t7umGPu_tclJM27xgkrwRMCBZVGKCQfQX6dixIit0pU6PXfVSax3jPF-e9MPS84sTXyCbG3Qw7g84lqimnrxVxQTZq-0GT9wUg3pa68"/>
+</div>
+<div class="aspect-square bg-slate-800 border border-slate-700 overflow-hidden">
+<img alt="Insta 2" class="w-full h-full object-cover" data-alt="hand holding a professional digital multimeter testing a circuit board with components" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOHprflxMSIX_d_Ior4h2R9OXLjm25ojHjvmaWFqRY2B-AHbsUBXYZa9JMvVdG1ZCOECDr4LuonVx9RZ5wWfHFJJ5pBed6_LR7jqvM2c1i-N-Zl5S641Ll7ErA08CnuK6UYFJLfiw-OyUhMXYe_8cdcwLQuLk9pocqMohge8glDF25E-2b4zzePPE1asPmRBeW0qqnZZoB98wN9rWG7tFJrg8D2GMLldwKQlcidG6U3hmKsn9rzUr2KJNypxRtb4mXNB0OQ1N4C8I"/>
+</div>
+<div class="aspect-square bg-slate-800 border border-slate-700 overflow-hidden">
+<img alt="Insta 3" class="w-full h-full object-cover" data-alt="carpenter workshop with wood shavings and high quality woodworking tools on a bench" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfaIcGfEudbxLahQPz5okGq-YEBmtCRAA5xVuZziOk3x8YM7WYrPEEllej7IcTIY8zENyGHMAiKdPP2AYGUcqVT2TElGMOmes0aKJNFw9U2IAWGMRypDQpa5ysO_h11AS1QjC7Jx9zhuoUs6-ArUEfWC8DrXG2RMkioTxtg7jRjzmGUQXaJAIiOaPjV7fXMUN6-zc8ZZTGkGYLm06v9C_7v91h1AMqZw9wpsRkQ6CxFi3_xUjR0tRw2swdpNQEEjg_an_Kt1XJKfk"/>
+</div>
+<div class="aspect-square bg-slate-800 border border-slate-700 overflow-hidden">
+<img alt="Insta 4" class="w-full h-full object-cover" data-alt="close up of heavy duty metal CNC milling machine in action with cooling liquid" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBifThZxCSVBqqBjTTCyisQAN5dyirPyjODfWH6KjSZc1SCXwqYnxpFedPjwWxF9tnJHGw4MRggjlBKOdONQjnLOcNmWuXPbZ3dSPcPsajr3ukawT-XcRxqdoVzZCt2SgDqK9lGkArOFPKql7rHw_5BoX3d6j3XYMOXAgkjhn09crBqlpuH1B8CKf3Jwec8F1TX1TDmU4hpA6Pou0Xtz123Kl7dEaXddW_Oz83ZtTWxxNQQxiDEsHm-kkOXjmv7wlJroHmcOCuUhpQ"/>
+</div>
+<div class="aspect-square bg-slate-800 border border-slate-700 overflow-hidden">
+<img alt="Insta 5" class="w-full h-full object-cover" data-alt="vibrant textile workshop with industrial sewing machines and colorful fabric rolls" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAP2f6cQtZv7q9g4WSM0F6Onn9rZa_R5SjQKc_lZxzGpiWdTAJm9gWdtI1n3XvI6WLy3ltXJo7nb5UKrW6z-vl8rIJAdLSuzMJk8Uiya-x5QDYhNnlyRRgAZZ754lxd2cpU0FI_WA-Sg5rolOIYYn6AWT4xmUny8DTqxfXfilRhgl2ln4Qn0YT-T4LR3en05Hq6ssjc4muACmxyghHpEPtm7zzrULwLbrFcfcSXMpBQyvNxbAPMFEtnht4s99e1bNOj7BJuymodS94"/>
+</div>
+<div class="aspect-square bg-slate-800 border border-slate-700 overflow-hidden">
+<img alt="Insta 6" class="w-full h-full object-cover" data-alt="diverse group of makers collaborating around a large technical blueprint in a bright space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3BSNH7VuIscjCHSZnZdra3UB44zoOXUOpa8iR37C0VDLhwVc_-J4RkvMIdaEVSiqHjhXkpd14Ko_nWHxbGceuiszCWuRWfzDLL0LuxAQr6Fql08NYR6U1HuN9EzlkVTjBu4LchsC1IDyJbuGMbokruIWYSlnoXMsK_bOO5LsbNcG-9dNKl_YrAdt2k37DvaYrteMK27hT8YHdo2RuXcoV1IKtptseReEkIuvsWHJfqsWoYNo2sQe05UU_hSUt0mfgr2iIX2qsXlU"/>
+</div>
+</div>
+</div>
+<!-- FAQ Section -->
+<div class="md:col-span-4 bg-surface-container-low border-2 border-primary p-lg rounded-xl">
+<h3 class="font-headline-md text-headline-md text-primary mb-md">FAQ</h3>
+<div class="space-y-md">
+<details class="group border-b border-slate-700 pb-2">
+<summary class="list-none flex justify-between items-center cursor-pointer font-label-bold text-on-surface">
+                                    Warum ist der MakerSpace noch nicht eröffnet?
+                                    <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<p class="text-sm text-on-surface-variant mt-2">Wir warten aktuell noch auf die finalen Abnahmen durch den Brandschutz und die Fertigstellung der Lüftungsanlage.</p>
+</details>
+<details class="group border-b border-slate-700 pb-2">
+<summary class="list-none flex justify-between items-center cursor-pointer font-label-bold text-on-surface">
+                                    Wie kann ich Mitglied werden?
+                                    <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<p class="text-sm text-on-surface-variant mt-2">Du kannst dich direkt über unsere Webseite registrieren oder zu einem unserer offenen Abende vorbeikommen.</p>
+</details>
+<details class="group border-b border-slate-700 pb-2">
+<summary class="list-none flex justify-between items-center cursor-pointer font-label-bold text-on-surface">
+                                    Gibt es Maschineneinweisungen?
+                                    <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<p class="text-sm text-on-surface-variant mt-2">Ja, für jede größere Maschine ist eine Sicherheitseinweisung (SUI) zwingend erforderlich.</p>
+</details>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Mobile Navigation Shell (Suppressed on Desktop) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t-4 border-slate-800 flex justify-around py-4 z-50">
+<button class="flex flex-col items-center gap-1 text-yellow-400">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-black">HOME</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-teal-400">
+<span class="material-symbols-outlined">handyman</span>
+<span class="text-[10px] font-black">TOOLS</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-teal-400">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="text-[10px] font-black">EVENTS</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-teal-400">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-black">PROFIL</span>
+</button>
+</nav>
+<!-- Floating Action Button - Contextual -->
+<button class="fixed bottom-24 right-8 md:bottom-8 md:right-8 w-16 h-16 bg-secondary text-on-secondary rounded-none border-4 border-slate-900 hard-shadow-primary flex items-center justify-center neo-brutal-btn z-40">
+<span class="material-symbols-outlined !text-3xl" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+</body></html>
