@@ -206,18 +206,28 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
 
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Kauflink (URL)</label>
-              {canEdit ? (
-                <input 
-                  type="url" 
-                  className="input-field" 
-                  value={suggestion.buyLink || ''} 
-                  onChange={e => setSuggestion({...suggestion, buyLink: e.target.value})}
-                  onBlur={e => handleUpdateSuggestion('buyLink', e.target.value)}
-                  placeholder="https://..."
-                />
-              ) : (
-                suggestion.buyLink ? <a href={suggestion.buyLink} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'underline' }}>Zum Shop</a> : '-'
-              )}
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                {canEdit ? (
+                  <input 
+                    type="url" 
+                    className="input-field" 
+                    value={suggestion.buyLink || ''} 
+                    onChange={e => setSuggestion({...suggestion, buyLink: e.target.value})}
+                    onBlur={e => handleUpdateSuggestion('buyLink', e.target.value)}
+                    placeholder="https://..."
+                    style={{ flex: 1 }}
+                  />
+                ) : (
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
+                    {suggestion.buyLink || '-'}
+                  </span>
+                )}
+                {suggestion.buyLink && (
+                  <a href={suggestion.buyLink} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: 'none', padding: '0.4rem 1rem', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                    🛒 Link
+                  </a>
+                )}
+              </div>
             </div>
             
             <div style={{ marginBottom: '1rem' }}>

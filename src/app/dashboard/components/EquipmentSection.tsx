@@ -394,16 +394,9 @@ export default function EquipmentSection({ user }: { user: any }) {
                           )}
                           <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{s.title}</h3>
                           <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem', flex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
                               <span>Maschine:</span>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <strong>{s.price.toLocaleString('de-DE')} €</strong>
-                                {s.buyLink && (
-                                  <a href={s.buyLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', backgroundColor: 'var(--accent-primary)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }} onClick={e => e.stopPropagation()}>
-                                    🛒 Link
-                                  </a>
-                                )}
-                              </div>
+                              <strong>{s.price.toLocaleString('de-DE')} €</strong>
                             </div>
                             {s.materials.length > 0 && (
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
