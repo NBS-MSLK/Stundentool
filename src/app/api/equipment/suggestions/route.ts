@@ -17,6 +17,18 @@ export async function POST(request: Request) {
         price: parseFloat(body.price) || 0
       }
     });
+
+    if (user) {
+      await prisma.activityLog.create({
+        data: {
+          userId: user.id,
+          userName: user.name,
+          action: 'Gerät vorgeschlagen',
+          details: `Das Gerät "${body.title}" wurde vorgeschlagen.`
+        }
+      });
+    }
+
     return NextResponse.json({ suggestion });
   } catch (error) {
     console.error(error);

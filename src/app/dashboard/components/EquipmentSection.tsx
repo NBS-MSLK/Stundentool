@@ -28,7 +28,6 @@ export default function EquipmentSection({ user }: { user: any }) {
 
   const handleCreateGroupSubCategory = async (groupNum: string, groupName: string, subCategoryCount: number) => {
     if (!newGroupSubCategoryTitle.trim()) return;
-    // e.g., "10.99 Möbel: Whiteboard" - the exact number after dot doesn't matter for grouping regex, but let's make it unique enough
     const newTitle = `${groupNum}.${subCategoryCount + 1} ${groupName}: ${newGroupSubCategoryTitle}`;
     
     await fetch('/api/equipment/categories', {
@@ -38,6 +37,40 @@ export default function EquipmentSection({ user }: { user: any }) {
     });
     setNewGroupSubCategoryTitle('');
     setActiveGroupId(null);
+    fetchData();
+  };
+
+  const handleMoveCategory = async (e: React.MouseEvent, catId: string, direction: number) => {
+    e.stopPropagation();
+    const index = categories.findIndex(c => c.id === catId);
+    if (index === -1) return;
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= categories.length) return;
+
+    const current = categories[index];
+    const target = categories[targetIndex];
+    
+    // Set fallback order values if they don't exist yet
+    const currentOrder = current.order !== undefined ? current.order : index;
+    const targetOrder = target.order !== undefined ? target.order : targetIndex;
+
+    const newCats = [...categories];
+    newCats[index] = { ...current, order: targetOrder };
+    newCats[targetIndex] = { ...target, order: currentOrder };
+    // Sort array locally immediately
+    newCats.sort((a, b) => a.order - b.order);
+    setCategories(newCats);
+
+    await fetch('/api/equipment/reorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        updates: [
+          { id: current.id, order: targetOrder },
+          { id: target.id, order: currentOrder }
+        ]
+      })
+    });
     fetchData();
   };
 
@@ -207,6 +240,24 @@ export default function EquipmentSection({ user }: { user: any }) {
         </div>
       </div>
 
+      {user?.role === 'ADMIN' && (
+        <div className="glass-card" style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', padding: '1rem' }}>
+          <button 
+            onClick={async () => {
+              if (confirm('Wirklich automatisch neu nummerieren und sortieren?')) {
+                setLoading(true);
+                await fetch('/api/equipment/auto-number', { method: 'POST' });
+                fetchData();
+              }
+            }}
+            className="btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            🔢 Auto-Nummerieren & Sortieren
+          </button>
+        </div>
+      )}
+
       {/* Categories and Suggestions */}
       {(() => {
         let maxCatStars = 0;
@@ -279,18 +330,26 @@ export default function EquipmentSection({ user }: { user: any }) {
                     ~ {catSum.toLocaleString('de-DE')} €
                   </span>
                   {(user?.role === 'ADMIN' || (cat.creatorId && user?.id === cat.creatorId)) && (
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm('Kategorie inkl. aller Vorschläge wirklich löschen?')) {
-                           fetch(`/api/equipment/categories/${cat.id}`, { method: 'DELETE' }).then(() => fetchData());
-                        }
-                      }}
-                      title="Kategorie löschen"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5, marginLeft: '1rem' }}
-                    >
-                      🗑️
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
+                      {user?.role === 'ADMIN' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginRight: '0.5rem' }}>
+                          <button onClick={(e) => handleMoveCategory(e, cat.id, -1)} style={{ background: 'var(--bg-secondary)', border: 'none', cursor: 'pointer', borderRadius: '4px', fontSize: '0.8rem', padding: '0.2rem' }}>🔼</button>
+                          <button onClick={(e) => handleMoveCategory(e, cat.id, 1)} style={{ background: 'var(--bg-secondary)', border: 'none', cursor: 'pointer', borderRadius: '4px', fontSize: '0.8rem', padding: '0.2rem' }}>🔽</button>
+                        </div>
+                      )}
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm('Kategorie inkl. aller Vorschläge wirklich löschen?')) {
+                             fetch(`/api/equipment/categories/${cat.id}`, { method: 'DELETE' }).then(() => fetchData());
+                          }
+                        }}
+                        title="Kategorie löschen"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5 }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   )}
                 </div>
                 <div style={{ 
@@ -315,7 +374,7 @@ export default function EquipmentSection({ user }: { user: any }) {
 
                       return (
                         <div key={s.id} style={{ 
-                          border: s.status === 'PURCHASED' ? '2px solid var(--success)' : '1px solid var(--border-color)', 
+                          border: s.status === 'PURCHASED' ? '2px solid var(--success)' : (maxCatStars > 0 && s.priorityVotes?.length === maxCatStars) ? '2px solid #ffd700' : '1px solid var(--border-color)', 
                           borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--bg-primary)',
                           display: 'flex', flexDirection: 'column', position: 'relative'
                         }}>
@@ -335,9 +394,16 @@ export default function EquipmentSection({ user }: { user: any }) {
                           )}
                           <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{s.title}</h3>
                           <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem', flex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem', alignItems: 'center' }}>
                               <span>Maschine:</span>
-                              <strong>{s.price.toLocaleString('de-DE')} €</strong>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <strong>{s.price.toLocaleString('de-DE')} €</strong>
+                                {s.buyLink && (
+                                  <a href={s.buyLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', backgroundColor: 'var(--accent-primary)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }} onClick={e => e.stopPropagation()}>
+                                    🛒 Link
+                                  </a>
+                                )}
+                              </div>
                             </div>
                             {s.materials.length > 0 && (
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
@@ -459,6 +525,9 @@ export default function EquipmentSection({ user }: { user: any }) {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <span style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>{group.title}</span>
+                    {group.categories.some((c: any) => catStarCounts[c.id] === maxCatStars && maxCatStars > 0) && (
+                      <span title="Enthält das Gerät mit der höchsten Priorität!" style={{ fontSize: '1.2rem' }}>⭐</span>
+                    )}
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)', padding: '0.2rem 0.6rem', borderRadius: '1rem' }}>
                       ~ {groupSum.toLocaleString('de-DE')} €
                     </span>

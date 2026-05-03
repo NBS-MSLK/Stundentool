@@ -17,6 +17,20 @@ export async function POST(request: Request) {
       }
     });
 
+    if (creatorId) {
+      const user = await prisma.user.findUnique({ where: { id: creatorId } });
+      if (user) {
+        await prisma.activityLog.create({
+          data: {
+            userId: user.id,
+            userName: user.name,
+            action: 'Kategorie erstellt',
+            details: `Kategorie "${title}" wurde vorgeschlagen.`
+          }
+        });
+      }
+    }
+
     return NextResponse.json({ category });
   } catch (error) {
     console.error('Error creating category:', error);

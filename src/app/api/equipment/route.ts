@@ -20,7 +20,7 @@ export async function GET() {
           orderBy: { createdAt: 'desc' }
         }
       },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { order: 'asc' }
     });
 
     return NextResponse.json({ budget: budget || { totalAmount: 0 }, categories });
