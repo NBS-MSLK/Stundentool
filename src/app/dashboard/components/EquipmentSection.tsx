@@ -115,7 +115,7 @@ export default function EquipmentSection({ user }: { user: any }) {
     if (!cat.suggestions || cat.suggestions.length === 0) return;
 
     let topSuggestion = cat.suggestions[0];
-    let maxVotes = topSuggestion.votes.length;
+    let maxVotes = topSuggestion.priorityVotes?.length || 0;
 
     cat.suggestions.forEach((s: any) => {
       let sCost = s.price || 0;
@@ -129,8 +129,8 @@ export default function EquipmentSection({ user }: { user: any }) {
         spentAmount += sCost;
         topSuggestion = s;
         maxVotes = 999999;
-      } else if (s.status !== 'REJECTED' && s.votes.length > maxVotes) {
-        maxVotes = s.votes.length;
+      } else if (s.status !== 'REJECTED' && (s.priorityVotes?.length || 0) > maxVotes) {
+        maxVotes = s.priorityVotes?.length || 0;
         topSuggestion = s;
       }
     });
@@ -251,7 +251,7 @@ export default function EquipmentSection({ user }: { user: any }) {
           if (cat.suggestions && cat.suggestions.length > 0) {
              let top = cat.suggestions[0];
              cat.suggestions.forEach((s: any) => {
-               if (s.status === 'PURCHASED' || (s.votes.length > top.votes.length && s.status !== 'REJECTED')) top = s;
+               if (s.status === 'PURCHASED' || ((s.priorityVotes?.length || 0) > (top.priorityVotes?.length || 0) && s.status !== 'REJECTED')) top = s;
              });
              if (top.status === 'PURCHASED') isPurchased = true;
              catSum = top.price;
@@ -429,7 +429,7 @@ export default function EquipmentSection({ user }: { user: any }) {
               if (cat.suggestions && cat.suggestions.length > 0) {
                  let top = cat.suggestions[0];
                  cat.suggestions.forEach((s: any) => {
-                   if (s.status === 'PURCHASED' || (s.votes.length > top.votes.length && s.status !== 'REJECTED')) top = s;
+                   if (s.status === 'PURCHASED' || ((s.priorityVotes?.length || 0) > (top.priorityVotes?.length || 0) && s.status !== 'REJECTED')) top = s;
                  });
                  let sSum = top.price;
                  top.materials.forEach((m: any) => { sSum += m.quantity * m.pricePerUnit; });

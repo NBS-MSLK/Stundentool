@@ -29,7 +29,7 @@ model User {
   pollVotes        PollVote[]
   equipmentCreated EquipmentSuggestion[] @relation("UserEquipmentCreated")
   equipmentVotes   EquipmentVote[]       @relation("UserEquipmentVotes")
-  priorityVote     EquipmentPriorityVote? @relation("UserPriorityVote")
+  priorityVotes    EquipmentPriorityVote[] @relation("UserPriorityVote")
   equipmentNotes   EquipmentNote[]       @relation("UserEquipmentNotes")
   createdAt        DateTime        @default(now())
 }
@@ -285,7 +285,7 @@ model EquipmentPriorityVote {
   id            String    @id @default(uuid())
   suggestionId  String
   suggestion    EquipmentSuggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
-  userId        String    @unique
+  userId        String
   user          User      @relation("UserPriorityVote", fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime  @default(now())
 }

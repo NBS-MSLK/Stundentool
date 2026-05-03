@@ -6,19 +6,36 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { suggestionId, userId } = body;
     
-    // A user can only have one priority vote. If they click the same suggestion, maybe toggle it off?
-    // If they click a different one, update their vote.
-    const existing = await prisma.equipmentPriorityVote.findUnique({
-      where: { userId }
+    // Find the category of the suggestion the user wants to vote for
+    const targetSuggestion = await prisma.equipmentSuggestion.findUnique({
+      where: { id: suggestionId },
+      select: { categoryId: true }
     });
     
-    if (existing) {
+    if (!targetSuggestion) {
+      return NextResponse.json({ error: 'Suggestion not found' }, { status: 404 });
+    }
+    
+    const { categoryId } = targetSuggestion;
+
+    // Check if the user already voted for a priority suggestion IN THIS CATEGORY
+    const existingVotes = await prisma.equipmentPriorityVote.findMany({
+      where: {
+        userId,
+        suggestion: {
+          categoryId
+        }
+      }
+    });
+    
+    if (existingVotes.length > 0) {
+      const existing = existingVotes[0];
       if (existing.suggestionId === suggestionId) {
         // Toggle off
         await prisma.equipmentPriorityVote.delete({ where: { id: existing.id } });
         return NextResponse.json({ status: 'removed' });
       } else {
-        // Change vote
+        // Change vote to the new suggestion in the same category
         const vote = await prisma.equipmentPriorityVote.update({
           where: { id: existing.id },
           data: { suggestionId }
@@ -26,7 +43,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ status: 'changed', vote });
       }
     } else {
-      // Create new vote
+      // Create new vote for this category
       const vote = await prisma.equipmentPriorityVote.create({
         data: { suggestionId, userId }
       });
