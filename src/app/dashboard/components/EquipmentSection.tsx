@@ -236,7 +236,7 @@ export default function EquipmentSection({ user }: { user: any }) {
   const totalBudget = budget.totalAmount;
   const budgetPercentage = totalBudget > 0 ? (plannedAmount / totalBudget) * 100 : 0;
   const spentPercentage = totalBudget > 0 ? (spentAmount / totalBudget) * 100 : 0;
-  const budgetDifference = spentAmount - totalBudget;
+  const plannedDifference = plannedAmount - totalBudget;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -269,9 +269,6 @@ export default function EquipmentSection({ user }: { user: any }) {
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Ausgegeben</span>
             <span style={{ color: 'var(--text-primary)' }}>
               {spentAmount.toLocaleString('de-DE')} €
-              <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem', color: budgetDifference > 0 ? 'var(--danger)' : 'var(--success)' }}>
-                ({budgetDifference > 0 ? '+' : ''}{budgetDifference.toLocaleString('de-DE')} €)
-              </span>
             </span>
           </div>
           <div style={{ textAlign: 'center' }}>
@@ -282,6 +279,9 @@ export default function EquipmentSection({ user }: { user: any }) {
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Geplant</span>
             <span style={{ color: plannedAmount > totalBudget ? 'var(--danger)' : 'var(--success)' }}>
               {plannedAmount.toLocaleString('de-DE')} €
+              <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem', color: plannedDifference > 0 ? 'var(--danger)' : 'var(--success)' }}>
+                ({plannedDifference > 0 ? '+' : ''}{plannedDifference.toLocaleString('de-DE')} €)
+              </span>
             </span>
           </div>
         </div>
