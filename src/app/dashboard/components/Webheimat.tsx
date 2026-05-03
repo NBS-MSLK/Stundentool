@@ -10,6 +10,8 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
   const [polls, setPolls] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
+  const [equipmentBudget, setEquipmentBudget] = useState<any>(null);
+  const [equipmentCategories, setEquipmentCategories] = useState<any[]>([]);
   const [expandedNews, setExpandedNews] = useState<{[key: string]: boolean}>({});
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [currentHeadlineIndex, setCurrentHeadlineIndex] = useState(0);
@@ -35,13 +37,14 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
     const fetchData = async () => {
       try {
         const fetchOpts = { cache: 'no-store' as RequestCache };
-        const [fRes, hRes, nRes, pRes, faqRes, tasksRes] = await Promise.all([
+        const [fRes, hRes, nRes, pRes, faqRes, tasksRes, eqRes] = await Promise.all([
           fetch('/api/funding', fetchOpts).then(r => r.json()),
           fetch('/api/headlines', fetchOpts).then(r => r.json()),
           fetch('/api/news', fetchOpts).then(r => r.json()),
           fetch('/api/polls', fetchOpts).then(r => r.json()),
           fetch('/api/faqs', fetchOpts).then(r => r.json()),
-          fetch('/api/tasks', fetchOpts).then(r => r.json())
+          fetch('/api/tasks', fetchOpts).then(r => r.json()),
+          fetch('/api/equipment', fetchOpts).then(r => r.json())
         ]);
         if (fRes.funding) setFunding(fRes.funding);
         if (hRes.headlines) setHeadlines(hRes.headlines);
@@ -49,6 +52,8 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         if (pRes.polls) setPolls(pRes.polls.filter((p:any) => p.isActive && !p.isArchived));
         if (faqRes.faqs) setFaqs(faqRes.faqs);
         if (tasksRes.tasks) setTasks(tasksRes.tasks);
+        if (eqRes.budget) setEquipmentBudget(eqRes.budget);
+        if (eqRes.categories) setEquipmentCategories(eqRes.categories);
       } catch (e) {
         console.error(e);
       }
@@ -97,6 +102,40 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
   };
 
   const latestHeadlines = headlines.slice(0, 3);
+
+  let eqSpentAmount = 0;
+  let eqPlannedAmount = 0;
+  let eqTotalBudget = equipmentBudget ? equipmentBudget.totalAmount : 0;
+
+  equipmentCategories.forEach(cat => {
+    if (!cat.suggestions || cat.suggestions.length === 0) return;
+    let topSuggestion = cat.suggestions[0];
+    let maxVotes = topSuggestion.priorityVotes?.length || 0;
+    cat.suggestions.forEach((s: any) => {
+      let sCost = s.price || 0;
+      if (s.materials) {
+        s.materials.forEach((m: any) => { sCost += (m.quantity * m.pricePerUnit) || 0; });
+      }
+      if (s.status === 'PURCHASED') {
+        eqSpentAmount += sCost;
+        topSuggestion = s;
+        maxVotes = 999999;
+      } else if (s.status !== 'REJECTED' && (s.priorityVotes?.length || 0) > maxVotes) {
+        maxVotes = s.priorityVotes?.length || 0;
+        topSuggestion = s;
+      }
+    });
+    if (topSuggestion && topSuggestion.status !== 'REJECTED') {
+      let topCost = topSuggestion.price || 0;
+      if (topSuggestion.materials) {
+        topSuggestion.materials.forEach((m: any) => { topCost += (m.quantity * m.pricePerUnit) || 0; });
+      }
+      eqPlannedAmount += topCost;
+    }
+  });
+
+  const eqSpentPercentage = eqTotalBudget > 0 ? (eqSpentAmount / eqTotalBudget) * 100 : 0;
+  const eqPlannedDifference = eqPlannedAmount - eqTotalBudget;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -207,41 +246,13 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         </div>
       )}
 
-      {/* 2. Kalender & Termine */}
-      <div className="glass-card">
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Kalender & Termine</h2>
-        <div style={{ marginBottom: '1.5rem' }}>
-          <GlobalCalendar tasks={tasks} user={user} refetch={fetchTasks} />
-        </div>
-        
-        <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Anstehende Arbeitsdienste</h3>
-        {tasks.filter(t => t.status === 'SCHEDULED').length > 0 ? (
-          <div style={{ display: 'grid', gap: '1rem' }}>
-            {tasks.filter(t => t.status === 'SCHEDULED').map(t => (
-              <div key={t.id} style={{ padding: '1rem', border: '1px solid #52c41a', backgroundColor: 'rgba(82, 196, 26, 0.05)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
-                <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#52c41a' }}>{t.title}</div>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                    Termin: {new Date(t.dueDate).toLocaleDateString('de-DE')}
-                    {t.dateProposals?.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()) && 
-                      ` (${t.dateProposals.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()).startTime} - ${t.dateProposals.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()).endTime} Uhr)`}
-                  </div>
-                </div>
-                <div style={{ fontSize: '0.85rem' }}>
-                  Verantwortlich: {t.creator?.name || 'Unbekannt'}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>Aktuell sind keine Arbeitsdienste fest terminiert.</div>
-        )}
-      </div>
-
-      {/* 3. Stundentool Balken */}
+      {/* 2. Stundentool Balken */}
       <div className="glass-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span>Projekt-Förderwert (Stunden)</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span>Projekt-Förderwert (Stunden)</span>
+            <a href="/dashboard?tab=STUNDEN" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', textDecoration: 'underline' }}>zum Stundentool</a>
+          </div>
           <div style={{ textAlign: 'right' }}>
             <span style={{ fontSize: '1.2rem', color: '#ffd700', textShadow: '0 0 10px rgba(255,215,0,0.3)' }}>
               {((stats.hardcodedBaseHours + stats.systemArchivedHours + stats.systemActiveHours) * 20).toLocaleString('de-DE')} € / {(stats.totalGoalHours * 20).toLocaleString('de-DE')} €
@@ -275,6 +286,83 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
             Offener Förderwert: {(stats.systemActiveHours * 20).toLocaleString('de-DE')} € ({stats.systemActiveHours}h)
           </div>
         </div>
+      </div>
+
+      {/* 3. Equipment Balken */}
+      {equipmentBudget && (
+        <div className="glass-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <span>Equipment Budget</span>
+              <a href="/dashboard?tab=EQUIPMENT" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', textDecoration: 'underline' }}>zur Ausstattung</a>
+            </div>
+          </div>
+          
+          <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', position: 'relative' }}>
+            <div 
+              style={{ 
+                position: 'absolute', left: 0, top: 0,
+                width: `${Math.min(eqSpentPercentage, 100)}%`, 
+                backgroundColor: eqSpentAmount > eqTotalBudget ? 'var(--danger)' : 'var(--success)', 
+                height: '100%', transition: 'width 0.5s ease-in-out', zIndex: 2
+              }} 
+            />
+            <div style={{ position: 'relative', zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white', fontSize: '0.85rem', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
+              {Math.round(eqSpentPercentage)}%
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', marginTop: '1rem', fontSize: '0.95rem', fontWeight: 600 }}>
+            <div style={{ textAlign: 'left' }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Ausgegeben</span>
+              <span style={{ color: 'var(--text-primary)' }}>{eqSpentAmount.toLocaleString('de-DE')} €</span>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Budget</span>
+              <span>{eqTotalBudget.toLocaleString('de-DE')} €</span>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Geplant</span>
+              <span style={{ color: eqPlannedAmount > eqTotalBudget ? 'var(--danger)' : 'var(--success)' }}>
+                {eqPlannedAmount.toLocaleString('de-DE')} €
+                <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem', color: eqPlannedDifference > 0 ? 'var(--danger)' : 'var(--success)' }}>
+                  ({eqPlannedDifference > 0 ? '+' : ''}{eqPlannedDifference.toLocaleString('de-DE')} €)
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. Kalender & Termine */}
+      <div className="glass-card">
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Kalender & Termine</h2>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <GlobalCalendar tasks={tasks} user={user} refetch={fetchTasks} />
+        </div>
+        
+        <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Anstehende Arbeitsdienste</h3>
+        {tasks.filter(t => t.status === 'SCHEDULED').length > 0 ? (
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {tasks.filter(t => t.status === 'SCHEDULED').map(t => (
+              <div key={t.id} style={{ padding: '1rem', border: '1px solid #52c41a', backgroundColor: 'rgba(82, 196, 26, 0.05)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#52c41a' }}>{t.title}</div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                    Termin: {new Date(t.dueDate).toLocaleDateString('de-DE')}
+                    {t.dateProposals?.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()) && 
+                      ` (${t.dateProposals.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()).startTime} - ${t.dateProposals.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()).endTime} Uhr)`}
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.85rem' }}>
+                  Verantwortlich: {t.creator?.name || 'Unbekannt'}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>Aktuell sind keine Arbeitsdienste fest terminiert.</div>
+        )}
       </div>
 
       {/* 4. News Section */}
