@@ -440,6 +440,11 @@ export default function EquipmentSection({ user }: { user: any }) {
                               Abgelehnt
                             </div>
                           )}
+                          {s.status !== 'PURCHASED' && s.status !== 'REJECTED' && maxCatStars > 0 && s.priorityVotes?.length === maxCatStars && (
+                            <div style={{ position: 'absolute', top: '-10px', right: '-10px', backgroundColor: '#ffd700', color: 'black', padding: '0.3rem 0.8rem', borderRadius: '1rem', fontSize: '0.8rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                              Aktueller Favorit
+                            </div>
+                          )}
                           
                           {s.imageUrl && (
                             <div style={{ width: '100%', aspectRatio: '1 / 1', backgroundImage: `url(${s.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 'var(--radius-sm)', marginBottom: '1rem' }} />
