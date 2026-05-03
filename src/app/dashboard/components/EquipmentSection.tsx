@@ -235,6 +235,8 @@ export default function EquipmentSection({ user }: { user: any }) {
 
   const totalBudget = budget.totalAmount;
   const budgetPercentage = totalBudget > 0 ? (plannedAmount / totalBudget) * 100 : 0;
+  const spentPercentage = totalBudget > 0 ? (spentAmount / totalBudget) * 100 : 0;
+  const budgetDifference = spentAmount - totalBudget;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -250,36 +252,27 @@ export default function EquipmentSection({ user }: { user: any }) {
               position: 'absolute',
               left: 0,
               top: 0,
-              width: `${Math.min((spentAmount / totalBudget) * 100, 100)}%`, 
-              backgroundColor: 'var(--success)', 
+              width: `${Math.min(spentPercentage, 100)}%`, 
+              backgroundColor: spentAmount > totalBudget ? 'var(--danger)' : 'var(--success)', 
               height: '100%', 
               transition: 'width 0.5s ease-in-out',
               zIndex: 2
             }} 
           />
-          {/* Planned Progress */}
-          <div 
-            style={{ 
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              width: `${Math.min(budgetPercentage, 100)}%`, 
-              backgroundColor: plannedAmount > totalBudget ? 'var(--danger)' : 'var(--accent-primary)', 
-              height: '100%', 
-              opacity: 0.6,
-              transition: 'width 0.5s ease-in-out',
-              zIndex: 1
-            }} 
-          />
           <div style={{ position: 'relative', zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white', fontSize: '0.85rem', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
-            {Math.round(budgetPercentage)}%
+            {Math.round(spentPercentage)}%
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', marginTop: '1rem', fontSize: '0.95rem', fontWeight: 600 }}>
           <div style={{ textAlign: 'left' }}>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Ausgegeben</span>
-            <span style={{ color: 'var(--success)' }}>{spentAmount.toLocaleString('de-DE')} €</span>
+            <span style={{ color: 'var(--text-primary)' }}>
+              {spentAmount.toLocaleString('de-DE')} €
+              <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem', color: budgetDifference > 0 ? 'var(--danger)' : 'var(--success)' }}>
+                ({budgetDifference > 0 ? '+' : ''}{budgetDifference.toLocaleString('de-DE')} €)
+              </span>
+            </span>
           </div>
           <div style={{ textAlign: 'center' }}>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Budget</span>
