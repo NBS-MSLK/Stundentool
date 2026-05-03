@@ -22,6 +22,9 @@ export default function EquipmentSection({ user }: { user: any }) {
   const [newCategoryTitle, setNewCategoryTitle] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
+  const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null);
+  const [renamingGroupTitle, setRenamingGroupTitle] = useState('');
+
   // For grouping: adding a new sub-category to a group
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [newGroupSubCategoryTitle, setNewGroupSubCategoryTitle] = useState('');
@@ -106,6 +109,22 @@ export default function EquipmentSection({ user }: { user: any }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ updates })
     });
+    fetchData();
+  };
+
+  const handleRenameGroup = async (oldGroupName: string) => {
+    if (!renamingGroupTitle.trim() || renamingGroupTitle === oldGroupName) {
+      setRenamingGroupId(null);
+      return;
+    }
+    
+    await fetch('/api/equipment/rename-group', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ oldGroupName, newGroupName: renamingGroupTitle })
+    });
+    
+    setRenamingGroupId(null);
     fetchData();
   };
 
@@ -307,19 +326,17 @@ export default function EquipmentSection({ user }: { user: any }) {
           if (stars > maxCatStars) maxCatStars = stars;
         });
 
-        const groupNames: Record<string, string> = { '9': 'Holzwerkstatt', '10': 'Möbel', '13': 'Elektrotechnik', '16': 'Vereinsleben' };
-        
         const groups: any[] = [];
         categories.forEach(cat => {
           const match = cat.title.match(/^(\d+)\.\d+\s(.*?):\s?(.*)/);
           if (match) {
             const groupNum = match[1];
-            const groupName = groupNames[groupNum] || match[2];
+            const groupName = match[2];
             const subName = match[3];
             
             let group = groups.find(g => g.id === `group_${groupNum}`);
             if (!group) {
-              group = { id: `group_${groupNum}`, isGroup: true, title: `${groupNum}. ${groupName}`, categories: [] };
+              group = { id: `group_${groupNum}`, isGroup: true, title: `${groupNum}. ${groupName}`, groupName, categories: [] };
               groups.push(group);
             }
             group.categories.push({ ...cat, displayTitle: subName });
@@ -552,7 +569,37 @@ export default function EquipmentSection({ user }: { user: any }) {
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: `${percent}%`, backgroundColor: 'var(--success)', transition: 'height 0.5s ease-in-out' }} />
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                    <span style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>{group.title}</span>
+                    {renamingGroupId === group.id ? (
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
+                        <input 
+                          type="text" 
+                          className="input-field" 
+                          style={{ padding: '0.2rem 0.5rem', fontSize: '1rem', width: '200px' }}
+                          value={renamingGroupTitle}
+                          onChange={e => setRenamingGroupTitle(e.target.value)}
+                          autoFocus
+                        />
+                        <button onClick={() => handleRenameGroup(group.groupName)} className="btn-success" style={{ padding: '0.2rem 0.5rem' }}>✓</button>
+                        <button onClick={() => setRenamingGroupId(null)} className="btn-danger" style={{ padding: '0.2rem 0.5rem' }}>✕</button>
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>
+                        {group.title}
+                        {user?.role === 'ADMIN' && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setRenamingGroupId(group.id);
+                              setRenamingGroupTitle(group.groupName);
+                            }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: '0.5rem', opacity: 0.5, fontSize: '1rem' }}
+                            title="Name ändern"
+                          >
+                            ✏️
+                          </button>
+                        )}
+                      </span>
+                    )}
                     {group.categories.some((c: any) => catStarCounts[c.id] === maxCatStars && maxCatStars > 0) && (
                       <span title="Enthält das Gerät mit der höchsten Priorität!" style={{ fontSize: '1.2rem' }}>⭐</span>
                     )}
