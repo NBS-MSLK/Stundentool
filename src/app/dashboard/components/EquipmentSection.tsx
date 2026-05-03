@@ -74,6 +74,41 @@ export default function EquipmentSection({ user }: { user: any }) {
     fetchData();
   };
 
+  const handleMoveBlock = async (e: React.MouseEvent, blockIndex: number, direction: number, blocks: any[]) => {
+    e.stopPropagation();
+    const targetIndex = blockIndex + direction;
+    if (targetIndex < 0 || targetIndex >= blocks.length) return;
+
+    const newBlocks = [...blocks];
+    const temp = newBlocks[blockIndex];
+    newBlocks[blockIndex] = newBlocks[targetIndex];
+    newBlocks[targetIndex] = temp;
+
+    const newCategoriesOrder: any[] = [];
+    newBlocks.forEach(b => {
+      if (b.isGroup) {
+        newCategoriesOrder.push(...b.categories);
+      } else {
+        newCategoriesOrder.push(b.category);
+      }
+    });
+
+    const updates = newCategoriesOrder.map((cat, i) => ({
+      id: cat.id,
+      order: i
+    }));
+
+    const updatedCats = newCategoriesOrder.map((cat, i) => ({ ...cat, order: i }));
+    setCategories(updatedCats);
+
+    await fetch('/api/equipment/reorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ updates })
+    });
+    fetchData();
+  };
+
   const handleCreateCategory = async () => {
     if (!newCategoryTitle.trim()) return;
     await fetch('/api/equipment/categories', {
@@ -516,7 +551,7 @@ export default function EquipmentSection({ user }: { user: any }) {
                   <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', backgroundColor: 'var(--accent-primary)' }}>
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: `${percent}%`, backgroundColor: 'var(--success)', transition: 'height 0.5s ease-in-out' }} />
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
                     <span style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>{group.title}</span>
                     {group.categories.some((c: any) => catStarCounts[c.id] === maxCatStars && maxCatStars > 0) && (
                       <span title="Enthält das Gerät mit der höchsten Priorität!" style={{ fontSize: '1.2rem' }}>⭐</span>
@@ -524,6 +559,14 @@ export default function EquipmentSection({ user }: { user: any }) {
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)', padding: '0.2rem 0.6rem', borderRadius: '1rem' }}>
                       ~ {groupSum.toLocaleString('de-DE')} €
                     </span>
+                    {user?.role === 'ADMIN' && (
+                      <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto', marginRight: '1rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                          <button onClick={(e) => handleMoveBlock(e, groups.indexOf(group), -1, groups)} style={{ background: 'var(--bg-secondary)', border: 'none', cursor: 'pointer', borderRadius: '4px', fontSize: '0.8rem', padding: '0.2rem' }}>🔼</button>
+                          <button onClick={(e) => handleMoveBlock(e, groups.indexOf(group), 1, groups)} style={{ background: 'var(--bg-secondary)', border: 'none', cursor: 'pointer', borderRadius: '4px', fontSize: '0.8rem', padding: '0.2rem' }}>🔽</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div style={{ transform: isGroupExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s', fontSize: '1.2rem', color: 'var(--text-secondary)' }}>▼</div>
                 </div>
