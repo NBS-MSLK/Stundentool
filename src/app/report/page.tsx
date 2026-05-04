@@ -135,7 +135,7 @@ function ReportContent() {
             </table>
 
             <div className="table-wrapper" style={{ overflowX: 'auto', marginBottom: '1rem', width: '100%' }}>
-              <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+              <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ height: '60px' }}>
                     <th style={{ width: '10%' }}>Datum</th>
