@@ -100,7 +100,7 @@ function ReportContent() {
             word-break: break-word;
             hyphens: auto;
           }
-          h3 { margin-bottom: 1rem !important; font-size: 12pt !important; }
+          h3 { margin-bottom: 1rem !important; font-size: 11.5pt !important; }
           .leader-info { margin-bottom: 1rem !important; font-size: 9pt !important; }
           .signature-confirm { margin-top: 0.5rem !important; margin-bottom: 1rem !important; font-size: 9pt !important; }
           .signature-area { margin-top: 1.5rem !important; font-size: 9pt !important; }
