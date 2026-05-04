@@ -59,28 +59,29 @@ function ReportContent() {
             margin: 0 !important;
             padding: 0 !important;
             box-sizing: border-box !important;
-            /* Force paper width instead of mobile screen width */
-            width: 270mm !important;
-            max-width: 270mm !important;
+            width: 100% !important;
+            min-width: 800px !important; /* Safe width for A4 Landscape (842px at 72dpi) */
+            max-width: none !important;
           }
           .print-wrapper {
             padding: 0 !important;
             margin: 0 !important;
-            width: 270mm !important;
-            max-width: 270mm !important;
+            width: 100% !important;
+            min-width: 800px !important;
+            max-width: none !important;
             box-sizing: border-box !important;
           }
           .report-page { 
-            width: 270mm !important;
-            max-width: 270mm !important;
+            width: 100% !important;
+            min-width: 800px !important;
+            max-width: none !important;
             margin-bottom: 0 !important; 
             padding: 0 !important; 
             box-sizing: border-box !important;
           }
           @media print and (orientation: portrait) {
             body, .print-wrapper, .report-page {
-              width: 190mm !important;
-              max-width: 190mm !important;
+              min-width: 550px !important; /* Safe width for A4 Portrait (595px at 72dpi) */
             }
           }
           .report-page:not(:last-child) { page-break-after: always; }
