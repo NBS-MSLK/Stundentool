@@ -127,12 +127,12 @@ function ReportContent() {
               <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                 <thead>
                   <tr style={{ height: '60px' }}>
-                    <th>Datum</th>
-                    <th>geleistete Arbeit</th>
-                    <th>Gewerk / Arbeitsbereich</th>
-                    <th>Anzahl<br/>Stunden</th>
-                    <th>Name<br/>der Leistungserbringerin/<br/>des Leistungserbringers<br/>(Blockschrift)</th>
-                    <th>Unterschrift<br/>der Leistungserbringerin/<br/>des Leistungserbringers</th>
+                    <th style={{ width: '10%' }}>Datum</th>
+                    <th style={{ width: '22%' }}>geleistete Arbeit</th>
+                    <th style={{ width: '24%' }}>Gewerk / Arbeitsbereich</th>
+                    <th style={{ width: '8%' }}>Anzahl<br/>Stunden</th>
+                    <th style={{ width: '18%' }}>Name<br/>der Leistungserbringerin/<br/>des Leistungserbringers<br/>(Blockschrift)</th>
+                    <th style={{ width: '18%' }}>Unterschrift<br/>der Leistungserbringerin/<br/>des Leistungserbringers</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -168,7 +168,7 @@ function ReportContent() {
               Ich bestätige, dass die o.g. Arbeitsleistungen im Rahmen der von mir beantragten Fördermaßnahme erbracht wurden.
             </div>
 
-            <div className="signature-area" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem' }}>
+            <div className="signature-area" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem' }}>
               <div style={{ width: '30%', borderTop: '1px solid black', paddingTop: '0.5rem' }}>Ort, Datum</div>
               <div style={{ width: '50%', borderTop: '1px solid black', paddingTop: '0.5rem', textAlign: 'center' }}>Unterschrift der/des Vertretungsberechtigten</div>
             </div>
