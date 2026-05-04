@@ -55,23 +55,32 @@ function ReportContent() {
           @page { size: landscape; margin: 10mm; }
           body { 
             background-color: white !important; 
-            font-size: 11pt; 
+            font-size: 10pt !important; 
             margin: 0 !important;
             padding: 0 !important;
           }
           .report-page { 
-            /* Force desktop-like width for consistent printing on mobile */
-            min-width: 1000px !important; 
+            width: 100% !important;
             margin-bottom: 0 !important; 
             padding: 0 !important; 
           }
           .report-page:not(:last-child) { page-break-after: always; }
-          .table-wrapper { overflow: visible !important; }
-          .report-table { width: 100% !important; }
-          h3 { margin-bottom: 1rem !important; }
-          .leader-info { margin-bottom: 1rem !important; }
-          .signature-confirm { margin-top: 0.5rem !important; margin-bottom: 1rem !important; }
-          .signature-area { margin-top: 1.5rem !important; }
+          .table-wrapper { overflow: visible !important; width: 100% !important; }
+          .report-table { 
+            width: 100% !important; 
+            max-width: 100% !important;
+            table-layout: fixed !important;
+          }
+          .report-table th, .report-table td {
+            font-size: 9pt !important;
+            padding: 0.2rem !important;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+          }
+          h3 { margin-bottom: 1rem !important; font-size: 12pt !important; }
+          .leader-info { margin-bottom: 1rem !important; font-size: 9pt !important; }
+          .signature-confirm { margin-top: 0.5rem !important; margin-bottom: 1rem !important; font-size: 9pt !important; }
+          .signature-area { margin-top: 1.5rem !important; font-size: 9pt !important; }
         }
         .report-table th, .report-table td {
           border: 1px solid black;
