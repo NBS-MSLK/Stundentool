@@ -40,10 +40,10 @@ function ReportContent() {
 
   if (!user) return null;
 
-  // Split entries into chunks of 12
+  // Split entries into chunks of 8 to ensure everything fits on one page
   const chunks = [];
-  for (let i = 0; i < entries.length; i += 10) {
-    chunks.push(entries.slice(i, i + 10));
+  for (let i = 0; i < entries.length; i += 8) {
+    chunks.push(entries.slice(i, i + 8));
   }
   if (chunks.length === 0) chunks.push([]); // Always render at least one empty page
 
