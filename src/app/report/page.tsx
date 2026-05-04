@@ -53,15 +53,17 @@ function ReportContent() {
         @media print { 
           .no-print { display: none !important; } 
           @page { size: landscape; margin: 10mm; }
-          body { 
+          html, body { 
             background-color: white !important; 
             font-size: 10pt !important; 
             margin: 0 !important;
             padding: 0 !important;
             box-sizing: border-box !important;
-            width: 100% !important;
-            min-width: 800px !important; /* Safe width for A4 Landscape (842px at 72dpi) */
+            width: auto !important;
             max-width: none !important;
+            min-width: 0 !important;
+            overflow: visible !important;
+            overflow-x: visible !important;
           }
           .print-wrapper {
             padding: 0 !important;
@@ -73,14 +75,13 @@ function ReportContent() {
           }
           .report-page { 
             width: 100% !important;
-            min-width: 800px !important;
             max-width: none !important;
             margin-bottom: 0 !important; 
             padding: 0 !important; 
             box-sizing: border-box !important;
           }
           @media print and (orientation: portrait) {
-            body, .print-wrapper, .report-page {
+            .print-wrapper {
               min-width: 550px !important; /* Safe width for A4 Portrait (595px at 72dpi) */
             }
           }
