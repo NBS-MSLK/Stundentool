@@ -52,10 +52,22 @@ function ReportContent() {
       <style dangerouslySetInnerHTML={{ __html: `
         @media print { 
           .no-print { display: none !important; } 
-          @page { size: landscape; margin: 5mm; }
-          body { background-color: white !important; font-size: 11pt; }
+          @page { size: landscape; margin: 10mm; }
+          body { 
+            background-color: white !important; 
+            font-size: 11pt; 
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          .report-page { 
+            /* Force desktop-like width for consistent printing on mobile */
+            min-width: 1000px !important; 
+            margin-bottom: 0 !important; 
+            padding: 0 !important; 
+          }
           .report-page:not(:last-child) { page-break-after: always; }
-          .report-page { margin-bottom: 0 !important; padding: 0 !important; }
+          .table-wrapper { overflow: visible !important; }
+          .report-table { width: 100% !important; }
           h3 { margin-bottom: 1rem !important; }
           .leader-info { margin-bottom: 1rem !important; }
           .signature-confirm { margin-top: 0.5rem !important; margin-bottom: 1rem !important; }
@@ -102,7 +114,7 @@ function ReportContent() {
               </tbody>
             </table>
 
-            <div style={{ overflowX: 'auto', marginBottom: '1rem', width: '100%' }}>
+            <div className="table-wrapper" style={{ overflowX: 'auto', marginBottom: '1rem', width: '100%' }}>
               <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                 <thead>
                   <tr style={{ height: '60px' }}>
