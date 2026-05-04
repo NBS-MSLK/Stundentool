@@ -48,7 +48,7 @@ function ReportContent() {
   if (chunks.length === 0) chunks.push([]); // Always render at least one empty page
 
   return (
-    <div style={{ maxWidth: '100%', margin: '0 auto', padding: '2rem', backgroundColor: 'white', color: 'black', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
+    <div className="print-wrapper" style={{ maxWidth: '100%', margin: '0 auto', padding: '2rem', backgroundColor: 'white', color: 'black', minHeight: '100vh', fontFamily: 'Arial, sans-serif', boxSizing: 'border-box' }}>
       <style dangerouslySetInnerHTML={{ __html: `
         @media print { 
           .no-print { display: none !important; } 
@@ -58,11 +58,20 @@ function ReportContent() {
             font-size: 10pt !important; 
             margin: 0 !important;
             padding: 0 !important;
+            box-sizing: border-box !important;
+          }
+          .print-wrapper {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
           }
           .report-page { 
             width: 100% !important;
             margin-bottom: 0 !important; 
             padding: 0 !important; 
+            box-sizing: border-box !important;
           }
           .report-page:not(:last-child) { page-break-after: always; }
           .table-wrapper { overflow: visible !important; width: 100% !important; }
@@ -75,7 +84,9 @@ function ReportContent() {
             font-size: 9pt !important;
             padding: 0.2rem !important;
             word-wrap: break-word;
-            overflow-wrap: break-word;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            hyphens: auto;
           }
           h3 { margin-bottom: 1rem !important; font-size: 12pt !important; }
           .leader-info { margin-bottom: 1rem !important; font-size: 9pt !important; }
