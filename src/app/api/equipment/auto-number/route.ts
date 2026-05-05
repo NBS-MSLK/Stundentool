@@ -31,41 +31,53 @@ export async function POST() {
       ]
     });
 
-    let currentTopNumber = 0;
-    let currentGroupSubNumber = 0;
-    let lastGroupName = '';
+    // Group categories by groupName to prevent splitting groups
+    const grouped = new Map<string, { cat: any, parsed: any }[]>();
+    const groupOrder: string[] = [];
 
-    const updates = [];
-
-    for (let i = 0; i < categories.length; i++) {
-      const cat = categories[i];
+    for (const cat of categories) {
       const parsed = parseCategoryTitle(cat.title);
-      let newTitle = '';
+      // Non-grouped categories use their own ID as a unique group key
+      const key = parsed.isGrouped ? parsed.groupName : cat.id;
 
-      if (parsed.isGrouped) {
-        if (parsed.groupName !== lastGroupName) {
-          currentTopNumber++;
-          currentGroupSubNumber = 1;
-          lastGroupName = parsed.groupName;
-        } else {
-          currentGroupSubNumber++;
-        }
-        newTitle = `${currentTopNumber}.${currentGroupSubNumber} ${parsed.groupName}: ${parsed.subName}`;
-      } else {
-        currentTopNumber++;
-        lastGroupName = ''; // Reset
-        newTitle = `${currentTopNumber}. ${parsed.groupName}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, []);
+        groupOrder.push(key);
       }
+      grouped.get(key)!.push({ cat, parsed });
+    }
 
-      updates.push(
-        prisma.equipmentCategory.update({
-          where: { id: cat.id },
-          data: { 
-            title: newTitle,
-            order: i // Also normalize the order to be strictly sequential (0, 1, 2...)
-          }
-        })
-      );
+    let currentTopNumber = 0;
+    const updates = [];
+    let globalIndex = 0;
+
+    for (const key of groupOrder) {
+      currentTopNumber++;
+      const items = grouped.get(key)!;
+      
+      let currentGroupSubNumber = 0;
+      for (const item of items) {
+        const { cat, parsed } = item;
+        let newTitle = '';
+
+        if (parsed.isGrouped) {
+          currentGroupSubNumber++;
+          newTitle = `${currentTopNumber}.${currentGroupSubNumber} ${parsed.groupName}: ${parsed.subName}`;
+        } else {
+          newTitle = `${currentTopNumber}. ${parsed.groupName}`;
+        }
+
+        updates.push(
+          prisma.equipmentCategory.update({
+            where: { id: cat.id },
+            data: { 
+              title: newTitle,
+              order: globalIndex
+            }
+          })
+        );
+        globalIndex++;
+      }
     }
 
     await prisma.$transaction(updates);

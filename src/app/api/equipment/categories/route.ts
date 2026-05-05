@@ -10,10 +10,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
+    // Find the maximum order to place the new category at the end
+    const maxOrderCat = await prisma.equipmentCategory.findFirst({
+      orderBy: { order: 'desc' }
+    });
+    const nextOrder = maxOrderCat ? maxOrderCat.order + 1 : 0;
+
     const category = await prisma.equipmentCategory.create({
       data: {
         title,
-        creatorId: creatorId || null
+        creatorId: creatorId || null,
+        order: nextOrder
       }
     });
 
