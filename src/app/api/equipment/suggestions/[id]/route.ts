@@ -32,6 +32,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl;
     if (body.buyLink !== undefined) updateData.buyLink = body.buyLink;
     if (body.price !== undefined) updateData.price = parseFloat(body.price);
+    if (body.quantity !== undefined) updateData.quantity = parseInt(body.quantity) || 1;
     if (body.status !== undefined) updateData.status = body.status;
     
     const suggestion = await prisma.equipmentSuggestion.update({

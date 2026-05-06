@@ -252,6 +252,7 @@ model EquipmentSuggestion {
   imageUrl        String?         
   buyLink         String?         
   price           Float           @default(0) 
+  quantity        Int             @default(1)
   status          String          @default("PROPOSED") 
   materials       EquipmentMaterial[] 
   votes           EquipmentVote[]

@@ -102,7 +102,8 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
 
   let totalMatCost = 0;
   suggestion.materials.forEach((m: any) => { totalMatCost += m.quantity * m.pricePerUnit; });
-  const totalPrice = suggestion.price + totalMatCost;
+  const baseCost = suggestion.price * (suggestion.quantity || 1);
+  const totalPrice = baseCost + totalMatCost;
 
   return (
     <div className="container" style={{ maxWidth: '800px' }}>
@@ -187,21 +188,39 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
         {/* Details and Image columns */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem', marginBottom: '2rem' }}>
           <div style={{ flex: 1, minWidth: '300px' }}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Preis der Maschine (€)</label>
-              {canEdit ? (
-                <input 
-                  type="number" 
-                  step="0.01" 
-                  className="input-field" 
-                  value={suggestion.price} 
-                  onChange={e => setSuggestion({...suggestion, price: parseFloat(e.target.value) || 0})}
-                  onBlur={e => handleUpdateSuggestion('price', parseFloat(e.target.value) || 0)}
-                  style={{ width: '150px' }}
-                />
-              ) : (
-                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{suggestion.price.toLocaleString('de-DE')} €</div>
-              )}
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Preis (Stück) (€)</label>
+                {canEdit ? (
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    className="input-field" 
+                    value={suggestion.price} 
+                    onChange={e => setSuggestion({...suggestion, price: parseFloat(e.target.value) || 0})}
+                    onBlur={e => handleUpdateSuggestion('price', parseFloat(e.target.value) || 0)}
+                    style={{ width: '120px' }}
+                  />
+                ) : (
+                  <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{suggestion.price.toLocaleString('de-DE')} €</div>
+                )}
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Anzahl</label>
+                {canEdit ? (
+                  <input 
+                    type="number" 
+                    min="1"
+                    className="input-field" 
+                    value={suggestion.quantity || 1} 
+                    onChange={e => setSuggestion({...suggestion, quantity: parseInt(e.target.value) || 1})}
+                    onBlur={e => handleUpdateSuggestion('quantity', parseInt(e.target.value) || 1)}
+                    style={{ width: '80px' }}
+                  />
+                ) : (
+                  <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{suggestion.quantity || 1}x</div>
+                )}
+              </div>
             </div>
 
             <div style={{ marginBottom: '1rem' }}>

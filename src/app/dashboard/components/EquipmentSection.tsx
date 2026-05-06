@@ -205,7 +205,7 @@ export default function EquipmentSection({ user }: { user: any }) {
     let maxVotes = topSuggestion.priorityVotes?.length || 0;
 
     cat.suggestions.forEach((s: any) => {
-      let sCost = s.price || 0;
+      let sCost = (s.price * (s.quantity || 1)) || 0;
       if (s.materials) {
         s.materials.forEach((m: any) => {
           sCost += (m.quantity * m.pricePerUnit) || 0;
@@ -223,7 +223,7 @@ export default function EquipmentSection({ user }: { user: any }) {
     });
 
     if (topSuggestion && topSuggestion.status !== 'REJECTED') {
-      let topCost = topSuggestion.price || 0;
+      let topCost = (topSuggestion.price * (topSuggestion.quantity || 1)) || 0;
       if (topSuggestion.materials) {
         topSuggestion.materials.forEach((m: any) => {
           topCost += (m.quantity * m.pricePerUnit) || 0;
@@ -350,7 +350,7 @@ export default function EquipmentSection({ user }: { user: any }) {
                if (s.status === 'PURCHASED' || ((s.priorityVotes?.length || 0) > (top.priorityVotes?.length || 0) && s.status !== 'REJECTED')) top = s;
              });
              if (top.status === 'PURCHASED') isPurchased = true;
-             catSum = top.price;
+             catSum = top.price * (top.quantity || 1);
              top.materials.forEach((m: any) => { catSum += m.quantity * m.pricePerUnit; });
           }
 
@@ -415,7 +415,8 @@ export default function EquipmentSection({ user }: { user: any }) {
                       const hasPriorityVote = s.priorityVotes.some((v: any) => v.userId === user.id);
                       let totalMatCost = 0;
                       s.materials.forEach((m: any) => { totalMatCost += m.quantity * m.pricePerUnit; });
-                      const totalPrice = s.price + totalMatCost;
+                      const baseCost = s.price * (s.quantity || 1);
+                      const totalPrice = baseCost + totalMatCost;
 
                       return (
                         <div key={s.id} style={{ 
@@ -445,8 +446,8 @@ export default function EquipmentSection({ user }: { user: any }) {
                           <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{s.title}</h3>
                           <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem', flex: 1 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
-                              <span>Maschine:</span>
-                              <strong>{s.price.toLocaleString('de-DE')} €</strong>
+                              <span>Maschine ({s.quantity || 1}x):</span>
+                              <strong>{(s.price * (s.quantity || 1)).toLocaleString('de-DE')} €</strong>
                             </div>
                             {s.materials.length > 0 && (
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
@@ -540,7 +541,7 @@ export default function EquipmentSection({ user }: { user: any }) {
                  cat.suggestions.forEach((s: any) => {
                    if (s.status === 'PURCHASED' || ((s.priorityVotes?.length || 0) > (top.priorityVotes?.length || 0) && s.status !== 'REJECTED')) top = s;
                  });
-                 let sSum = top.price;
+                 let sSum = top.price * (top.quantity || 1);
                  top.materials.forEach((m: any) => { sSum += m.quantity * m.pricePerUnit; });
                  groupSum += sSum;
                  if (top.status === 'PURCHASED') groupSpent += sSum;
