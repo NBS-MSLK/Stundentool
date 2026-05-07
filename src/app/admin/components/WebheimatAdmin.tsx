@@ -10,6 +10,8 @@ export default function WebheimatAdmin({ user }: { user: any }) {
   // News State
   const [news, setNews] = useState<any[]>([]);
   const [newNews, setNewNews] = useState({ title: '', content: '', imageUrl: '' });
+  const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
+  const [editNewsData, setEditNewsData] = useState({ title: '', content: '', imageUrl: '' });
   
   // Polls State
   const [polls, setPolls] = useState<any[]>([]);
@@ -80,6 +82,16 @@ export default function WebheimatAdmin({ user }: { user: any }) {
   const handleDeleteNews = async (id: string) => {
     if (!confirm('News wirklich löschen?')) return;
     await fetch(`/api/news/${id}`, { method: 'DELETE' });
+    fetchData();
+  };
+
+  const handleUpdateNews = async (id: string) => {
+    await fetch(`/api/news/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editNewsData)
+    });
+    setEditingNewsId(null);
     fetchData();
   };
 
@@ -173,6 +185,9 @@ export default function WebheimatAdmin({ user }: { user: any }) {
         <div>
           <h2 style={{ marginBottom: '1rem' }}>Fördergelder anpassen</h2>
           <div style={{ display: 'grid', gap: '1rem', maxWidth: '400px' }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--warning)' }}>
+              ⚠️ Bitte Beträge <b>ohne</b> Tausendertrennzeichen eingeben (z.B. 28202 anstatt 28.202). Dezimalstellen ggf. mit Punkt.
+            </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Gesamtsumme (€)</label>
               <input type="number" step="0.01" className="input-field" value={funding.totalAmount} onChange={e => setFunding({...funding, totalAmount: e.target.value})} />
@@ -198,6 +213,9 @@ export default function WebheimatAdmin({ user }: { user: any }) {
         <div>
           <h2 style={{ marginBottom: '1rem' }}>Anschaffungen & Budget</h2>
           <div style={{ display: 'grid', gap: '1rem', maxWidth: '400px', marginBottom: '2rem' }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--warning)' }}>
+              ⚠️ Bitte Beträge <b>ohne</b> Tausendertrennzeichen eingeben (z.B. 12000 anstatt 12.000). Dezimalstellen ggf. mit Punkt.
+            </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Gesamtbudget Equipment (€)</label>
               <input type="number" step="0.01" className="input-field" value={equipmentBudget.totalAmount} onChange={e => setEquipmentBudget({...equipmentBudget, totalAmount: e.target.value})} />
@@ -298,12 +316,29 @@ export default function WebheimatAdmin({ user }: { user: any }) {
           <h3 style={{ marginBottom: '1rem' }}>Aktuelle Nachrichten</h3>
           {news.map(n => (
             <div key={n.id} style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <strong style={{ fontSize: '1.1rem' }}>{n.title}</strong>
-                <button onClick={() => handleDeleteNews(n.id)} className="btn-danger" style={{ padding: '0.3rem 0.7rem', height: 'auto', fontSize: '0.85rem' }}>Löschen</button>
-              </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Von {n.author.name} am {new Date(n.createdAt).toLocaleDateString()}</div>
-              <p style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>{n.content}</p>
+              {editingNewsId === n.id ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <input type="text" className="input-field" value={editNewsData.title} onChange={e => setEditNewsData({...editNewsData, title: e.target.value})} required />
+                  <input type="url" className="input-field" placeholder="Bild URL (Optional)" value={editNewsData.imageUrl} onChange={e => setEditNewsData({...editNewsData, imageUrl: e.target.value})} />
+                  <textarea className="input-field" rows={4} value={editNewsData.content} onChange={e => setEditNewsData({...editNewsData, content: e.target.value})} required />
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => handleUpdateNews(n.id)} className="btn-success" style={{ padding: '0.5rem 1rem' }}>Speichern</button>
+                    <button onClick={() => setEditingNewsId(null)} className="btn-danger" style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--text-secondary)' }}>Abbrechen</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <strong style={{ fontSize: '1.1rem' }}>{n.title}</strong>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button onClick={() => { setEditingNewsId(n.id); setEditNewsData({ title: n.title, content: n.content, imageUrl: n.imageUrl || '' }); }} className="btn-primary" style={{ backgroundColor: 'var(--accent-primary)', padding: '0.3rem 0.7rem', height: 'auto', fontSize: '0.85rem' }}>Bearbeiten</button>
+                      <button onClick={() => handleDeleteNews(n.id)} className="btn-danger" style={{ padding: '0.3rem 0.7rem', height: 'auto', fontSize: '0.85rem' }}>Löschen</button>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Von {n.author?.name || 'Unbekannt'} am {new Date(n.createdAt).toLocaleDateString()}</div>
+                  <p style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>{n.content}</p>
+                </>
+              )}
             </div>
           ))}
         </div>
