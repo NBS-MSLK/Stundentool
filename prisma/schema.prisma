@@ -154,6 +154,8 @@ model FundingStatus {
   disbursedAmount   Float     @default(14643.72)
   submittedAmount   Float     @default(13558.31)
   lastSubmittedDate DateTime?
+  baseHours         Int       @default(619)
+  goalHours         Int       @default(2700)
 }
 
 model NewsPost {

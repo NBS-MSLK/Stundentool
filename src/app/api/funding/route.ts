@@ -25,7 +25,7 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { totalAmount, disbursedAmount, submittedAmount, lastSubmittedDate } = body;
+    const { totalAmount, disbursedAmount, submittedAmount, lastSubmittedDate, baseHours, goalHours } = body;
     
     const dataToUpdate: any = {};
     if (totalAmount !== undefined) dataToUpdate.totalAmount = parseFloat(totalAmount);
@@ -34,6 +34,8 @@ export async function PUT(request: Request) {
     if (lastSubmittedDate !== undefined) {
       dataToUpdate.lastSubmittedDate = lastSubmittedDate ? new Date(lastSubmittedDate) : null;
     }
+    if (baseHours !== undefined) dataToUpdate.baseHours = parseInt(baseHours);
+    if (goalHours !== undefined) dataToUpdate.goalHours = parseInt(goalHours);
 
     const funding = await prisma.fundingStatus.upsert({
       where: { id: 'singleton' },

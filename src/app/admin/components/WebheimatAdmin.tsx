@@ -204,6 +204,21 @@ export default function WebheimatAdmin({ user }: { user: any }) {
               <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Datum der letzten Einreichung</label>
               <input type="date" className="input-field" value={funding.lastSubmittedDate ? funding.lastSubmittedDate.split('T')[0] : ''} onChange={e => setFunding({...funding, lastSubmittedDate: e.target.value})} />
             </div>
+
+            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+              <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Stundentool Werte</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Fest eingereichte Stunden (Basiswert)</label>
+                  <input type="number" step="1" className="input-field" value={funding.baseHours ?? 619} onChange={e => setFunding({...funding, baseHours: parseInt(e.target.value) || 0})} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Ziel-Stunden (Projekt-Gesamtwert)</label>
+                  <input type="number" step="1" className="input-field" value={funding.goalHours ?? 2700} onChange={e => setFunding({...funding, goalHours: parseInt(e.target.value) || 0})} />
+                </div>
+              </div>
+            </div>
+
             <button onClick={handleSaveFunding} className="btn-success" style={{ marginTop: '1rem', width: 'fit-content', padding: '0.5rem 1.2rem', fontSize: '1rem' }}>Speichern</button>
           </div>
         </div>

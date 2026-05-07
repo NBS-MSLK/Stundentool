@@ -32,11 +32,15 @@ export async function GET() {
       }
     });
 
+    const funding = await prisma.fundingStatus.findUnique({
+      where: { id: 'singleton' }
+    });
+
     return NextResponse.json({ 
       systemActiveHours, 
       systemArchivedHours,
-      hardcodedBaseHours: 619,
-      totalGoalHours: 2700
+      hardcodedBaseHours: funding?.baseHours || 619,
+      totalGoalHours: funding?.goalHours || 2700
     });
   } catch (error) {
     console.error('Stats API Error:', error);
