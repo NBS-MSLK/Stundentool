@@ -165,13 +165,6 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
     
     const pd = new Date(`${newProposalDate}T${newProposalStartTime}`);
     const now = new Date();
-    const diffMs = pd.getTime() - now.getTime();
-    const diffHours = diffMs / (1000 * 60 * 60);
-
-    if (diffHours < 24) {
-      alert('Terminvorschläge sollten 24h Vorlaufzeit haben!');
-      return;
-    }
 
     if (parseInt(newProposalStartTime) >= parseInt(newProposalEndTime)) {
       alert('Die Startzeit muss zwingend vor der Endzeit liegen!');

@@ -72,15 +72,6 @@ export default function NewTask() {
 
   const addDateProposal = () => {
     if (tempDate) {
-      const pd = new Date(`${tempDate}T${tempStartTime}`);
-      const now = new Date();
-      const diffMs = pd.getTime() - now.getTime();
-      const diffHours = diffMs / (1000 * 60 * 60);
-
-      if (diffHours < 24) {
-        alert('Terminvorschläge sollten 24h Vorlaufzeit haben!');
-        return;
-      }
 
       if (parseInt(tempStartTime) >= parseInt(tempEndTime)) {
         alert('Die Startzeit muss zwingend vor der Endzeit liegen!');

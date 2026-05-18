@@ -8,6 +8,17 @@ export async function GET(request: Request) {
   const status = searchParams.get('status');
 
   try {
+    // Automatically delete proposals that are in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    await prisma.taskDateProposal.deleteMany({
+      where: {
+        date: {
+          lt: today
+        }
+      }
+    });
+
     const tasks = await prisma.task.findMany({
       where: status ? { status } : undefined,
       include: {
@@ -34,18 +45,6 @@ export async function POST(request: Request) {
 
     if (!title || !creatorId || !creatorName) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
-
-    if (proposedDates && proposedDates.length > 0) {
-      const now = new Date();
-      for (const p of proposedDates) {
-        const pd = new Date(`${p.date}T${p.startTime || '08:00'}`);
-        const diffMs = pd.getTime() - now.getTime();
-        const diffHours = diffMs / (1000 * 60 * 60);
-        if (diffHours < 24) {
-          return NextResponse.json({ error: 'Terminvorschläge sollten 24h Vorlaufzeit haben' }, { status: 400 });
-        }
-      }
     }
 
     const task = await prisma.task.create({

@@ -10,12 +10,6 @@ export async function POST(request: Request, context: unknown) {
 
     const proposedDateTime = new Date(`${date}T${startTime || '08:00'}`);
     const now = new Date();
-    const diffMs = proposedDateTime.getTime() - now.getTime();
-    const diffHours = diffMs / (1000 * 60 * 60);
-
-    if (diffHours < 24) {
-      return NextResponse.json({ error: 'Terminvorschläge sollten 24h Vorlaufzeit haben' }, { status: 400 });
-    }
 
     const proposal = await prisma.taskDateProposal.create({
       data: {
