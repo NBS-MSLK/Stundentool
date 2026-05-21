@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendTaskNotification } from '@/lib/mailer';
+import { runTaskCleanup } from '@/lib/taskCleanup';
 
 export async function GET(request: Request, context: unknown) {
   const { id } = await (context as any).params;
   try {
+    // Automatically delete past proposals and reset past tasks
+    await runTaskCleanup();
     const task = await prisma.task.findUnique({
       where: { id },
       include: {

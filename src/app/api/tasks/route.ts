@@ -2,22 +2,15 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendTaskNotification } from '@/lib/mailer';
 import { logActivity } from '@/lib/activityLogger';
+import { runTaskCleanup } from '@/lib/taskCleanup';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
 
   try {
-    // Automatically delete proposals that are in the past
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    await prisma.taskDateProposal.deleteMany({
-      where: {
-        date: {
-          lt: today
-        }
-      }
-    });
+    // Automatically delete past proposals and reset past tasks
+    await runTaskCleanup();
 
     const tasks = await prisma.task.findMany({
       where: status ? { status } : undefined,
