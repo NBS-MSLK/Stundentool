@@ -1,6 +1,5 @@
 import prisma from './prisma';
 import { logActivity } from './activityLogger';
-import { sendTaskNotification } from './mailer';
 
 export async function runTaskCleanup() {
   const now = new Date();
@@ -67,15 +66,6 @@ export async function runTaskCleanup() {
           'TASK_RESET_AUTOMATIC',
           `Der Arbeitsdienst "${task.title}" wurde automatisch auf "Offen" zurückgesetzt, da der Termin (${scheduledDateString}${scheduledTimeString}) in der Vergangenheit liegt.`
         );
-
-        // Notify subscribers
-        sendTaskNotification(
-          task.id,
-          `Termin abgelaufen: ${task.title}`,
-          `Der geplante Termin für den Arbeitsdienst "${task.title}" am ${scheduledDateString}${scheduledTimeString} ist vergangen, ohne dass die Arbeit als erledigt markiert wurde. Die Arbeit ist nun wieder als "Offen" gelistet, so dass neue Terminvorschläge gemacht werden können.`
-        ).catch((err) => {
-          console.error(`Error sending task notification for task ${task.id}:`, err);
-        });
       }
     }
 

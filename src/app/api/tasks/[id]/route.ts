@@ -108,7 +108,7 @@ export async function PUT(request: Request, context: unknown) {
       include: { steps: true, materials: true, volunteers: true, dateProposals: true, subscribers: true, videos: true }
     });
 
-    if (oldTask && status && oldTask.status !== status) {
+    if (oldTask && status && oldTask.status !== status && status !== 'DONE') {
       const statusLabels: any = { OPEN: 'Offen', IN_PROGRESS: 'In Arbeit', DONE: 'Erledigt', SCHEDULED: 'Terminiert' };
       const oldS = statusLabels[oldTask.status] || oldTask.status;
       const newS = statusLabels[status] || status;
