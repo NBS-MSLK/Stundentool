@@ -1,6 +1,26 @@
 'use client';
 import { useState, useEffect } from 'react';
 
+function safeParseFloat(val: any): number {
+  if (val === undefined || val === null || val === '') return 0;
+  if (typeof val === 'number') return val;
+  
+  let str = String(val).trim();
+  
+  if (str.includes(',') && str.includes('.')) {
+    if (str.indexOf('.') < str.indexOf(',')) {
+      str = str.replace(/\./g, '').replace(/,/g, '.');
+    } else {
+      str = str.replace(/,/g, '');
+    }
+  } else if (str.includes(',')) {
+    str = str.replace(/,/g, '.');
+  }
+  
+  const parsed = parseFloat(str);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
 export default function WebheimatAdmin({ user }: { user: any }) {
   const [activeSubTab, setActiveSubTab] = useState('FUNDING');
   
@@ -188,27 +208,27 @@ export default function WebheimatAdmin({ user }: { user: any }) {
           <h2 style={{ marginBottom: '1rem' }}>Fördergelder anpassen</h2>
           <div style={{ display: 'grid', gap: '1rem', maxWidth: '400px' }}>
             <div style={{ fontSize: '0.85rem', color: 'var(--warning)' }}>
-              ⚠️ Bitte Beträge <b>ohne</b> Tausendertrennzeichen eingeben (z.B. 28202 anstatt 28.202). Dezimalstellen ggf. mit Punkt.
+              ⚠️ Bitte Beträge <b>ohne</b> Tausendertrennzeichen eingeben (z.B. 28202 anstatt 28.202). Dezimalstellen / Cents können mit einem Komma eingegeben werden (z.B. 28202,03).
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Gesamtsumme (€)</label>
-              <input type="number" step="0.01" className="input-field" value={funding.totalAmount} onChange={e => setFunding({...funding, totalAmount: e.target.value})} />
+              <input type="text" className="input-field" value={funding.totalAmount} onChange={e => setFunding({...funding, totalAmount: e.target.value})} />
               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                Vorschau: {(parseFloat(funding.totalAmount) || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                Vorschau: {safeParseFloat(funding.totalAmount).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
               </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Ausgezahlt (€)</label>
-              <input type="number" step="0.01" className="input-field" value={funding.disbursedAmount} onChange={e => setFunding({...funding, disbursedAmount: e.target.value})} />
+              <input type="text" className="input-field" value={funding.disbursedAmount} onChange={e => setFunding({...funding, disbursedAmount: e.target.value})} />
               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                Vorschau: {(parseFloat(funding.disbursedAmount) || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                Vorschau: {safeParseFloat(funding.disbursedAmount).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
               </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Eingereicht (€)</label>
-              <input type="number" step="0.01" className="input-field" value={funding.submittedAmount} onChange={e => setFunding({...funding, submittedAmount: e.target.value})} />
+              <input type="text" className="input-field" value={funding.submittedAmount} onChange={e => setFunding({...funding, submittedAmount: e.target.value})} />
               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                Vorschau: {(parseFloat(funding.submittedAmount) || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                Vorschau: {safeParseFloat(funding.submittedAmount).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
               </div>
             </div>
             <div>
