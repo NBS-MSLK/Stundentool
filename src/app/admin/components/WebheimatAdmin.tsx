@@ -59,11 +59,13 @@ export default function WebheimatAdmin({ user }: { user: any }) {
 
   // --- Funding Actions ---
   const handleSaveFunding = async () => {
-    await fetch('/api/funding', {
+    const res = await fetch('/api/funding', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(funding)
     });
+    const data = await res.json();
+    if (data.funding) setFunding(data.funding);
     alert('Fördergelder gespeichert!');
   };
 

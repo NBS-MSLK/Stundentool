@@ -204,47 +204,56 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
       )}
 
       {/* 1. Fördergeld-Statusbalken */}
-      {funding && (
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span>Fördermittel-Status</span>
-            <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '1.2rem', color: '#ffd700', textShadow: '0 0 10px rgba(255,215,0,0.3)' }}>
-                {(funding.disbursedAmount + funding.submittedAmount).toLocaleString('de-DE')} € / {funding.totalAmount.toLocaleString('de-DE')} €
-              </span>
-            </div>
-          </div>
-          
-          <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
-            <div 
-              style={{ width: `${(funding.disbursedAmount / funding.totalAmount) * 100}%`, backgroundColor: 'var(--success)', height: '100%', transition: 'width 0.5s ease-in-out' }} 
-              title="Ausgezahlt"
-            ></div>
-            <div 
-              style={{ width: `${(funding.submittedAmount / funding.totalAmount) * 100}%`, backgroundColor: 'var(--accent-primary)', height: '100%', transition: 'width 0.5s ease-in-out' }} 
-              title="Eingereicht (Wartend)"
-            ></div>
-          </div>
-          
-          <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></div>
-                Bereits ausgezahlt: {funding.disbursedAmount.toLocaleString('de-DE')} €
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)' }}></div>
-                Aktuell eingereicht: {funding.submittedAmount.toLocaleString('de-DE')} €
+      {funding && (() => {
+        const total = parseFloat(funding.totalAmount) || 0;
+        const disbursed = parseFloat(funding.disbursedAmount) || 0;
+        const submitted = parseFloat(funding.submittedAmount) || 0;
+        const totalSum = disbursed + submitted;
+        const disbursedPercent = total > 0 ? (disbursed / total) * 100 : 0;
+        const submittedPercent = total > 0 ? (submitted / total) * 100 : 0;
+
+        return (
+          <div className="glass-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span>Fördermittel-Status</span>
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ fontSize: '1.2rem', color: '#ffd700', textShadow: '0 0 10px rgba(255,215,0,0.3)' }}>
+                  {totalSum.toLocaleString('de-DE')} € / {total.toLocaleString('de-DE')} €
+                </span>
               </div>
             </div>
-            {funding.lastSubmittedDate && (
-              <div style={{ fontStyle: 'italic' }}>
-                Letzte Einreichung am {new Date(funding.lastSubmittedDate).toLocaleDateString('de-DE')} ({calculateDaysAgo(funding.lastSubmittedDate)})
+            
+            <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
+              <div 
+                style={{ width: `${disbursedPercent}%`, backgroundColor: 'var(--success)', height: '100%', transition: 'width 0.5s ease-in-out' }} 
+                title="Ausgezahlt"
+              ></div>
+              <div 
+                style={{ width: `${submittedPercent}%`, backgroundColor: 'var(--accent-primary)', height: '100%', transition: 'width 0.5s ease-in-out' }} 
+                title="Eingereicht (Wartend)"
+              ></div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></div>
+                  Bereits ausgezahlt: {disbursed.toLocaleString('de-DE')} €
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)' }}></div>
+                  Aktuell eingereicht: {submitted.toLocaleString('de-DE')} €
+                </div>
               </div>
-            )}
+              {funding.lastSubmittedDate && (
+                <div style={{ fontStyle: 'italic' }}>
+                  Letzte Einreichung am {new Date(funding.lastSubmittedDate).toLocaleDateString('de-DE')} ({calculateDaysAgo(funding.lastSubmittedDate)})
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 2. Stundentool Balken */}
       <div className="glass-card">
