@@ -193,14 +193,23 @@ export default function WebheimatAdmin({ user }: { user: any }) {
             <div>
               <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Gesamtsumme (€)</label>
               <input type="number" step="0.01" className="input-field" value={funding.totalAmount} onChange={e => setFunding({...funding, totalAmount: e.target.value})} />
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                Vorschau: {(parseFloat(funding.totalAmount) || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+              </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Ausgezahlt (€)</label>
               <input type="number" step="0.01" className="input-field" value={funding.disbursedAmount} onChange={e => setFunding({...funding, disbursedAmount: e.target.value})} />
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                Vorschau: {(parseFloat(funding.disbursedAmount) || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+              </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Eingereicht (€)</label>
               <input type="number" step="0.01" className="input-field" value={funding.submittedAmount} onChange={e => setFunding({...funding, submittedAmount: e.target.value})} />
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                Vorschau: {(parseFloat(funding.submittedAmount) || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+              </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem' }}>Datum der letzten Einreichung</label>
