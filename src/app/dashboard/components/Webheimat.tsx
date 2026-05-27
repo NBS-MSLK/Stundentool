@@ -255,19 +255,19 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
           </div>
           <div style={{ textAlign: 'right' }}>
             <span style={{ fontSize: '1.2rem', color: '#ffd700', textShadow: '0 0 10px rgba(255,215,0,0.3)' }}>
-              {((stats.hardcodedBaseHours + stats.systemArchivedHours + stats.systemActiveHours) * 20).toLocaleString('de-DE')} € / {(stats.totalGoalHours * 20).toLocaleString('de-DE')} €
+              {((stats.hardcodedBaseHours + stats.systemActiveHours) * 20).toLocaleString('de-DE')} € / {(stats.totalGoalHours * 20).toLocaleString('de-DE')} €
             </span>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}>
-              ({stats.hardcodedBaseHours + stats.systemArchivedHours + stats.systemActiveHours} / {stats.totalGoalHours} Stunden)
+              ({stats.hardcodedBaseHours + stats.systemActiveHours} / {stats.totalGoalHours} Stunden)
             </div>
           </div>
         </div>
         <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
           <div 
-            style={{ width: `${((stats.hardcodedBaseHours + stats.systemArchivedHours) / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--success)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold' }} 
+            style={{ width: `${(stats.hardcodedBaseHours / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--success)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold' }} 
             title="Eingereicht / Archiviert"
           >
-            {((stats.hardcodedBaseHours + stats.systemArchivedHours) / stats.totalGoalHours) * 100 > 10 && `${((stats.hardcodedBaseHours + stats.systemArchivedHours) * 20).toLocaleString('de-DE')} €`}
+            {(stats.hardcodedBaseHours / stats.totalGoalHours) * 100 > 10 && `${(stats.hardcodedBaseHours * 20).toLocaleString('de-DE')} €`}
           </div>
           <div 
             style={{ width: `${(stats.systemActiveHours / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--accent-primary)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold' }} 
@@ -279,7 +279,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></div>
-            Bereits eingereicht: {((stats.hardcodedBaseHours + stats.systemArchivedHours) * 20).toLocaleString('de-DE')} € ({stats.hardcodedBaseHours + stats.systemArchivedHours}h)
+            Bereits eingereicht: {(stats.hardcodedBaseHours * 20).toLocaleString('de-DE')} € ({stats.hardcodedBaseHours}h)
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)' }}></div>
