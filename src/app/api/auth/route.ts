@@ -14,15 +14,15 @@ export async function POST(req: Request) {
     const adminName = 'Nils Beinke-Schulte';
     const targetRole = trimmedName === adminName ? 'ADMIN' : 'USER';
 
-    // Find or create user
+    // Find user
     let user = await prisma.user.findUnique({
       where: { name: trimmedName },
     });
 
     if (!user) {
-      user = await prisma.user.create({
-        data: { name: trimmedName, password, role: targetRole },
-      });
+      return NextResponse.json({ 
+        error: 'Neue Zugänge und Passwörter werden für Vereinsmitglieder erstellt. Bitte nimm Kontakt mit dem Vorstand auf.' 
+      }, { status: 403 });
     } else {
       if (user.password === "") {
         user = await prisma.user.update({
