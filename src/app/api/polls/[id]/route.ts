@@ -8,6 +8,9 @@ async function handlePUT(request: Request, { params }: { params: Promise<{ id: s
     const { id } = await params;
     const body = await request.json();
     
+    if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => !['isActive', 'isArchived'].includes(key)) || Object.values(body).some(value => typeof value !== 'boolean')) {
+      return NextResponse.json({ error: 'Nur Aktiv- und Archivstatus können geändert werden.' }, { status: 400 });
+    }
     const poll = await prisma.poll.update({
       where: { id },
       data: body

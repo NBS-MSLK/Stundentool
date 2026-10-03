@@ -73,11 +73,16 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
 
   const handleVote = async (pollId: string, optionId: string) => {
     if (!user) return;
-    await fetch(`/api/polls/${pollId}/vote`, {
+    const response = await fetch(`/api/polls/${pollId}/vote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ optionId, userId: user.id, userName: user.name })
+      body: JSON.stringify({ optionId })
     });
+    if (!response.ok) {
+      const data = await response.json();
+      alert(data.error || 'Abstimmung fehlgeschlagen.');
+      return;
+    }
     // Refresh polls to get updated votes
     fetch('/api/polls').then(r => r.json()).then(pRes => {
       if (pRes.polls) setPolls(pRes.polls.filter((p:any) => p.isActive && !p.isArchived));
@@ -455,21 +460,21 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
           <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Aktuelle Umfragen</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {polls.map(poll => {
-              const userVote = poll.votes.find((v:any) => v.userId === user?.id);
-              const totalVotes = poll.votes.length;
+              const userVote = poll.myOptionId;
+              const totalVotes = poll.totalVotes;
 
               return (
                 <div key={poll.id} style={{ padding: '1.5rem', backgroundColor: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                   <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{poll.question}</h3>
                   <div style={{ fontSize: '0.85rem', color: poll.isAnonymous ? 'var(--warning)' : 'var(--text-secondary)', marginBottom: '1.5rem', fontWeight: poll.isAnonymous ? 'bold' : 'normal' }}>
-                    {poll.isAnonymous ? 'ℹ️ Diese Umfrage ist anonym. Namen werden nicht gespeichert.' : 'ℹ️ Dein Name wird bei der Abstimmung gespeichert.'}
+                    {poll.isAnonymous ? 'ℹ️ Vertrauliche Abstimmung: Auch Administratoren sehen nur Summen. Deine Stimme bleibt änderbar; die Zuordnung wird dafür in der Datenbank gespeichert.' : 'ℹ️ Namentliche Abstimmung: Dein Name wird bei deiner gewählten Antwort für alle Mitglieder angezeigt. Deine Stimme bleibt änderbar.'}
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                     {poll.options.map((opt:any) => {
-                      const optVotes = opt.votes.length;
+                      const optVotes = opt.voteCount;
                       const percentage = totalVotes > 0 ? (optVotes / totalVotes) * 100 : 0;
-                      const isSelected = userVote?.optionId === opt.id;
+                      const isSelected = userVote === opt.id;
 
                       return (
                         <div key={opt.id}>
@@ -493,6 +498,11 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
                               {userVote && <span style={{ fontWeight: 'bold', color: isSelected ? 'white' : 'var(--text-secondary)' }}>{optVotes} ({Math.round(percentage)}%)</span>}
                             </div>
                           </button>
+                          {!poll.isAnonymous && opt.voterNames?.length > 0 && (
+                            <div style={{ marginTop: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}>
+                              Abgestimmt: {opt.voterNames.join(', ')}
+                            </div>
+                          )}
                         </div>
                       );
                     })}

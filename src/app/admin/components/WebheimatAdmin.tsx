@@ -397,8 +397,9 @@ export default function WebheimatAdmin({ user }: { user: any }) {
             <input type="text" className="input-field" placeholder="Umfrage-Frage" value={newPoll.question} onChange={e => setNewPoll({...newPoll, question: e.target.value})} required />
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
               <input type="checkbox" checked={newPoll.isAnonymous} onChange={e => setNewPoll({...newPoll, isAnonymous: e.target.checked})} style={{ width: '18px', height: '18px' }} />
-              Anonyme Abstimmung (Namen werden nicht gespeichert)
+              Vertrauliche Abstimmung (auch im Adminbereich nur Summen; Stimmen bleiben änderbar)
             </label>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Ohne Häkchen ist die Abstimmung namentlich: Alle Mitglieder sehen die Namen je Antwort.</div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem' }}>Antwortmöglichkeiten:</label>
               {newPoll.options.map((opt, idx) => (
@@ -421,7 +422,7 @@ export default function WebheimatAdmin({ user }: { user: any }) {
           {polls.filter(p => !p.isArchived).map(p => (
             <div key={p.id} style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', marginBottom: '1rem', backgroundColor: p.isActive ? 'rgba(var(--accent-primary-rgb), 0.05)' : 'transparent' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <strong style={{ fontSize: '1.1rem' }}>{p.question} {p.isAnonymous && <span style={{ fontSize: '0.8rem', color: 'var(--warning)', fontWeight: 'normal' }}>(Anonym)</span>}</strong>
+                <strong style={{ fontSize: '1.1rem' }}>{p.question} {p.isAnonymous && <span style={{ fontSize: '0.8rem', color: 'var(--warning)', fontWeight: 'normal' }}>(Vertraulich)</span>}</strong>
                 <div style={{ display: 'flex', gap: '0.3rem' }}>
                   <button onClick={() => handleTogglePoll(p.id, p.isActive)} style={{ backgroundColor: p.isActive ? '#faad14' : '#52c41a', padding: '0.3rem 0.7rem', height: 'auto', color: p.isActive ? 'black' : 'white', fontSize: '0.85rem', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
                     {p.isActive ? 'Deaktivieren' : 'Aktivieren'}
@@ -435,8 +436,8 @@ export default function WebheimatAdmin({ user }: { user: any }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginTop: '1rem' }}>
                 {p.options.map((o: any) => (
                   <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '4px' }}>
-                    <span>{o.text}</span>
-                    <strong>{o.votes.length} Votes</strong>
+                    <span>{o.text}{!p.isAnonymous && o.voterNames?.length > 0 && <small style={{ display: 'block', overflowWrap: 'anywhere' }}>Abgestimmt: {o.voterNames.join(', ')}</small>}</span>
+                    <strong>{o.voteCount} Votes</strong>
                   </div>
                 ))}
               </div>
@@ -460,8 +461,8 @@ export default function WebheimatAdmin({ user }: { user: any }) {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginTop: '1rem' }}>
                     {p.options.map((o: any) => (
                       <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '4px', fontSize: '0.85rem' }}>
-                        <span>{o.text}</span>
-                        <strong>{o.votes.length} Votes</strong>
+                        <span>{o.text}{!p.isAnonymous && o.voterNames?.length > 0 && <small style={{ display: 'block', overflowWrap: 'anywhere' }}>Abgestimmt: {o.voterNames.join(', ')}</small>}</span>
+                        <strong>{o.voteCount} Votes</strong>
                       </div>
                     ))}
                   </div>

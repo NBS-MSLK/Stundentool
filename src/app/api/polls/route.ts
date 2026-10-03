@@ -1,3 +1,4 @@
+import { getSession } from '@/lib/session';
 import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
@@ -9,13 +10,29 @@ export const dynamic = 'force-dynamic';
 
 async function handleGET() {
   try {
-    const polls = await prisma.poll.findMany({
+    const session = await getSession();
+    if (!session) return NextResponse.json({ error: 'Bitte anmelden.' }, { status: 401 });
+    const records = await prisma.poll.findMany({
       orderBy: { createdAt: 'desc' },
       include: { 
-        options: { include: { votes: true } },
-        votes: true 
+        options: { include: {
+          _count: { select: { votes: true } },
+          votes: { where: { poll: { isAnonymous: false } }, select: { userName: true } },
+        } },
+        _count: { select: { votes: true } },
+        votes: { where: { userId: session.user.id }, select: { optionId: true } }
       }
     });
+    const polls = records.map(({ votes, options, _count, ...poll }) => ({
+      ...poll,
+      totalVotes: _count.votes,
+      myOptionId: votes[0]?.optionId ?? null,
+      options: options.map(({ _count, votes: optionVotes, ...option }) => ({
+        ...option,
+        voteCount: _count.votes,
+        ...(!poll.isAnonymous ? { voterNames: optionVotes.map(vote => vote.userName) } : {}),
+      })),
+    }));
     return NextResponse.json({ polls });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

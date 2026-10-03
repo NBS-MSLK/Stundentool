@@ -170,6 +170,56 @@ test('session and API access integration', { timeout: 300000 }, async t => {
       assert.equal((await request('/api/tasks', { cookie: memberCookie })).status, 401);
       await login(user, 'reset-test-only');
     });
+    await t.test('polls keep confidential voters private and show named voters, with changeable selections', async () => {
+      for (const isAnonymous of [true, false]) {
+        const poll = await prisma.poll.create({ data: { question: 'Privacy test', isAnonymous, options: { create: [{ text: 'A' }, { text: 'B' }] } }, include: { options: true } });
+        const [first, second] = poll.options;
+        await prisma.pollVote.create({ data: { pollId: poll.id, optionId: first.id, userId: bob.id, userName: bob.name } });
+        async function read(cookie) {
+          const response = await request('/api/polls', { cookie });
+          assert.equal(response.status, 200);
+          const payload = await response.json();
+          const result = payload.polls.find(item => item.id === poll.id);
+          const encoded = JSON.stringify(result);
+          assert(!/"(?:userId|userName|votes|createdAtVote)"\s*:/.test(encoded));
+          assert(!encoded.includes(bob.id));
+          if (isAnonymous) {
+            assert(!encoded.includes(bob.name));
+            assert(result.options.every(option => !Object.hasOwn(option, 'voterNames')));
+          } else {
+            assert.deepEqual(result.options.find(option => option.id === first.id).voterNames, [bob.name]);
+          }
+          return result;
+        }
+        assert.equal((await read(root)).myOptionId, null);
+        assert.equal((await read(a)).totalVotes, 1);
+        assert.equal((await read(b)).myOptionId, first.id);
+        let response = await request('/api/polls/' + poll.id + '/vote', { cookie: a, method: 'POST', body: { optionId: first.id } });
+        assert.equal(response.status, 200);
+        assert.deepEqual(await response.json(), { myOptionId: first.id });
+        response = await request('/api/polls/' + poll.id + '/vote', { cookie: a, method: 'POST', body: { optionId: second.id } });
+        assert.equal(response.status, 200);
+        const updated = await read(a);
+        assert.equal(updated.myOptionId, second.id);
+        assert.equal(updated.totalVotes, 2);
+        assert.deepEqual(updated.options.map(o => o.voteCount).sort(), [1, 1]);
+        if (!isAnonymous) {
+          for (const cookie of [root, a, b]) {
+            const named = await read(cookie);
+            assert.deepEqual(named.options.find(option => option.id === second.id).voterNames, [alice.name]);
+          }
+        }
+        assert.equal((await read(root)).myOptionId, null);
+        assert.equal(await prisma.pollVote.count({ where: { pollId: poll.id, userId: alice.id } }), 1);
+        assert.equal((await request('/api/polls/' + poll.id, { cookie: root, method: 'PUT', body: { votes: { deleteMany: {} } } })).status, 400);
+        assert.equal((await request('/api/polls/' + poll.id, { cookie: root, method: 'PUT', body: { isAnonymous: !isAnonymous } })).status, 400);
+        assert.equal((await request('/api/polls/' + poll.id + '/vote', { cookie: a, method: 'POST', body: { optionId: 'wrong-poll-option' } })).status, 400);
+        assert.equal((await request('/api/polls/' + poll.id, { cookie: root, method: 'PUT', body: { isActive: false } })).status, 200);
+        assert.equal((await request('/api/polls/' + poll.id + '/vote', { cookie: a, method: 'POST', body: { optionId: first.id } })).status, 409);
+        const closed = await read(root);
+        assert.equal(closed.totalVotes, 2);
+      }
+    });
     await t.test('roles are read fresh; logout, expiry and password changes revoke access', async () => {
       await prisma.user.update({ where: { id: admin.id }, data: { role: 'USER' } });
       assert.equal((await request('/api/users', { cookie: root })).status, 403);
