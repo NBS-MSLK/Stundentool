@@ -2,6 +2,7 @@ import { hashPassword } from '@/lib/password.mjs';
 import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 async function handleGET(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
@@ -62,19 +63,20 @@ async function handleDELETE(req: Request, props: { params: Promise<{ id: string 
     const params = await props.params;
     const { id } = params;
 
-    // Einträge zuerst löschen um sqlite foreign key constraints zu umgehen, ohne Schema zu ändern
-    await prisma.timeEntry.deleteMany({
-      where: { userId: id }
-    });
-
-    await prisma.user.delete({
-      where: { id }
+    // Roll back the entries too if another relation prevents deleting the user.
+    await prisma.$transaction(async (tx) => {
+      await tx.timeEntry.deleteMany({ where: { userId: id } });
+      await tx.user.delete({ where: { id } });
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Delete user error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025') return NextResponse.json({ error: 'Benutzer nicht gefunden.' }, { status: 404 });
+      if (error.code === 'P2003') return NextResponse.json({ error: 'Der Benutzer ist noch mit Aufgaben, Beiträgen oder Anschaffungsvorschlägen verknüpft und kann deshalb nicht gelöscht werden. Es wurden keine Daten gelöscht.' }, { status: 409 });
+    }
+    console.error('Delete user failed');
+    return NextResponse.json({ error: 'Benutzer konnte nicht gelöscht werden. Es wurden keine Daten gelöscht.' }, { status: 500 });
   }
 }
 

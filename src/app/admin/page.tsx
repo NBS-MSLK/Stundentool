@@ -97,7 +97,12 @@ export default function AdminView() {
   const deleteUser = async (id: string, name: string) => {
     if (!confirm(`Benutzer "${name}" wirklich löschen? ACHTUNG: Alle eingetragenen Zeiten dieses Benutzers werden ebenfalls unwiderruflich gelöscht!`)) return;
     
-    await fetch(`/api/users/${id}`, { method: 'DELETE' });
+    const response = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+    if (!response.ok) {
+      const data = await response.json();
+      alert(data.error || 'Benutzer konnte nicht gelöscht werden.');
+      return;
+    }
     fetchUsers();
     fetchEntries(); // Refresht die Zeiten, falls welche gelöscht wurden
   };

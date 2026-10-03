@@ -220,6 +220,33 @@ test('session and API access integration', { timeout: 300000 }, async t => {
         assert.equal(closed.totalVotes, 2);
       }
     });
+    await t.test('failed user deletion preserves entries and related records; successful deletion is atomic', async () => {
+      for (const kind of ['task', 'newsPost', 'headline', 'equipmentSuggestion']) {
+        const user = await prisma.user.create({ data: { name: 'Deletion test ' + kind } });
+        const entry = await prisma.timeEntry.create({ data: { userId: user.id, startTime: new Date(), note: 'Keep this entry' } });
+        const data = {
+          task: { title: 'Keep task', creatorId: user.id, creatorName: user.name },
+          newsPost: { title: 'Keep post', content: 'Keep content', authorId: user.id },
+          headline: { content: 'Keep headline', authorId: user.id },
+          equipmentSuggestion: { title: 'Keep suggestion', categoryId: category.id, creatorId: user.id, creatorName: user.name },
+        }[kind];
+        const related = await prisma[kind].create({ data });
+        const response = await request('/api/users/' + user.id, { cookie: root, method: 'DELETE' });
+        assert.equal(response.status, 409);
+        assert.match((await response.json()).error, /keine Daten gelöscht/);
+        assert.deepEqual(await prisma.timeEntry.findUnique({ where: { id: entry.id } }), entry);
+        assert.deepEqual(await prisma.user.findUnique({ where: { id: user.id } }), user);
+        assert.deepEqual(await prisma[kind].findUnique({ where: { id: related.id } }), related);
+      }
+      const user = await prisma.user.create({ data: { name: 'Deletable test user' } });
+      await prisma.timeEntry.create({ data: { userId: user.id, startTime: new Date() } });
+      await prisma.session.create({ data: { userId: user.id, tokenHash: 'deletion-test-session', expiresAt: new Date(Date.now() + 60000) } });
+      assert.equal((await request('/api/users/' + user.id, { cookie: root, method: 'DELETE' })).status, 200);
+      assert.equal(await prisma.user.findUnique({ where: { id: user.id } }), null);
+      assert.equal(await prisma.timeEntry.count({ where: { userId: user.id } }), 0);
+      assert.equal(await prisma.session.count({ where: { userId: user.id } }), 0);
+      assert.equal((await request('/api/users/' + user.id, { cookie: root, method: 'DELETE' })).status, 404);
+    });
     await t.test('roles are read fresh; logout, expiry and password changes revoke access', async () => {
       await prisma.user.update({ where: { id: admin.id }, data: { role: 'USER' } });
       assert.equal((await request('/api/users', { cookie: root })).status, 403);
