@@ -1,3 +1,4 @@
+import { hashPassword } from '@/lib/password.mjs';
 import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
@@ -20,13 +21,15 @@ async function handlePOST(req: Request) {
     if (typeof name !== 'string' || !name.trim()) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     
     if (role !== undefined && !['USER', 'ADMIN'].includes(role)) return NextResponse.json({ error: 'Ungültige Rolle' }, { status: 400 });
+    if (password !== undefined && (typeof password !== 'string' || password.length > 4096)) return NextResponse.json({ error: 'Ungültiges Passwort' }, { status: 400 });
     const existing = await prisma.user.findUnique({ where: { name } });
     if (existing) return NextResponse.json({ error: 'Nutzername existiert bereits' }, { status: 400 });
 
     const user = await prisma.user.create({
       data: {
         name,
-        password: password || '',
+        password: '',
+        passwordHash: password?.trim() ? await hashPassword(password) : null,
         role: role || 'USER',
       },
     });

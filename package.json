@@ -5,10 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "start": "node scripts/prepare-session-table.mjs && next start",
+    "start": "node scripts/prepare-session-table.mjs && node scripts/migrate-passwords.mjs && next start",
     "lint": "eslint",
     "db:session": "node scripts/prepare-session-table.mjs",
-    "test:security": "node --test tests/security.test.mjs"
+    "test:security": "node --test tests/password.test.mjs tests/security.test.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

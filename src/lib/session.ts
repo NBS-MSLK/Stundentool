@@ -17,12 +17,12 @@ export async function getSession() {
   return session;
 }
 
-export async function createSession(userId: string, verifiedPassword: string) {
+export async function createSession(userId: string, verifiedPasswordHash: string) {
   const token = randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + LIFETIME_SECONDS * 1000);
   await prisma.$transaction(async tx => {
     // Recheck inside the same transaction as session creation, in case an admin reset the password during login.
-    const user = await tx.user.findFirst({ where: { id: userId, password: verifiedPassword }, select: { id: true } });
+    const user = await tx.user.findFirst({ where: { id: userId, passwordHash: verifiedPasswordHash }, select: { id: true } });
     if (!user) throw new Error('Credentials changed during login');
     await tx.session.deleteMany({ where: { expiresAt: { lte: new Date() } } });
     await tx.session.create({ data: { tokenHash: hashToken(token), userId, expiresAt } });

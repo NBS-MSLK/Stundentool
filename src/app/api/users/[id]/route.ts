@@ -1,3 +1,4 @@
+import { hashPassword } from '@/lib/password.mjs';
 import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
@@ -28,8 +29,9 @@ async function handlePUT(req: Request, props: { params: Promise<{ id: string }> 
 
     const data: any = {};
     if (password !== undefined) {
-      if (typeof password !== 'string' || !password.trim()) return NextResponse.json({ error: 'Passwort darf nicht leer sein.' }, { status: 400 });
-      data.password = password;
+      if (typeof password !== 'string' || !password.trim() || password.length > 4096) return NextResponse.json({ error: 'Passwort darf nicht leer sein.' }, { status: 400 });
+      data.password = '';
+      data.passwordHash = await hashPassword(password);
     }
     if (showInHighscore !== undefined) data.showInHighscore = showInHighscore;
     if (email !== undefined) data.email = email;

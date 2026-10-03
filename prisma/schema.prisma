@@ -11,7 +11,8 @@ model User {
   sessions         Session[]
   id               String          @id @default(uuid())
   name             String          @unique
-  password         String          @default("")
+  password         String          @default("") // Legacy column; emptied by password migration.
+  passwordHash     String?
   role             String          @default("USER") // "USER" or "ADMIN"
   showInHighscore  Boolean         @default(true)
   email            String?

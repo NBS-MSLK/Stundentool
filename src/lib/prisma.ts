@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 
 const prismaClientSingleton = () => {
   // Credentials must never be included implicitly, including nested user relations.
-  return new PrismaClient({ omit: { user: { password: true } } })
+  return new PrismaClient({ omit: { user: { password: true, passwordHash: true } } })
 }
 
 declare global {

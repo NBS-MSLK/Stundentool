@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { verifyPassword } from '../src/lib/password.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -38,6 +39,8 @@ test('session and API access integration', { timeout: 300000 }, async t => {
   const aliceTask = await prisma.task.create({ data: { title: 'Alice task', creatorId: alice.id, creatorName: alice.name } });
   const category = await prisma.equipmentCategory.create({ data: { title: 'Bob category', creatorId: bob.id } });
   const suggestion = await prisma.equipmentSuggestion.create({ data: { categoryId: category.id, title: 'Bob suggestion', creatorId: bob.id, creatorName: bob.name, materials: { create: { name: 'Material' } } }, include: { materials: true } });
+  const migration = spawnSync(process.execPath, ['scripts/migrate-passwords.mjs'], { env, encoding: 'utf8' });
+  assert.equal(migration.status, 0, migration.stdout + migration.stderr);
   const probe = net.createServer();
   await new Promise(resolve => probe.listen(0, '127.0.0.1', resolve));
   const port = probe.address().port;
@@ -58,6 +61,7 @@ test('session and API access integration', { timeout: 300000 }, async t => {
     assert.equal(response.status, 200, await response.clone().text());
     const data = await response.json();
     assert(!('password' in data.user));
+    assert(!('passwordHash' in data.user));
     const cookie = response.headers.get('set-cookie');
     assert.match(cookie, /HttpOnly/i);
     assert.match(cookie, /SameSite=lax/i);
@@ -149,8 +153,22 @@ test('session and API access integration', { timeout: 300000 }, async t => {
       for (const url of ['/api/users', `/api/users/${bob.id}`, '/api/entries?all=true', `/api/entries/${entry.id}`, '/api/tasks', `/api/tasks/${task.id}`, '/api/headlines']) {
         const response = await request(url, { cookie: root });
         assert.equal(response.status, 200, url);
-        assert(!/"password"\s*:/.test(await response.text()), url);
+        assert(!/"password(?:Hash)?"\s*:/.test(await response.text()), url);
       }
+    });
+    await t.test('new users store hashes and administrators can reset passwords', async () => {
+      const created = await request('/api/users', { method: 'POST', cookie: root, body: { name: 'New member', password: 'new-member-test-only' } });
+      assert.equal(created.status, 200);
+      const { user } = await created.json();
+      assert(!('passwordHash' in user));
+      const stored = await prisma.user.findUnique({ where: { id: user.id } });
+      assert.equal(stored.password, '');
+      assert(await verifyPassword('new-member-test-only', stored.passwordHash));
+      const memberCookie = await login(user, 'new-member-test-only');
+      const reset = await request('/api/users/' + user.id, { method: 'PUT', cookie: root, body: { password: 'reset-test-only' } });
+      assert.equal(reset.status, 200);
+      assert.equal((await request('/api/tasks', { cookie: memberCookie })).status, 401);
+      await login(user, 'reset-test-only');
     });
     await t.test('roles are read fresh; logout, expiry and password changes revoke access', async () => {
       await prisma.user.update({ where: { id: admin.id }, data: { role: 'USER' } });
@@ -164,8 +182,17 @@ test('session and API access integration', { timeout: 300000 }, async t => {
       a = await login(alice, 'alice-test-only');
       assert.equal((await request(`/api/users/${alice.id}`, { method: 'PUT', cookie: a, body: { password: 'new-alice-test-only' } })).status, 200);
       assert.equal((await request('/api/tasks', { cookie: a })).status, 401);
+      const changed = await prisma.user.findUnique({ where: { id: alice.id } });
+      assert.equal(changed.password, '');
+      assert(await verifyPassword('new-alice-test-only', changed.passwordHash));
       a = await login(alice, 'new-alice-test-only');
       assert.equal((await request('/api/tasks', { cookie: a })).status, 200);
+    });
+    await t.test('repeated failed logins are throttled', async () => {
+      for (let i = 0; i < 20; i++) {
+        assert.equal((await request('/api/auth', { method: 'POST', body: { name: 'Missing account', password: 'wrong' } })).status, 401);
+      }
+      assert.equal((await request('/api/auth', { method: 'POST', body: { name: 'Missing account', password: 'wrong' } })).status, 429);
     });
     console.log(`Checked ${routes.length} protected API handlers against anonymous access.`);
   } catch (error) {
