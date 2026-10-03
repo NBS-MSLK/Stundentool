@@ -1,161 +1,724 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-primary: #f0f4f8;
-  --bg-secondary: #ffffff;
-  --text-primary: #102a43;
-  --text-secondary: #486581;
-  
-  --accent-primary: #3b82f6;
-  --accent-primary-hover: #2563eb;
-  
-  --success: #10b981;
-  --success-hover: #059669;
-  
-  --danger: #ef4444;
-  --danger-hover: #dc2626;
 
-  --border-color: #e2e8f0;
-  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.3);
+  --bg-primary: #f8f7f3;
+   --bg-secondary: #ffffff;
+   --text-primary: #392776;
+   --text-secondary: #706b82;
 
-  --radius-md: 12px;
-  --radius-full: 9999px;
-}
+  --accent-primary: #392776;
+   --accent-primary-hover: #513994;
+   --accent-primary-rgb: 57,39,118;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    
-    --border-color: #334155;
-    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-    --glass-bg: rgba(30, 41, 59, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-  }
+  --success: #247e74;
+   --success-hover: #1c665e;
+   --danger: #bd2457;
+   --danger-hover: #9e1d48;
+
+  --warning: #9a5a08;
+   --border-color: #e7e4ed;
+   --card-shadow: none;
+
+  --glass-bg: #ffffff;
+   --glass-border: #e7e4ed;
+   --radius-sm: 8px;
+   --radius-md: 14px;
+   --radius-full: 9999px;
+
+  --bg-hover: #efebf8;
+   --brand-teal: #4dbdcb;
+   --brand-pink: #e93270;
+   --brand-orange: #ffa632;
+
 }
 
 * {
+
   box-sizing: border-box;
+
   padding: 0;
+
   margin: 0;
+
 }
+
 
 html,
 body {
+
   max-width: 100vw;
+
   overflow-x: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
   background-color: var(--bg-primary);
+
   color: var(--text-primary);
+
   transition: background-color 0.3s ease, color 0.3s ease;
+
   min-height: 100vh;
+
 }
+
 
 a {
+
   color: inherit;
+
   text-decoration: none;
+
 }
+
 
 button {
+
   cursor: pointer;
+
   font-family: inherit;
+
   border: none;
-  transition: all 0.2s ease;
+
+  transition: background-color 0.2s ease, transform 0.2s ease;
+
 }
 
+
 input {
+
   font-family: inherit;
+
 }
+
 
 /* Utilities */
 .container {
+
   width: 100%;
+
   max-width: 1200px;
+
   margin: 0 auto;
+
   padding: 2rem 1rem;
+
 }
+
 
 .glass-card {
+
   background: var(--glass-bg);
+
   backdrop-filter: blur(12px);
+
   -webkit-backdrop-filter: blur(12px);
+
   border: 1px solid var(--glass-border);
+
   border-radius: var(--radius-md);
+
   box-shadow: var(--card-shadow);
+
   padding: 1.5rem;
+
 }
+
 
 .btn-primary {
+
   background-color: var(--accent-primary);
+
   color: white;
+
   padding: 0.75rem 1.5rem;
+
   border-radius: var(--radius-md);
+
   font-weight: 600;
-  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+
+
 }
+
 
 .btn-primary:disabled {
+
   opacity: 0.6;
+
   cursor: not-allowed;
+
 }
+
 
 .btn-primary:not(:disabled):hover {
+
   background-color: var(--accent-primary-hover);
+
   transform: translateY(-1px);
+
 }
+
 
 .btn-success {
+
   background-color: var(--success);
+
   color: white;
+
   padding: 1.5rem 3rem;
+
   border-radius: var(--radius-full);
+
   font-weight: 700;
+
   font-size: 1.5rem;
+
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+
 }
+
 
 .btn-success:hover {
+
   background-color: var(--success-hover);
+
   transform: translateY(-2px);
+
 }
+
 
 .btn-danger {
+
   background-color: var(--danger);
+
   color: white;
+
   padding: 1.5rem 3rem;
+
   border-radius: var(--radius-full);
+
   font-weight: 700;
+
   font-size: 1.5rem;
+
   box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+
 }
+
 
 .btn-danger:hover {
+
   background-color: var(--danger-hover);
+
   transform: translateY(-2px);
+
 }
+
 
 .input-field {
+
   width: 100%;
+
   padding: 0.75rem 1rem;
+
   border-radius: var(--radius-md);
+
   border: 1px solid var(--border-color);
+
   background-color: var(--bg-secondary);
+
   color: var(--text-primary);
+
   font-size: 1rem;
+
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
 }
+
 
 .input-field:focus {
+
   outline: none;
+
   border-color: var(--accent-primary);
+
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+
 }
 
+
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+
+  from {
+   opacity: 0;
+   }
+
+  to {
+   opacity: 1;
+   }
+
 }
+
+/* MakerSpace: the shared palette also styles existing forms and detail pages. */
+button:disabled{
+  cursor:not-allowed;
+  opacity:.6}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid var(--brand-pink);
+  outline-offset:3px}
+select,textarea{
+  font-family:inherit}
+.maker-shell{
+  display:grid;
+  grid-template-columns:236px minmax(0,1fr);
+  min-height:100vh}
+.maker-sidebar{
+  background:white;
+  border-right:1px solid var(--border-color);
+  padding:28px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:28px}
+.maker-logo{
+  display:block;
+  width:100%;
+  border-radius:12px}
+.maker-eyebrow{
+  font-size:11px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-weight:700;
+  color:var(--text-secondary)}
+.maker-navigation{
+  display:grid;
+  gap:7px}
+.maker-nav{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:14px 16px;
+  border-radius:11px;
+  text-align:left;
+  background:transparent;
+  color:var(--text-secondary);
+  font-weight:600}
+.maker-nav.active{
+  background:#efebfa;
+  color:var(--text-primary)}
+.maker-nav svg{
+  width:20px;
+  height:20px;
+  flex-shrink:0}
+.maker-sidebar-note{
+  margin-top:auto;
+  background:#f8f7fc;
+  border-radius:14px;
+  padding:18px;
+  line-height:1.7}
+.maker-sidebar-note strong{
+  display:block}
+.maker-sidebar-note p,.maker-profile p{
+  font-size:13px;
+  color:var(--text-secondary)}
+.maker-profile{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  border-top:1px solid var(--border-color);
+  padding-top:20px;
+  overflow-wrap:anywhere}
+.maker-avatar{
+  background:#fce5ed;
+  color:#ad2455;
+  width:39px;
+  height:39px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-weight:700;
+  flex-shrink:0}
+.maker-main{
+  padding:28px 42px;
+  max-width:1480px;
+  width:100%;
+  min-width:0;
+  margin:0 auto}
+.maker-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--border-color);
+  padding-bottom:23px;
+  margin-bottom:32px;
+  gap:16px}
+.maker-account{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  font-size:12px;
+  flex-wrap:wrap}
+.maker-account button{
+  background:transparent;
+  color:var(--text-secondary)}
+.maker-greeting{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:26px;
+  gap:16px}
+.maker-greeting h1{
+  font-size:clamp(28px,3vw,40px);
+  letter-spacing:-1.4px;
+  margin-bottom:9px;
+  font-weight:750}
+.maker-greeting p{
+  color:var(--text-secondary);
+  line-height:1.65}
+.maker-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--text-primary);
+  color:white;
+  border-radius:10px;
+  padding:12px 17px;
+  font-weight:600;
+  white-space:nowrap;
+  font-size:14px}
+.maker-button.secondary{
+  background:#efebf8;
+  color:var(--text-primary)}
+.maker-button:hover{
+  background:var(--accent-primary-hover);
+  color:white}
+.maker-hero-grid{
+  display:grid;
+  grid-template-columns:1.15fr 1fr;
+  gap:22px;
+  margin-bottom:24px}
+.maker-timer{
+  background:var(--brand-teal);
+  border-radius:19px;
+  padding:27px 30px;
+  position:relative;
+  overflow:hidden}
+.maker-timer:after{
+  content:'+';
+  font-size:190px;
+  line-height:1;
+  position:absolute;
+  right:12px;
+  top:20px;
+  opacity:.12;
+  transform:rotate(15deg);
+  pointer-events:none}
+.maker-timer .maker-eyebrow{
+  color:var(--text-primary)}
+.maker-timer-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px}
+.maker-timer-heading>span:last-child{
+  font-size:12px}
+.maker-clock{
+  font-size:56px;
+  letter-spacing:-2px;
+  font-weight:750;
+  font-variant-numeric:tabular-nums;
+  margin:18px 0 16px;
+  position:relative;
+  z-index:1}
+.maker-timer-controls{
+  display:flex;
+  gap:10px;
+  position:relative;
+  z-index:1;
+  align-items:center}
+.maker-timer select{
+  min-width:0;
+  flex:1;
+  background:#ffffffb0;
+  border:1px solid #ffffff80;
+  color:var(--text-primary);
+  border-radius:10px;
+  padding:12px}
+.maker-running-activity{
+  flex:1;
+  overflow-wrap:anywhere}
+.maker-timer p{
+  margin-top:16px;
+  font-size:12px;
+  color:#294d66;
+  line-height:1.65}
+.maker-community{
+  border-radius:19px;
+  overflow:hidden;
+  background:var(--text-primary);
+  color:white;
+  display:flex;
+  flex-direction:column}
+.maker-community-art{
+  height:100px;
+  background:url('/brand/makerspace.png') center 43%/cover}
+.maker-community-body{
+  padding:22px 26px}
+.maker-community .maker-eyebrow{
+  color:#cec5eb}
+.maker-community h2{
+  font-size:23px;
+  margin:8px 0}
+.maker-community p{
+  color:#d8d2eb;
+  font-size:13px}
+.maker-progress{
+  height:9px;
+  border-radius:9px;
+  background:#ffffff25;
+  margin:16px 0 9px;
+  overflow:hidden}
+.maker-progress span{
+  display:block;
+  height:100%;
+  background:var(--brand-orange);
+  border-radius:9px}
+.maker-progress-label{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:#e8e2f5;
+  gap:10px}
+.maker-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+  margin-bottom:28px}
+.maker-metrics>div,.maker-metrics>a{
+  background:white;
+  border:1px solid var(--border-color);
+  border-radius:14px;
+  padding:19px 22px}
+.maker-metrics strong{
+  font-size:29px;
+  letter-spacing:-1px;
+  display:block;
+  margin:7px 0}
+.maker-metrics small{
+  font-size:15px;
+  font-weight:500}
+.maker-metrics p{
+  font-size:12px;
+  color:var(--text-secondary)}
+.maker-finance-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px}
+.maker-finance-grid .glass-card{
+  padding:22px;
+  min-width:0}
+.maker-finance-grid .glass-card>div:first-child{
+  gap:12px;
+  align-items:flex-start!important;
+  flex-direction:column}
+.maker-finance-grid .glass-card>div:first-child>div{
+  text-align:left!important;
+  flex-wrap:wrap}
+.maker-finance-grid .glass-card>div:first-child>div>span{
+  font-size:1.1rem!important}
+.maker-budget-note{
+  font-size:12px;
+  color:var(--text-secondary);
+  margin-top:16px;
+  line-height:1.6}
+.maker-overview>.glass-card{
+  padding:26px}
+.maker-footer{
+  font-size:12px;
+  color:var(--text-secondary);
+  padding:30px 0 10px}
+.maker-error{
+  background:#fce7ef;
+  color:#a32150;
+  border:1px solid #edbfd0;
+  padding:16px;
+  border-radius:12px;
+  margin-bottom:20px}
+.maker-main .glass-card{
+  box-shadow:none}
+.maker-main .glass-card h2{
+  font-size:20px!important;
+  letter-spacing:-.5px}
+.maker-main a:hover{
+  text-decoration:underline}
+.maker-main .maker-button:hover{
+  text-decoration:none}
+.maker-main .btn-primary{
+  font-size:13px}
+.maker-main .glass-card>div{
+  max-width:100%}
+
+@media(max-width:1200px){
+  .maker-shell{
+  grid-template-columns:190px minmax(0,1fr)}
+.maker-main{
+  padding:26px}
+.maker-sidebar{
+  padding:24px 14px}
+.maker-finance-grid{
+  grid-template-columns:1fr}
+.maker-hero-grid{
+  grid-template-columns:1fr 1fr}
+.maker-timer-controls{
+  flex-wrap:wrap}
+.maker-timer-controls select{
+  flex-basis:100%}
+.maker-timer-controls .maker-button{
+  width:100%}
+}
+
+@media(max-width:850px){
+  .maker-hero-grid{
+  grid-template-columns:1fr}
+.maker-community{
+  display:grid;
+  grid-template-columns:140px minmax(0,1fr)}
+.maker-community-art{
+  height:100%;
+  background-position:center}
+.maker-greeting{
+  align-items:flex-start;
+  flex-direction:column}
+.maker-metrics{
+  gap:10px}
+.maker-metrics>div,.maker-metrics>a{
+  padding:15px}
+.maker-metrics strong{
+  font-size:24px}
+.maker-top{
+  align-items:flex-start;
+  flex-direction:column}
+}
+
+@media(max-width:650px){
+  .maker-shell{
+  display:block}
+.maker-sidebar{
+  padding:12px 16px;
+  border-bottom:1px solid var(--border-color);
+  gap:13px}
+.maker-logo{
+  width:135px;
+  height:auto}
+.sidebar-caption,.maker-sidebar-note,.maker-profile{
+  display:none}
+.maker-navigation{
+  display:flex;
+  gap:4px;
+  overflow:auto}
+.maker-nav{
+  padding:10px;
+  font-size:12px;
+  gap:6px;
+  white-space:nowrap}
+.maker-nav svg{
+  width:16px}
+.maker-main{
+  padding:20px 16px}
+.maker-top{
+  margin-bottom:24px;
+  padding-bottom:15px}
+.maker-top .maker-eyebrow{
+  font-size:10px}
+.maker-account{
+  gap:14px}
+.maker-greeting h1{
+  font-size:28px}
+.maker-greeting p{
+  font-size:13px}
+.maker-hero-grid{
+  gap:16px}
+.maker-timer{
+  padding:23px}
+.maker-clock{
+  font-size:48px}
+.maker-timer-heading{
+  flex-wrap:wrap}
+.maker-community{
+  display:flex}
+.maker-community-art{
+  height:90px;
+  background-position:center 43%}
+.maker-metrics{
+  gap:8px}
+.maker-metrics>div,.maker-metrics>a{
+  padding:12px 9px}
+.maker-metrics .maker-eyebrow{
+  font-size:9px;
+  letter-spacing:.5px}
+.maker-metrics strong{
+  font-size:20px;
+  overflow-wrap:anywhere}
+.maker-metrics p{
+  font-size:10px}
+.maker-overview>.glass-card,.maker-finance-grid .glass-card{
+  padding:18px}
+.maker-main .glass-card{
+  overflow-wrap:anywhere}
+.maker-main .glass-card>div{
+  min-width:0!important}
+.maker-main .glass-card button,.maker-main .glass-card a{
+  white-space:normal}
+.maker-main .glass-card>div[style*="display: flex"]{
+  flex-wrap:wrap}
+.maker-main .glass-card>div[style*="grid-template-columns"]{
+  gap:8px}
+.container{
+  padding:1.5rem 1rem}
+.btn-primary{
+  padding:.7rem 1rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+  animation:none!important;
+  transition:none!important}
+}
+
+.maker-section-heading{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  margin-bottom:16px}
+.maker-section-heading a{
+  font-size:13px}
+.maker-task-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  padding:18px 0;
+  border-top:1px solid var(--border-color)}
+.maker-task-row p{
+  font-size:12px;
+  color:var(--text-secondary);
+  margin-top:6px}
+.maker-task-row>span{
+  background:#efebf8;
+  border-radius:8px;
+  padding:10px 12px;
+  font-size:12px;
+  white-space:nowrap}
+.maker-task-row:hover{
+  color:var(--accent-primary-hover)}
+
+@media(min-width:651px){
+  .maker-sidebar{
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto}
+}
+
+.maker-logo{
+  height:auto}

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function Login() {
   const [name, setName] = useState('');
@@ -50,11 +51,14 @@ export default function Login() {
   return (
     <div className="container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100vh', alignItems: 'center' }}>
       <div className="glass-card" style={{ width: '100%', maxWidth: '400px', textAlign: 'center' }}>
+        <Image src="/brand/makerspace.png" alt="MakerSpace Lübbecke e. V." width={938} height={530} sizes="350px" style={{ width: '100%', height: 'auto', borderRadius: '12px', marginBottom: '1.5rem' }} />
         <h1 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontWeight: 600 }}>Willkommen im MakerSpace</h1>
         <p style={{ marginBottom: '2rem', color: 'var(--text-secondary)' }}>Bitte gib deinen Namen ein, um deine Zeiten zu erfassen.</p>
         
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <input 
+            aria-label="Vor- und Nachname"
+            autoComplete="username"
             type="text" 
             placeholder="Dein Vor- und Nachname" 
             className="input-field" 
@@ -64,6 +68,8 @@ export default function Login() {
             autoFocus
           />
           <input 
+            aria-label="Passwort"
+            autoComplete="current-password"
             type="password" 
             placeholder="Dein Passwort" 
             className="input-field" 

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ACTIVITIES } from '@/lib/activities';
 import confetti from 'canvas-confetti';
 import TaskManager from './components/TaskManager';
@@ -26,6 +27,8 @@ export default function Dashboard() {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [activeEntry, setActiveEntry] = useState<TimeEntry | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const [stats, setStats] = useState({ systemActiveHours: 0, systemArchivedHours: 0, hardcodedBaseHours: 619, totalGoalHours: 2700 });
   const [selectedActivity, setSelectedActivity] = useState('');
   const [activeTab, setActiveTab] = useState<'WEBHEIMAT' | 'STUNDEN' | 'TASKS' | 'EQUIPMENT'>('WEBHEIMAT');
@@ -47,7 +50,7 @@ export default function Dashboard() {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
     if (tab === 'EQUIPMENT' || tab === 'TASKS' || tab === 'STUNDEN' || tab === 'WEBHEIMAT') {
-      setActiveTab(tab as any);
+      setActiveTab(tab);
     }
   }, [router]);
 
@@ -68,6 +71,7 @@ export default function Dashboard() {
       }
     } catch (e) {
       console.error(e);
+      setError('Daten konnten nicht geladen werden. Bitte lade die Seite erneut.');
     } finally {
       setLoading(false);
     }
@@ -76,16 +80,18 @@ export default function Dashboard() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (activeEntry) {
-      interval = setInterval(() => {
+      const updateElapsed = () => {
         const start = new Date(activeEntry.startTime).getTime();
         const now = new Date().getTime();
-        const diff = now - start;
+        const diff = Math.max(0, now - start);
         
         const h = Math.floor(diff / (1000 * 60 * 60)).toString().padStart(2, '0');
         const m = Math.floor((diff / (1000 * 60)) % 60).toString().padStart(2, '0');
         const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
         setElapsedString(`${h}:${m}:${s}`);
-      }, 1000);
+      };
+      updateElapsed();
+      interval = setInterval(updateElapsed, 1000);
     } else {
       setElapsedString('00:00:00');
     }
@@ -93,7 +99,8 @@ export default function Dashboard() {
   }, [activeEntry]);
 
   const handleStart = async () => {
-    setLoading(true);
+    setSaving(true);
+    setError('');
     try {
       const res = await fetch('/api/entries/start', {
         method: 'POST',
@@ -101,14 +108,16 @@ export default function Dashboard() {
         body: JSON.stringify({ userId: user?.id, activity: selectedActivity })
       });
       const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Timer konnte nicht gestartet werden.'); return; }
       if (data.entry) setActiveEntry(data.entry);
-    } finally {
-      setLoading(false);
+    } catch { setError('Timer konnte nicht gestartet werden. Bitte erneut versuchen.'); } finally {
+      setSaving(false);
     }
   };
 
   const handleStop = async () => {
-    setLoading(true);
+    setSaving(true);
+    setError('');
     try {
       const res = await fetch('/api/entries/stop', {
         method: 'POST',
@@ -125,8 +134,8 @@ export default function Dashboard() {
         fetchData(user!.id);
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
       }
-    } finally {
-      setLoading(false);
+    } catch { setError('Timer konnte nicht gestoppt werden. Bitte erneut versuchen.'); } finally {
+      setSaving(false);
     }
   };
   const handleConfirm = async (id: string) => {
@@ -144,129 +153,42 @@ export default function Dashboard() {
   };
   
   const handleToggleSubmitted = async (id: string, current: boolean) => {
-    await fetch(`/api/entries/${id}`, {
+    const response = await fetch(`/api/entries/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isSubmitted: !current })
     });
+    if (!response.ok) { setError('Eintrag konnte nicht aktualisiert werden.'); return; }
     fetchData(user!.id);
   };
 
   if (!user || loading) return <div className="container" style={{ textAlign: 'center', marginTop: '4rem' }}>Lade...</div>;
 
+  const totalHours = entries.reduce((sum, entry) => sum + Math.max(1, Math.ceil((new Date(entry.endTime!).getTime() - new Date(entry.startTime).getTime()) / 3600000)), 0);
+  const monthHours = entries.filter(entry => { const date = new Date(entry.startTime); const now = new Date(); return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear(); }).reduce((sum, entry) => sum + Math.max(1, Math.ceil((new Date(entry.endTime!).getTime() - new Date(entry.startTime).getTime()) / 3600000)), 0);
+  const tabs = [{id: 'WEBHEIMAT', label: 'Übersicht', icon: 'grid'}, {id: 'STUNDEN', label: 'Meine Stunden', icon: 'clock'}, {id: 'TASKS', label: 'Aufgaben', icon: 'tasks'}, {id: 'EQUIPMENT', label: 'Ausstattung', icon: 'box'}] as const;
+  const currentLabel = tabs.find(tab => tab.id === activeTab)!.label;
+  const projectHours = stats.hardcodedBaseHours + stats.systemActiveHours;
+  const percentage = stats.totalGoalHours > 0 ? Math.min(100, Math.max(0, projectHours / stats.totalGoalHours * 100)) : 0;
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Hallo, {user.name}</h1>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          {user?.role === 'ADMIN' && (
-            <Link href="/admin" className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: '#8a2be2' }}>Admin</Link>
-          )}
-          <Link href="/dashboard/password" className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: 'var(--accent-primary)' }}>Einstellungen</Link>
-          <button onClick={async () => {
-            const response = await fetch('/api/auth', { method: 'DELETE' });
-            if (!response.ok) { alert('Abmeldung fehlgeschlagen. Bitte erneut versuchen.'); return; }
-            localStorage.removeItem('user'); router.replace('/');
-          }} className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: 'var(--text-secondary)' }}>Logout</button>
+    <div className="maker-shell">
+      <aside className="maker-sidebar">
+        <Link href="/dashboard" aria-label="MakerSpace Übersicht"><Image src="/brand/makerspace.png" alt="MakerSpace Lübbecke e. V." className="maker-logo" width={938} height={530} sizes="(max-width: 650px) 135px, 196px" /></Link>
+        <span className="maker-eyebrow sidebar-caption">Dein Makerspace</span>
+        <nav className="maker-navigation" aria-label="Hauptnavigation">{tabs.map(tab => <button key={tab.id} className={activeTab === tab.id ? 'maker-nav active' : 'maker-nav'} aria-current={activeTab === tab.id ? 'page' : undefined} onClick={() => { setActiveTab(tab.id); window.history.replaceState(null, '', '/dashboard?tab=' + tab.id); }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">{tab.icon === 'grid' ? <><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></> : tab.icon === 'clock' ? <><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></> : tab.icon === 'tasks' ? <><rect x="4" y="3" width="16" height="18" rx="3"/><path d="m8 12 3 3 5-6"/></> : <path d="m12 3 9 5v9l-9 5-9-5V8zm0 10v9M3 8l9 5 9-5M8 5l9 5"/>}</svg>{tab.label}</button>)}</nav>
+        <div className="maker-sidebar-note"><span className="maker-eyebrow">Zusammen machen</span><strong>Jede Stunde zählt.</strong><p>Dein Einsatz bringt unsere Werkstatt ein Stück weiter.</p></div>
+        <div className="maker-profile"><span className="maker-avatar">{user.name.split(' ').map(part => part[0]).slice(0,2).join('')}</span><div><strong>{user.name}</strong><p>{user.role === 'ADMIN' ? 'Administrator' : 'Mitglied'}</p></div></div>
+      </aside>
+      <main className="maker-main">
+        <header className="maker-top"><span className="maker-eyebrow">MakerSpace Lübbecke / {currentLabel}</span><div className="maker-account">{user.role === 'ADMIN' && <Link href="/admin">Admin</Link>}<Link href="/dashboard/password">Einstellungen</Link><button onClick={async () => { const response = await fetch('/api/auth', { method: 'DELETE' }); if (!response.ok) { setError('Abmeldung fehlgeschlagen.'); return; } localStorage.removeItem('user'); router.replace('/'); }}>Abmelden</button></div></header>
+        <div className="maker-greeting"><div><h1>{activeTab === 'WEBHEIMAT' ? 'Moin ' + user.name.split(' ')[0] + '. Zeit, was zu machen.' : currentLabel}</h1><p>{activeTab === 'WEBHEIMAT' ? 'Deine Werkstatt, dein Beitrag, unser gemeinsames Projekt.' : activeTab === 'TASKS' ? 'Finde eine Aufgabe, die zu dir passt.' : activeTab === 'EQUIPMENT' ? 'Gestalte mit, was unsere Werkstatt möglich macht.' : 'Dein Einsatz macht den Unterschied.'}</p></div><Link href="/dashboard/new" className="maker-button secondary">＋ Stunden nachtragen</Link></div>
+        {error && <div role="alert" className="maker-error">{error}</div>}
+        <div className="maker-hero-grid">
+          <section className="maker-timer" aria-label="Zeiterfassung"><div className="maker-timer-heading"><span className="maker-eyebrow">Deine Zeiterfassung</span><span>{activeEntry ? '● Dein Timer läuft' : '● Bereit für deinen Einsatz'}</span></div><div className="maker-clock">{elapsedString}</div><div className="maker-timer-controls">{activeEntry ? <><span className="maker-running-activity">{activeEntry.activity || 'Aktiver Einsatz'}</span><button onClick={handleStop} className="maker-button" disabled={saving}>{saving ? 'Wird gespeichert …' : '■ Zeit stoppen'}</button></> : <><select value={selectedActivity} onChange={e => setSelectedActivity(e.target.value)} aria-label="Tätigkeit" disabled={saving}><option value="">Tätigkeit auswählen …</option>{Object.entries(ACTIVITIES).map(([group, acts]) => <optgroup key={group} label={group}>{acts.map(a => <option key={a} value={a}>{a}</option>)}</optgroup>)}</select><button onClick={handleStart} className="maker-button" disabled={!selectedActivity || saving}>{saving ? 'Startet …' : '▶ Zeit starten'}</button></>}</div><p>{activeEntry ? 'Läuft weiter, während du dich im Makerspace umschaust.' : 'Tätigkeit auswählen und loslegen. Schön, dass du dabei bist.'}</p></section>
+          <section className="maker-community"><div className="maker-community-art"/><div className="maker-community-body"><span className="maker-eyebrow">Unser gemeinsames Ziel</span><h2>Aus Ideen wird Werkstatt.</h2><p>Wir packen zusammen an – Stunde für Stunde.</p><div className="maker-progress" role="progressbar" aria-label="Gemeinsames Stundenziel" aria-valuenow={Math.round(percentage)} aria-valuemin={0} aria-valuemax={100}><span style={{width: percentage + '%'}}/></div><div className="maker-progress-label"><strong>{projectHours.toLocaleString('de-DE')} / {stats.totalGoalHours.toLocaleString('de-DE')} Stunden</strong><span>{Math.round(percentage)} % geschafft</span></div></div></section>
         </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--bg-secondary)', paddingBottom: '0.5rem', overflowX: 'auto' }}>
-        <button 
-          onClick={() => setActiveTab('WEBHEIMAT')} 
-          style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'WEBHEIMAT' ? '3px solid var(--accent-primary)' : '3px solid transparent', color: activeTab === 'WEBHEIMAT' ? 'white' : 'var(--text-secondary)', fontWeight: activeTab === 'WEBHEIMAT' ? 'bold' : 'normal', cursor: 'pointer', fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
-          Webheimat
-        </button>
-        <button 
-          onClick={() => setActiveTab('TASKS')} 
-          style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'TASKS' ? '3px solid var(--accent-primary)' : '3px solid transparent', color: activeTab === 'TASKS' ? 'white' : 'var(--text-secondary)', fontWeight: activeTab === 'TASKS' ? 'bold' : 'normal', cursor: 'pointer', fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
-          MS-Taskmanager
-        </button>
-        <button 
-          onClick={() => setActiveTab('STUNDEN')} 
-          style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'STUNDEN' ? '3px solid var(--accent-primary)' : '3px solid transparent', color: activeTab === 'STUNDEN' ? 'white' : 'var(--text-secondary)', fontWeight: activeTab === 'STUNDEN' ? 'bold' : 'normal', cursor: 'pointer', fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
-          Zeiterfassung
-        </button>
-        <button 
-          onClick={() => setActiveTab('EQUIPMENT')} 
-          style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'EQUIPMENT' ? '3px solid var(--accent-primary)' : '3px solid transparent', color: activeTab === 'EQUIPMENT' ? 'white' : 'var(--text-secondary)', fontWeight: activeTab === 'EQUIPMENT' ? 'bold' : 'normal', cursor: 'pointer', fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
-          Anschaffungen
-        </button>
-      </div>
-
-      {activeTab === 'WEBHEIMAT' ? (
-        <Webheimat user={user} stats={stats} />
-      ) : activeTab === 'TASKS' ? (
-        <TaskManager user={user} />
-      ) : activeTab === 'EQUIPMENT' ? (
-        <EquipmentSection user={user} />
-      ) : (
-        <>
-
-      <div className="glass-card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span>Projekt-Förderwert (Stunden)</span>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '1.2rem', color: '#ffd700', textShadow: '0 0 10px rgba(255,215,0,0.3)' }}>
-              {((stats.hardcodedBaseHours + stats.systemActiveHours) * 20).toLocaleString('de-DE')} € / {(stats.totalGoalHours * 20).toLocaleString('de-DE')} €
-            </span>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}>
-              ({stats.hardcodedBaseHours + stats.systemActiveHours} / {stats.totalGoalHours} Stunden)
-            </div>
-          </div>
-        </div>
-        <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
-          <div 
-            style={{ width: `${(stats.hardcodedBaseHours / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--success)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold' }} 
-            title="Eingereicht / Archiviert"
-          >
-            {(stats.hardcodedBaseHours / stats.totalGoalHours) * 100 > 10 && `${(stats.hardcodedBaseHours * 20).toLocaleString('de-DE')} €`}
-          </div>
-          <div 
-            style={{ width: `${(stats.systemActiveHours / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--accent-primary)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold' }} 
-            title="Offen / Neu"
-          >
-             {(stats.systemActiveHours / stats.totalGoalHours) * 100 > 5 && `${(stats.systemActiveHours * 20).toLocaleString('de-DE')} €`}
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></div>
-            Bereits eingereicht: {(stats.hardcodedBaseHours * 20).toLocaleString('de-DE')} € ({stats.hardcodedBaseHours}h)
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)' }}></div>
-            Offener Förderwert: {(stats.systemActiveHours * 20).toLocaleString('de-DE')} € ({stats.systemActiveHours}h)
-          </div>
-        </div>
-      </div>
-
-      <div className="glass-card" style={{ textAlign: 'center', marginBottom: '2rem', padding: '3rem 1rem' }}>
-        <div style={{ fontSize: '3.5rem', fontWeight: 'bold', marginBottom: '2rem', fontVariantNumeric: 'tabular-nums', letterSpacing: '2px' }}>
-          {elapsedString}
-        </div>
-        
-        {!activeEntry ? (
-          <>
-            <select value={selectedActivity} onChange={e => setSelectedActivity(e.target.value)} className="input-field" style={{ marginBottom: '1rem', maxWidth: '400px', display: 'inline-block' }}>
-              <option value="">-- Bitte Aktivität wählen --</option>
-              {Object.entries(ACTIVITIES).map(([group, acts]) => (
-                <optgroup key={group} label={group}>
-                  {acts.map(a => <option key={a} value={a}>{a}</option>)}
-                </optgroup>
-              ))}
-            </select>
-            <br />
-            <button onClick={handleStart} className="btn-success" disabled={!selectedActivity}>START</button>
-          </>
-        ) : (
-          <div>
-            <div style={{ marginBottom: '1rem', fontSize: '1.2rem', color: 'var(--text-secondary)' }}>Aktivität: {activeEntry.activity || 'Keine'}</div>
-            <button onClick={handleStop} className="btn-danger">STOP</button>
-          </div>
-        )}
-      </div>
-
+        <section className="maker-metrics" aria-label="Deine Stunden"><div><span className="maker-eyebrow">Dein Beitrag</span><strong>{totalHours.toLocaleString('de-DE')} <small>h</small></strong><p>Insgesamt mit angepackt</p></div><div><span className="maker-eyebrow">Diesen Monat</span><strong>{monthHours.toLocaleString('de-DE')} <small>h</small></strong><p>Danke für deinen Einsatz!</p></div><Link href="/dashboard/highscore"><span className="maker-eyebrow">Zusammen machen</span><strong>Trophäen <small>↗</small></strong><p>Unsere gemeinsamen Erfolge</p></Link></section>
+        {activeTab === 'WEBHEIMAT' ? <Webheimat user={user} stats={stats} /> : activeTab === 'TASKS' ? <TaskManager user={user} /> : activeTab === 'EQUIPMENT' ? <EquipmentSection user={user} /> : <>
       <div style={{ marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontSize: '1.2rem', fontWeight: 600, whiteSpace: 'nowrap' }}>Letzte Einträge</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
@@ -349,7 +271,9 @@ export default function Dashboard() {
         {entries.length === 0 && <p style={{ color: 'var(--text-secondary)' }}>Noch keine Einträge vorhanden.</p>}
       </div>
       </>
-      )}
+      }
+      <footer className="maker-footer">Mit Herz und Händen. MakerSpace Lübbecke e. V.</footer>
+      </main>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import GlobalCalendar from './GlobalCalendar';
 
 export default function Webheimat({ user, stats }: { user: any, stats: any }) {
@@ -143,7 +144,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
   const eqPlannedDifference = eqPlannedAmount - eqTotalBudget;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div className="maker-overview" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
         <>
           {/* 0. Kurzmeldungen (Headlines) */}
@@ -208,6 +209,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         </div>
       )}
 
+      <div className="maker-finance-grid">
       {/* 1. Fördergeld-Statusbalken */}
       {funding && (() => {
         const total = parseFloat(funding.totalAmount) || 0;
@@ -220,15 +222,15 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         return (
           <div className="glass-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span>Fördermittel-Status</span>
+              <span>Gesamtfinanzierung</span>
               <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '1.2rem', color: '#ffd700', textShadow: '0 0 10px rgba(255,215,0,0.3)' }}>
+                <span style={{ fontSize: '1.2rem', color: 'var(--text-primary)' }}>
                   {totalSum.toLocaleString('de-DE')} € / {total.toLocaleString('de-DE')} €
                 </span>
               </div>
             </div>
             
-            <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
+            <div style={{ width: '100%', backgroundColor: 'var(--bg-primary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
               <div 
                 style={{ width: `${disbursedPercent}%`, backgroundColor: 'var(--success)', height: '100%', transition: 'width 0.5s ease-in-out' }} 
                 title="Ausgezahlt"
@@ -256,6 +258,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
                 </div>
               )}
             </div>
+            <p className="maker-budget-note">Noch nicht ausgezahlt oder eingereicht: {Math.max(0, total - totalSum).toLocaleString('de-DE')} €</p>
           </div>
         );
       })()}
@@ -268,7 +271,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
             <a href="/dashboard?tab=STUNDEN" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', textDecoration: 'underline' }}>zum Stundentool</a>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '1.2rem', color: '#ffd700', textShadow: '0 0 10px rgba(255,215,0,0.3)' }}>
+            <span style={{ fontSize: '1.2rem', color: 'var(--text-primary)' }}>
               {((stats.hardcodedBaseHours + stats.systemActiveHours) * 20).toLocaleString('de-DE')} € / {(stats.totalGoalHours * 20).toLocaleString('de-DE')} €
             </span>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}>
@@ -307,7 +310,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         <div className="glass-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span>Equipment Budget</span>
+              <span>Ausstattungsbudget</span>
               <a href="/dashboard?tab=EQUIPMENT" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', textDecoration: 'underline' }}>zur Ausstattung</a>
             </div>
           </div>
@@ -321,7 +324,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
                 height: '100%', transition: 'width 0.5s ease-in-out', zIndex: 2
               }} 
             />
-            <div style={{ position: 'relative', zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white', fontSize: '0.85rem', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
+            <div style={{ position: 'relative', zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 'bold' }}>
               {Math.round(eqSpentPercentage)}%
             </div>
           </div>
@@ -345,9 +348,16 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
               </span>
             </div>
           </div>
+          <p className="maker-budget-note">Verfügbar nach Käufen: {(eqTotalBudget - eqSpentAmount).toLocaleString('de-DE')} €</p>
         </div>
       )}
 
+      </div>
+      <section className="glass-card maker-open-tasks">
+        <div className="maker-section-heading"><h2>Hier kannst du anpacken</h2><a href="/dashboard?tab=TASKS">Alle Aufgaben ↗</a></div>
+        {tasks.filter(task => task.status === 'OPEN' || task.status === 'IN_PROGRESS').slice(0, 3).map(task => <Link key={task.id} href={'/dashboard/tasks/' + task.id} className="maker-task-row"><div><strong>{task.title}</strong><p>{task.status === 'IN_PROGRESS' ? 'In Bearbeitung' : 'Offen'} · {task.volunteers?.length || 0} Helfer dabei</p></div><span>Mitmachen ↗</span></Link>)}
+        {!tasks.some(task => task.status === 'OPEN' || task.status === 'IN_PROGRESS') && <p className="maker-budget-note">Aktuell gibt es keine offenen Aufgaben. Im Kalender findest du unsere geplanten Arbeitsdienste.</p>}
+      </section>
       {/* 4. Kalender & Termine */}
       <div className="glass-card">
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Kalender & Termine</h2>

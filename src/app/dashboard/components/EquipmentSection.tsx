@@ -243,7 +243,7 @@ export default function EquipmentSection({ user }: { user: any }) {
       
       {/* Budget Bar */}
       <div className="glass-card" style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Equipment Budget</h2>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Ausstattungsbudget</h2>
         
         <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', position: 'relative' }}>
           {/* Spent Progress */}
