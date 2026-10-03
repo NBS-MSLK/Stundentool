@@ -1,7 +1,8 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+async function handleGET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const suggestion = await prisma.equipmentSuggestion.findUnique({
@@ -21,7 +22,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+async function handlePUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -56,7 +57,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+async function handleDELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     await prisma.equipmentSuggestion.delete({ where: { id } });
@@ -65,3 +66,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     return NextResponse.json({ error: 'Error deleting suggestion' }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/equipment/suggestions/[id]", handleGET);
+export const PUT = secureRoute("/api/equipment/suggestions/[id]", handlePUT);
+export const DELETE = secureRoute("/api/equipment/suggestions/[id]", handleDELETE);

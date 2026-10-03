@@ -267,6 +267,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
           </div>
           <select 
             value={task.status} 
+            disabled={!canEdit}
             onChange={(e) => handleUpdateStatus(e.target.value)} 
             className="input-field" 
             style={{ width: 'auto' }}
@@ -433,7 +434,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
             <div className="glass-card" style={{ marginBottom: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
                 <h2 style={{ fontSize: '1.2rem' }}>Schritte ({task.steps.filter((s:any) => s.isCompleted).length}/{task.steps.length})</h2>
-                <button onClick={handleUpdateHours} className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem' }} title="Addiert die Stunden aus noch offenen Einzelschritten zur Aufgabe">
+                <button disabled={!canEdit} onClick={handleUpdateHours} className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem' }} title="Addiert die Stunden aus noch offenen Einzelschritten zur Aufgabe">
                   Rest-Stunden aktualisieren
                 </button>
               </div>

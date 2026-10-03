@@ -1,10 +1,11 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendTaskNotification } from '@/lib/mailer';
 import { logActivity } from '@/lib/activityLogger';
 import { runTaskCleanup } from '@/lib/taskCleanup';
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
 
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const body = await request.json();
     const { title, description, creatorId, creatorName, imageUrl, videos, estimatedHours, creatorIsContact, proposedDates, steps, materials } = body;
@@ -118,3 +119,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/tasks", handleGET);
+export const POST = secureRoute("/api/tasks", handlePOST);

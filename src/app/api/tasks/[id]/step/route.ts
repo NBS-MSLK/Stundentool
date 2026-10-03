@@ -1,8 +1,9 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendTaskNotification } from '@/lib/mailer';
 
-export async function PUT(request: Request, context: unknown) {
+async function handlePUT(request: Request, context: unknown) {
   const { id } = await (context as any).params;
   try {
     const body = await request.json();
@@ -38,3 +39,5 @@ export async function PUT(request: Request, context: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export const PUT = secureRoute("/api/tasks/[id]/step", handlePUT);

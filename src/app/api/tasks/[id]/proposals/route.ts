@@ -1,7 +1,8 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function POST(request: Request, context: unknown) {
+async function handlePOST(request: Request, context: unknown) {
   const { id } = await (context as any).params;
   
   try {
@@ -36,3 +37,5 @@ export async function POST(request: Request, context: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export const POST = secureRoute("/api/tasks/[id]/proposals", handlePOST);

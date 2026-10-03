@@ -1,9 +1,10 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendTaskNotification } from '@/lib/mailer';
 import { runTaskCleanup } from '@/lib/taskCleanup';
 
-export async function GET(request: Request, context: unknown) {
+async function handleGET(request: Request, context: unknown) {
   const { id } = await (context as any).params;
   try {
     // Automatically delete past proposals and reset past tasks
@@ -29,7 +30,7 @@ export async function GET(request: Request, context: unknown) {
   }
 }
 
-export async function PUT(request: Request, context: unknown) {
+async function handlePUT(request: Request, context: unknown) {
   const { id } = await (context as any).params;
   try {
     const oldTask = await prisma.task.findUnique({ where: { id } });
@@ -125,7 +126,7 @@ export async function PUT(request: Request, context: unknown) {
   }
 }
 
-export async function DELETE(request: Request, context: unknown) {
+async function handleDELETE(request: Request, context: unknown) {
   const { id } = await (context as any).params;
   try {
     await prisma.task.delete({
@@ -136,3 +137,7 @@ export async function DELETE(request: Request, context: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/tasks/[id]", handleGET);
+export const PUT = secureRoute("/api/tasks/[id]", handlePUT);
+export const DELETE = secureRoute("/api/tasks/[id]", handleDELETE);

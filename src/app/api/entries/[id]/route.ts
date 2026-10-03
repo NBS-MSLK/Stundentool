@@ -1,8 +1,9 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { logActivity } from '@/lib/activityLogger';
 
-export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
+async function handleGET(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
     const params = await props.params;
     const { id } = params;
@@ -13,7 +14,7 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
   }
 }
 
-export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
+async function handlePUT(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
     const params = await props.params;
     const { id } = params;
@@ -69,7 +70,7 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
   }
 }
 
-export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
+async function handleDELETE(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
     const params = await props.params;
     const { id } = params;
@@ -88,3 +89,7 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/entries/[id]", handleGET);
+export const PUT = secureRoute("/api/entries/[id]", handlePUT);
+export const DELETE = secureRoute("/api/entries/[id]", handleDELETE);

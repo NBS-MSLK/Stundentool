@@ -154,7 +154,11 @@ export default function Dashboard() {
             <Link href="/admin" className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: '#8a2be2' }}>Admin</Link>
           )}
           <Link href="/dashboard/password" className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: 'var(--accent-primary)' }}>Einstellungen</Link>
-          <button onClick={() => { localStorage.removeItem('user'); router.push('/'); }} className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: 'var(--text-secondary)' }}>Logout</button>
+          <button onClick={async () => {
+            const response = await fetch('/api/auth', { method: 'DELETE' });
+            if (!response.ok) { alert('Abmeldung fehlgeschlagen. Bitte erneut versuchen.'); return; }
+            localStorage.removeItem('user'); router.replace('/');
+          }} className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: 'var(--text-secondary)' }}>Logout</button>
         </div>
       </div>
 

@@ -1,7 +1,8 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse, NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const adminUser = await prisma.user.findFirst({
       where: { role: 'ADMIN' }
@@ -153,3 +154,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/equipment/seed", handleGET);

@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && prisma generate",
-    "start": "prisma db push --accept-data-loss && exec next start",
-    "lint": "eslint"
+    "build": "prisma generate && next build",
+    "start": "node scripts/prepare-session-table.mjs && next start",
+    "lint": "eslint",
+    "db:session": "node scripts/prepare-session-table.mjs",
+    "test:security": "node --test tests/security.test.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

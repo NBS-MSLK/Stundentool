@@ -1,9 +1,10 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+async function handleGET() {
   try {
     const logs = await prisma.activityLog.findMany({
       orderBy: { createdAt: 'desc' },
@@ -14,3 +15,5 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/logs", handleGET);

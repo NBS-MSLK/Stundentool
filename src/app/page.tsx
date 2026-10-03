@@ -10,10 +10,15 @@ export default function Login() {
   const router = useRouter();
 
   useEffect(() => {
-    const userJson = localStorage.getItem('user');
-    if (userJson) {
-      router.push('/dashboard');
-    }
+    fetch('/api/auth', { cache: 'no-store' }).then(async response => {
+      if (response.ok) {
+        const { user } = await response.json();
+        localStorage.setItem('user', JSON.stringify(user));
+        router.replace('/dashboard');
+      } else if (response.status === 401) {
+        localStorage.removeItem('user');
+      }
+    }).catch(() => {});
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {

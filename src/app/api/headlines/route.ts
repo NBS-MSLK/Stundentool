@@ -1,3 +1,4 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendGeneralNotification } from '@/lib/mailer';
@@ -5,7 +6,7 @@ import { logActivity } from '@/lib/activityLogger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+async function handleGET(req: Request) {
   try {
     const headlines = await prisma.headline.findMany({
       orderBy: { createdAt: 'desc' },
@@ -17,7 +18,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   try {
     const bodyText = await req.text();
     const body = JSON.parse(bodyText);
@@ -50,3 +51,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/headlines", handleGET);
+export const POST = secureRoute("/api/headlines", handlePOST);

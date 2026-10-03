@@ -1,9 +1,9 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
-export async function GET() {
+async function handleGET() {
   try {
     let funding = await prisma.fundingStatus.findUnique({
       where: { id: 'singleton' }
@@ -42,7 +42,7 @@ function safeParseFloat(val: any): number {
   return isNaN(parsed) ? 0 : parsed;
 }
 
-export async function PUT(request: Request) {
+async function handlePUT(request: Request) {
   try {
     const body = await request.json();
     const { totalAmount, disbursedAmount, submittedAmount, lastSubmittedDate, baseHours, goalHours } = body;
@@ -72,3 +72,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/funding", handleGET);
+export const PUT = secureRoute("/api/funding", handlePUT);

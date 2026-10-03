@@ -59,7 +59,7 @@ export default function PasswordChange() {
       if (res.ok) {
         setMessage('Einstellungen erfolgreich gespeichert! Du wirst weitergeleitet...');
         setTimeout(() => {
-          router.push('/dashboard');
+          if (dataObj.password) { localStorage.removeItem('user'); router.push('/'); } else router.push('/dashboard');
         }, 2000);
       } else {
         setMessage('Fehler beim Speichern der Einstellungen.');

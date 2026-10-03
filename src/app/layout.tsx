@@ -1,3 +1,4 @@
+import AuthBoundary from './components/AuthBoundary';
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -14,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body>
-        {children}
+        <AuthBoundary>{children}</AuthBoundary>
       </body>
     </html>
   );

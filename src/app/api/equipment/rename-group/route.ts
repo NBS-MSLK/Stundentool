@@ -1,3 +1,4 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
@@ -5,7 +6,7 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const { oldGroupName, newGroupName } = await request.json();
     
@@ -41,3 +42,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Error renaming group' }, { status: 500 });
   }
 }
+
+export const POST = secureRoute("/api/equipment/rename-group", handlePOST);

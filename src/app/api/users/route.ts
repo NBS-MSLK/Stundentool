@@ -1,7 +1,8 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET() {
+async function handleGET() {
   try {
     const users = await prisma.user.findMany({
       orderBy: { name: 'asc' },
@@ -13,11 +14,12 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   try {
     const { name, password, role } = await req.json();
-    if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    if (typeof name !== 'string' || !name.trim()) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     
+    if (role !== undefined && !['USER', 'ADMIN'].includes(role)) return NextResponse.json({ error: 'Ungültige Rolle' }, { status: 400 });
     const existing = await prisma.user.findUnique({ where: { name } });
     if (existing) return NextResponse.json({ error: 'Nutzername existiert bereits' }, { status: 400 });
 
@@ -30,7 +32,10 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ user });
   } catch (error) {
-    console.error('Create user error:', error);
+    console.error('Create user failed');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/users", handleGET);
+export const POST = secureRoute("/api/users", handlePOST);

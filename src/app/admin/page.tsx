@@ -226,7 +226,7 @@ export default function AdminView() {
                 <input type="text" className="input-field" value={newUserName} onChange={e => setNewUserName(e.target.value)} required />
               </div>
               <div style={{ flex: '1', minWidth: '200px' }}>
-                <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>Passwort (optional)</label>
+                <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>Startpasswort (ohne Passwort bleibt der Zugang gesperrt)</label>
                 <input type="text" className="input-field" value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} />
               </div>
               <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1.5rem', height: 'fit-content' }}>Benutzer anlegen</button>

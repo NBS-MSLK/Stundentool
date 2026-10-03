@@ -1,7 +1,8 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const body = await request.json();
     const { updates } = body; // Array of { id, order }
@@ -26,3 +27,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Error reordering categories' }, { status: 500 });
   }
 }
+
+export const POST = secureRoute("/api/equipment/reorder", handlePOST);

@@ -1,3 +1,4 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
@@ -21,7 +22,7 @@ function parseCategoryTitle(title: string) {
   }
 }
 
-export async function POST() {
+async function handlePOST() {
   try {
     // Fetch all categories sorted by current order, then by creation date as fallback
     const categories = await prisma.equipmentCategory.findMany({
@@ -88,3 +89,5 @@ export async function POST() {
     return NextResponse.json({ error: 'Error auto-numbering categories' }, { status: 500 });
   }
 }
+
+export const POST = secureRoute("/api/equipment/auto-number", handlePOST);

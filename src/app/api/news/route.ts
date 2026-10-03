@@ -1,13 +1,13 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { sendGeneralNotification } from '@/lib/mailer';
 import { logActivity } from '@/lib/activityLogger';
 
-const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+async function handleGET() {
   try {
     const news = await prisma.newsPost.findMany({
       orderBy: { createdAt: 'desc' },
@@ -19,7 +19,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const body = await request.json();
     const { title, content, imageUrl, authorId } = body;
@@ -52,3 +52,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/news", handleGET);
+export const POST = secureRoute("/api/news", handlePOST);

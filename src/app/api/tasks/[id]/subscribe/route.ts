@@ -1,7 +1,8 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
+async function handlePOST(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
     const params = await props.params;
     const { id } = params;
@@ -25,3 +26,5 @@ export async function POST(req: Request, props: { params: Promise<{ id: string }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export const POST = secureRoute("/api/tasks/[id]/subscribe", handlePOST);

@@ -1,7 +1,8 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function PUT(request: Request) {
+async function handlePUT(request: Request) {
   try {
     const body = await request.json();
     const budget = await prisma.equipmentBudget.upsert({
@@ -15,3 +16,5 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Error updating budget' }, { status: 500 });
   }
 }
+
+export const PUT = secureRoute("/api/equipment/budget", handlePUT);

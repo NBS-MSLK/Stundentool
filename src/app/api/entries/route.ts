@@ -1,8 +1,9 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { logActivity } from '@/lib/activityLogger';
 
-export async function GET(req: Request) {
+async function handleGET(req: Request) {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get('userId');
   const all = searchParams.get('all');
@@ -32,7 +33,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   try {
     const { userId, startTime, endTime, activity, note } = await req.json();
 
@@ -73,3 +74,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+
+export const GET = secureRoute("/api/entries", handleGET);
+export const POST = secureRoute("/api/entries", handlePOST);

@@ -8,6 +8,7 @@ datasource db {
 }
 
 model User {
+  sessions         Session[]
   id               String          @id @default(uuid())
   name             String          @unique
   password         String          @default("")
@@ -32,6 +33,17 @@ model User {
   priorityVotes    EquipmentPriorityVote[] @relation("UserPriorityVote")
   equipmentNotes   EquipmentNote[]       @relation("UserEquipmentNotes")
   createdAt        DateTime        @default(now())
+}
+
+model Session {
+  tokenHash String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model TimeEntry {

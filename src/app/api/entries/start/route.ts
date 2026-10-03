@@ -1,7 +1,8 @@
+import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   try {
     const { userId, activity } = await req.json();
     if (!userId) return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
@@ -27,3 +28,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+
+export const POST = secureRoute("/api/entries/start", handlePOST);
