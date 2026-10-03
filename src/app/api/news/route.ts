@@ -1,7 +1,6 @@
 import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { sendGeneralNotification } from '@/lib/mailer';
 import { logActivity } from '@/lib/activityLogger';
 
 
@@ -32,12 +31,6 @@ async function handlePOST(request: Request) {
       data: { title, content, imageUrl, authorId }
     });
     
-    sendGeneralNotification(
-      'NEWS',
-      `Neue Nachricht: ${title}`,
-      `Es gibt eine neue Nachricht im MakerSpace:\n\n${title}\n\n${content}`,
-      'https://stundentool-production.up.railway.app/dashboard'
-    ).catch(console.error);
 
     const user = await prisma.user.findUnique({ where: { id: authorId }});
     await logActivity(

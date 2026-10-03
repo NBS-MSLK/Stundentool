@@ -6,11 +6,6 @@ export default function PasswordChange() {
   const [user, setUser] = useState<any>(null);
   const [password, setPassword] = useState('');
   const [showInHighscore, setShowInHighscore] = useState(true);
-  const [email, setEmail] = useState('');
-  const [emailPref, setEmailPref] = useState('NONE');
-  const [notifyHeadlines, setNotifyHeadlines] = useState(true);
-  const [notifyNews, setNotifyNews] = useState(true);
-  const [notifyPolls, setNotifyPolls] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
@@ -26,11 +21,6 @@ export default function PasswordChange() {
       fetch(`/api/users/${parsedUser.id}`).then(res => res.json()).then(data => {
         if (data.user) {
           setShowInHighscore(data.user.showInHighscore);
-          if (data.user.email) setEmail(data.user.email);
-          if (data.user.emailPref) setEmailPref(data.user.emailPref);
-          if (data.user.notifyHeadlines !== undefined) setNotifyHeadlines(data.user.notifyHeadlines);
-          if (data.user.notifyNews !== undefined) setNotifyNews(data.user.notifyNews);
-          if (data.user.notifyPolls !== undefined) setNotifyPolls(data.user.notifyPolls);
         }
       });
     }
@@ -42,10 +32,7 @@ export default function PasswordChange() {
     setLoading(true);
     setMessage('');
     try {
-      const dataObj: any = { showInHighscore, emailPref, notifyHeadlines, notifyNews, notifyPolls };
-      if (email.trim()) dataObj.email = email.trim();
-      else dataObj.email = null;
-
+      const dataObj: any = { showInHighscore };
       if (password.trim()) {
         dataObj.password = password.trim();
       }
@@ -90,53 +77,6 @@ export default function PasswordChange() {
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
             />
-          </div>
-
-          <hr style={{ border: 'none', borderTop: '1px solid var(--bg-hover)', margin: '0.5rem 0' }} />
-
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>E-Mail-Adresse für Benachrichtigungen</label>
-            <input 
-              type="email" 
-              placeholder="deine@email.de" 
-              className="input-field" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Allgemeine Benachrichtigungen (Arbeiten)</label>
-            <select 
-              className="input-field" 
-              value={emailPref} 
-              onChange={(e) => setEmailPref(e.target.value)}
-              disabled={loading}
-            >
-              <option value="NONE">Gar nicht (Aus)</option>
-              <option value="SPECIFIC">Nur für gezielt abonnierte Arbeiten ("Glocke")</option>
-              <option value="ALL">Immer (bei jedem Status-Update & jeder neuen Arbeit)</option>
-            </select>
-          </div>
-
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Benachrichtige mich sofort bei:</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
-                <input type="checkbox" checked={notifyHeadlines} onChange={e => setNotifyHeadlines(e.target.checked)} disabled={loading} style={{ width: '1.2rem', height: '1.2rem' }} />
-                Kurzmeldungen
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
-                <input type="checkbox" checked={notifyNews} onChange={e => setNotifyNews(e.target.checked)} disabled={loading} style={{ width: '1.2rem', height: '1.2rem' }} />
-                Nachrichten
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
-                <input type="checkbox" checked={notifyPolls} onChange={e => setNotifyPolls(e.target.checked)} disabled={loading} style={{ width: '1.2rem', height: '1.2rem' }} />
-                Umfragen
-              </label>
-            </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Hinweis: Wenn deine E-Mail-Adresse leer ist, erhältst du keine Benachrichtigungen.</p>
           </div>
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--bg-hover)', margin: '0.5rem 0' }} />

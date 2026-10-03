@@ -1,7 +1,6 @@
 import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { sendTaskNotification } from '@/lib/mailer';
 import { logActivity } from '@/lib/activityLogger';
 import { runTaskCleanup } from '@/lib/taskCleanup';
 
@@ -88,24 +87,6 @@ async function handlePOST(request: Request) {
         }
       });
     }
-
-    let mailText = `Hallo,\n\nes wurde ein neuer Arbeitsdienst eingetragen: "${task.title}".\n\nErsteller: ${task.creatorName}`;
-    
-    if (task.dateProposals && task.dateProposals.length > 0) {
-      mailText += `\n\nTerminvorschläge:`;
-      task.dateProposals.forEach((p: any) => {
-        mailText += `\n- ${new Date(p.date).toLocaleDateString('de-DE')} (${p.startTime} - ${p.endTime} Uhr)`;
-      });
-      mailText += `\n\nBitte stimme im Dashboard ab!`;
-    } else {
-      mailText += `\n\nSchau dir die Details direkt im Stundentool an!`;
-    }
-
-    sendTaskNotification(
-      task.id,
-      `Neuer Arbeitsdienst: ${task.title}`,
-      mailText
-    ).catch(console.error);
 
     await logActivity(
       'TASK_CREATE',

@@ -1,7 +1,6 @@
 import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { sendGeneralNotification } from '@/lib/mailer';
 import { logActivity } from '@/lib/activityLogger';
 
 export const dynamic = 'force-dynamic';
@@ -29,14 +28,6 @@ async function handlePOST(req: Request) {
       data: { content, authorId }
     });
     
-    // We can also trigger notifications here if needed
-    // Send notification in background to not block UI
-    sendGeneralNotification(
-      'HEADLINE',
-      'Neue Kurzmeldung im MakerSpace',
-      `Es gibt eine neue Kurzmeldung:\n\n"${content}"`,
-      'https://stundentool-production.up.railway.app/dashboard'
-    ).catch(console.error);
 
     const user = await prisma.user.findUnique({ where: { id: authorId }});
     await logActivity(

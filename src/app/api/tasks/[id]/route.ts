@@ -1,7 +1,6 @@
 import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { sendTaskNotification } from '@/lib/mailer';
 import { runTaskCleanup } from '@/lib/taskCleanup';
 
 async function handleGET(request: Request, context: unknown) {
@@ -16,7 +15,6 @@ async function handleGET(request: Request, context: unknown) {
         materials: true,
         volunteers: true,
         notes: true,
-        subscribers: true,
         dateProposals: {
           include: { votes: true }
         },
@@ -33,7 +31,6 @@ async function handleGET(request: Request, context: unknown) {
 async function handlePUT(request: Request, context: unknown) {
   const { id } = await (context as any).params;
   try {
-    const oldTask = await prisma.task.findUnique({ where: { id } });
     const body = await request.json();
     const { status, title, description, imageUrl, videos, estimatedHours, creatorIsContact, steps, materials, proposedDates } = body;
     // Anmerkung: Wir lesen dueDate aus dem Body nicht mehr ein, oder behalten es für die API bei, aber das Edit-Form sendet proposedDates
@@ -106,19 +103,8 @@ async function handlePUT(request: Request, context: unknown) {
     const task = await prisma.task.update({
       where: { id },
       data: dataToUpdate,
-      include: { steps: true, materials: true, volunteers: true, dateProposals: true, subscribers: true, videos: true }
+      include: { steps: true, materials: true, volunteers: true, dateProposals: true,  videos: true }
     });
-
-    if (oldTask && status && oldTask.status !== status && status !== 'DONE') {
-      const statusLabels: any = { OPEN: 'Offen', IN_PROGRESS: 'In Arbeit', DONE: 'Erledigt', SCHEDULED: 'Terminiert' };
-      const oldS = statusLabels[oldTask.status] || oldTask.status;
-      const newS = statusLabels[status] || status;
-      sendTaskNotification(
-        task.id,
-        `Update: ${task.title}`,
-        `Der Status der Arbeit "${task.title}" hat sich geändert.\n\nVorher: ${oldS}\nJetzt: ${newS}`
-      );
-    }
 
     return NextResponse.json({ task });
   } catch (error: any) {

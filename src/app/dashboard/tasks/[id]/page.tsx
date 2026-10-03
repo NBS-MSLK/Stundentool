@@ -22,7 +22,6 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
 
   const [task, setTask] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
-  const [dbUser, setDbUser] = useState<any>(null);
   const [myNote, setMyNote] = useState('');
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -40,10 +39,6 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
     }
     const u = JSON.parse(userJson);
     setUser(u);
-    // Fetch user details from DB to know their emailPref
-    fetch(`/api/users/${u.id}`).then(res => res.json()).then(data => {
-      if (data.user) setDbUser(data.user);
-    });
     fetchTask(u);
   }, [taskId, router]);
 
@@ -151,15 +146,6 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
     fetchTask(user);
   };
 
-  const handleToggleSubscription = async (subscribe: boolean) => {
-    await fetch(`/api/tasks/${taskId}/subscribe`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, subscribe })
-    });
-    fetchTask(user);
-  };
-
   const handleCreateProposal = async () => {
     if (!newProposalDate || !newProposalStartTime || !newProposalEndTime) return;
     
@@ -199,7 +185,6 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
   if (!task) return <div className="container">Aufgabe nicht gefunden.</div>;
 
   const isVolunteered = task.volunteers?.some((v: any) => v.userId === user.id);
-  const isSubscribed = task.subscribers?.some((s: any) => s.id === user.id);
   const canEdit = user.role === 'ADMIN' || user.id === task.creatorId;
   const existingNote = task.notes?.find((n:any) => n.userId === user.id);
 
@@ -224,15 +209,6 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
              <Link href={`/dashboard/tasks/${taskId}/edit`} className="btn-primary" style={{ backgroundColor: 'transparent', color: 'var(--accent-primary)', border: '1px solid var(--accent-primary)' }}>
                ✏️ Bearbeiten
              </Link>
-          )}
-          {dbUser?.emailPref === 'SPECIFIC' && (
-             <button 
-               onClick={() => handleToggleSubscription(!isSubscribed)} 
-               className="btn-primary" 
-               style={{ backgroundColor: isSubscribed ? 'var(--warning)' : 'transparent', color: isSubscribed ? 'black' : 'var(--text-secondary)', border: `1px solid ${isSubscribed ? 'var(--warning)' : 'var(--text-secondary)'}`, padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}
-             >
-               {isSubscribed ? '🔕 Nicht mehr abonnieren' : '🔔 Updates abonnieren'}
-             </button>
           )}
         </div>
         <button 

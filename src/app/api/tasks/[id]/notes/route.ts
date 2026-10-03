@@ -1,7 +1,6 @@
 import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { sendTaskNotification } from '@/lib/mailer';
 
 async function handlePOST(request: Request, context: unknown) {
   const { id } = await (context as any).params;
@@ -14,10 +13,6 @@ async function handlePOST(request: Request, context: unknown) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const existingNote = await prisma.taskNote.findUnique({
-      where: { taskId_userId: { taskId: id, userId } }
-    });
-
     // Upsert note (create if not exists, update if exists)
     const note = await prisma.taskNote.upsert({
       where: {
@@ -26,17 +21,6 @@ async function handlePOST(request: Request, context: unknown) {
       update: { content },
       create: { taskId: id, userId, userName, content }
     });
-
-    if (!existingNote) {
-      const task = await prisma.task.findUnique({ where: { id } });
-      if (task) {
-        sendTaskNotification(
-          task.id,
-          `Neue Anmerkung: ${task.title}`,
-          `Es gibt eine neue Anmerkung von ${userName} zur Arbeit "${task.title}":\n\n"${content}"`
-        );
-      }
-    }
 
     return NextResponse.json({ note });
   } catch (error: any) {

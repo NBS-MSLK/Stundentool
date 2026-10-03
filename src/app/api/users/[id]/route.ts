@@ -9,8 +9,7 @@ async function handleGET(req: Request, props: { params: Promise<{ id: string }> 
     const params = await props.params;
     const { id } = params;
     const user = await prisma.user.findUnique({ 
-      where: { id },
-      include: { subscribedTasks: true }
+      where: { id }
     });
     if (!user) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ user });
@@ -26,7 +25,7 @@ async function handlePUT(req: Request, props: { params: Promise<{ id: string }> 
     const bodyText = await req.text();
 
     const body = JSON.parse(bodyText);
-    const { password, showInHighscore, email, emailPref, notifyHeadlines, notifyNews, notifyPolls } = body;
+    const { password, showInHighscore } = body;
 
     const data: any = {};
     if (password !== undefined) {
@@ -35,11 +34,6 @@ async function handlePUT(req: Request, props: { params: Promise<{ id: string }> 
       data.passwordHash = await hashPassword(password);
     }
     if (showInHighscore !== undefined) data.showInHighscore = showInHighscore;
-    if (email !== undefined) data.email = email;
-    if (emailPref !== undefined) data.emailPref = emailPref;
-    if (notifyHeadlines !== undefined) data.notifyHeadlines = notifyHeadlines;
-    if (notifyNews !== undefined) data.notifyNews = notifyNews;
-    if (notifyPolls !== undefined) data.notifyPolls = notifyPolls;
 
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: 'No data to update' }, { status: 400 });

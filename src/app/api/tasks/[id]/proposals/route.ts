@@ -25,13 +25,6 @@ async function handlePOST(request: Request, context: unknown) {
       }
     });
 
-    const { sendTaskNotification } = await import('@/lib/mailer');
-    sendTaskNotification(
-      id,
-      `Neuer Terminvorschlag: ${proposal.task.title}`,
-      `Hallo,\n\nes wurde ein neuer Terminvorschlag für die Aufgabe "${proposal.task.title}" eingereicht:\n\nDatum: ${new Date(date).toLocaleDateString('de-DE')}\nZeit: ${startTime || '08:00'} - ${endTime || '09:00'} Uhr\n\nBitte stimme im Dashboard ab!`
-    );
-
     return NextResponse.json({ proposal });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

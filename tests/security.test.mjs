@@ -141,7 +141,6 @@ test('session and API access integration', { timeout: 300000 }, async t => {
         ['/api/tasks', { creatorId: bob.id }],
         [`/api/tasks/${task.id}/volunteer`, { userId: bob.id, userName: bob.name }],
         [`/api/tasks/${task.id}/notes`, { userId: alice.id, userName: bob.name, content: 'fake' }],
-        [`/api/tasks/${task.id}/subscribe`, { userId: bob.id, subscribe: true }],
         [`/api/polls/missing/vote`, { userId: bob.id }],
         [`/api/equipment/suggestions/${suggestion.id}/votes`, { userId: bob.id }],
       ]) assert.equal((await request(url, { cookie: a, method: 'POST', body })).status, 403, url);
@@ -155,6 +154,21 @@ test('session and API access integration', { timeout: 300000 }, async t => {
         assert.equal(response.status, 200, url);
         assert(!/"password(?:Hash)?"\s*:/.test(await response.text()), url);
       }
+    });
+    await t.test('removed mail subscriptions expose no subscriber profiles and preserve stored settings', async () => {
+      await prisma.user.update({ where: { id: bob.id }, data: { email: 'private@example.invalid', emailPref: 'SPECIFIC' } });
+      await prisma.task.update({ where: { id: task.id }, data: { subscribers: { connect: { id: bob.id } } } });
+      const response = await request('/api/tasks/' + task.id, { cookie: a });
+      assert.equal(response.status, 200);
+      const payload = await response.json();
+      assert(!Object.hasOwn(payload.task, 'subscribers'));
+      assert(!JSON.stringify(payload).includes('private@example.invalid'));
+      assert.equal((await request('/api/tasks/' + task.id + '/subscribe', { cookie: b, method: 'POST', body: { userId: bob.id, subscribe: false } })).status, 404);
+      assert.equal((await request('/api/users/' + bob.id, { cookie: b, method: 'PUT', body: { emailPref: 'ALL' } })).status, 400);
+      const stored = await prisma.user.findUnique({ where: { id: bob.id }, include: { subscribedTasks: true } });
+      assert.equal(stored.email, 'private@example.invalid');
+      assert.equal(stored.emailPref, 'SPECIFIC');
+      assert(stored.subscribedTasks.some(item => item.id === task.id));
     });
     await t.test('new users store hashes and administrators can reset passwords', async () => {
       const created = await request('/api/users', { method: 'POST', cookie: root, body: { name: 'New member', password: 'new-member-test-only' } });

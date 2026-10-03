@@ -102,7 +102,7 @@ async function authorize(route: string, request: Request, params: Params, body: 
       if (proposal.taskId !== id) deny();
       return;
     }
-    case '/api/tasks/[id]/subscribe': case '/api/tasks/[id]/notes': case '/api/tasks/[id]/proposals': return;
+    case '/api/tasks/[id]/notes': case '/api/tasks/[id]/proposals': return;
     case '/api/equipment': if (!read) admin(user); return;
     case '/api/equipment/categories': return;
     case '/api/equipment/[id]': case '/api/equipment/categories/[id]':
