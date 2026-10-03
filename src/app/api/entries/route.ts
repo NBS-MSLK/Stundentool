@@ -2,6 +2,7 @@ import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { logActivity } from '@/lib/activityLogger';
+import { parseEntryTime, entryDurationError } from '@/lib/time-entry-validation';
 
 async function handleGET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -41,12 +42,12 @@ async function handlePOST(req: Request) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
-    const start = new Date(startTime);
-    const end = new Date(endTime);
+    const start = parseEntryTime(startTime);
+    const end = parseEntryTime(endTime);
+    if (!start || !end) return NextResponse.json({ error: 'Bitte gültige Zeitangaben eingeben.' }, { status: 400 });
+    const durationError = entryDurationError(start, end);
+    if (durationError) return NextResponse.json({ error: durationError }, { status: 400 });
     const diffMs = end.getTime() - start.getTime();
-    if (diffMs > 10 * 60 * 60 * 1000) {
-      return NextResponse.json({ error: 'Maximal 10 Stunden pro Eintrag erlaubt.' }, { status: 400 });
-    }
 
     const entry = await prisma.timeEntry.create({
       data: {

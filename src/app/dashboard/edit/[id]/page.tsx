@@ -50,12 +50,18 @@ export default function EditEntry({ params }: { params: Promise<{ id: string }> 
     const startObj = new Date(`${date}T08:00:00`); 
     const endObj = new Date(startObj.getTime() + parseInt(hours, 10) * 60 * 60 * 1000);
 
-    await fetch(`/api/entries/${id}`, {
+    const response = await fetch(`/api/entries/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ startTime: startObj.toISOString(), endTime: endObj.toISOString(), isConfirmed: true, activity, note })
     });
     
+    if (!response.ok) {
+      const data = await response.json();
+      setLoading(false);
+      alert(data.error || 'Eintrag konnte nicht gespeichert werden.');
+      return;
+    }
     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     setTimeout(() => {
       router.back();

@@ -33,8 +33,8 @@ test('session and API access integration', { timeout: 300000 }, async t => {
   const bob = await prisma.user.create({ data: { name: 'Test Bob', password: 'bob-test-only' } });
   const blank = await prisma.user.create({ data: { name: 'Test Unactivated' } });
   const named = await prisma.user.create({ data: { name: 'Nils Beinke-Schulte', password: 'named-test-only', role: 'USER' } });
-  const entry = await prisma.timeEntry.create({ data: { userId: bob.id, startTime: new Date(), endTime: new Date(), isConfirmed: true } });
-  const aliceEntry = await prisma.timeEntry.create({ data: { userId: alice.id, startTime: new Date(), endTime: new Date() } });
+  const entry = await prisma.timeEntry.create({ data: { userId: bob.id, startTime: new Date(Date.now() - 3600000), endTime: new Date(), isConfirmed: true } });
+  const aliceEntry = await prisma.timeEntry.create({ data: { userId: alice.id, startTime: new Date(Date.now() - 3600000), endTime: new Date() } });
   const task = await prisma.task.create({ data: { title: 'Bob task', creatorId: bob.id, creatorName: bob.name, steps: { create: { description: 'Step' } }, materials: { create: { name: 'Material' } } }, include: { steps: true, materials: true } });
   const aliceTask = await prisma.task.create({ data: { title: 'Alice task', creatorId: alice.id, creatorName: alice.name } });
   const category = await prisma.equipmentCategory.create({ data: { title: 'Bob category', creatorId: bob.id } });
@@ -219,6 +219,48 @@ test('session and API access integration', { timeout: 300000 }, async t => {
         const closed = await read(root);
         assert.equal(closed.totalVotes, 2);
       }
+    });
+    await t.test('time entries reject invalid dates and durations without changing data', async () => {
+      const user = await prisma.user.create({ data: { name: 'Time validation test' } });
+      const startTime = '2026-01-01T10:00:00.000Z';
+      const endTime = '2026-01-01T11:00:00.000Z';
+      const saved = await prisma.timeEntry.create({ data: { userId: user.id, startTime, endTime } });
+      const url = '/api/entries/' + saved.id;
+      for (const invalid of ['not-a-date', '', null, 123, true, {}, [], '2026-02-30T10:00:00Z', '2026-01-01T24:00:00Z']) {
+        for (const field of ['startTime', 'endTime']) {
+          assert.equal((await request('/api/entries', { cookie: root, method: 'POST', body: { userId: user.id, startTime, endTime, [field]: invalid } })).status, 400);
+          assert.equal((await request(url, { cookie: root, method: 'PUT', body: { [field]: invalid } })).status, 400);
+        }
+      }
+      for (const end of [startTime, '2026-01-01T09:00:00Z', '2026-01-01T20:00:00.001Z']) {
+        assert.equal((await request('/api/entries', { cookie: root, method: 'POST', body: { userId: user.id, startTime, endTime: end } })).status, 400);
+        assert.equal((await request(url, { cookie: root, method: 'PUT', body: { endTime: end } })).status, 400);
+      }
+      // Validate a partial edit against the unchanged other endpoint too.
+      assert.equal((await request(url, { cookie: root, method: 'PUT', body: { startTime: endTime } })).status, 400);
+      assert.deepEqual(await prisma.timeEntry.findUnique({ where: { id: saved.id } }), saved);
+      assert.equal(await prisma.timeEntry.count({ where: { userId: user.id } }), 1);
+      for (const [start, end] of [
+        [startTime, '2026-01-01T20:00:00Z'],
+        ['2026-01-01T23:00:00Z', '2026-01-02T01:00:00Z'],
+        ['2026-03-29T01:30:00+01:00', '2026-03-29T03:30:00+02:00'],
+      ]) {
+        assert.equal((await request('/api/entries', { cookie: root, method: 'POST', body: { userId: user.id, startTime: start, endTime: end } })).status, 200);
+        assert.equal((await request(url, { cookie: root, method: 'PUT', body: { startTime: start, endTime: end } })).status, 200);
+      }
+      // Old running timers can still be edited and stopped with the existing six-hour cap.
+      const timer = await prisma.timeEntry.create({ data: { userId: user.id, startTime: new Date(Date.now() - 12 * 3600000) } });
+      const timerUrl = '/api/entries/' + timer.id;
+      assert.equal((await request(timerUrl, { cookie: root, method: 'PUT', body: { note: 'Still running' } })).status, 200);
+      assert.equal((await request(timerUrl, { cookie: root, method: 'PUT', body: { isConfirmed: true } })).status, 400);
+      assert.equal((await request(timerUrl, { cookie: root, method: 'PUT', body: { startTime: new Date(Date.now() + 3600000).toISOString() } })).status, 400);
+      const stopped = await request('/api/entries/stop', { cookie: root, method: 'POST', body: { userId: user.id } });
+      assert.equal(stopped.status, 200);
+      const stoppedEntry = (await stopped.json()).entry;
+      assert.equal(new Date(stoppedEntry.endTime) - new Date(stoppedEntry.startTime), 6 * 3600000);
+      const future = await prisma.timeEntry.create({ data: { userId: user.id, startTime: new Date(Date.now() + 3600000) } });
+      assert.equal((await request('/api/entries/stop', { cookie: root, method: 'POST', body: { userId: user.id } })).status, 400);
+      assert.deepEqual(await prisma.timeEntry.findUnique({ where: { id: future.id } }), future);
     });
     await t.test('failed user deletion preserves entries and related records; successful deletion is atomic', async () => {
       for (const kind of ['task', 'newsPost', 'headline', 'equipmentSuggestion']) {

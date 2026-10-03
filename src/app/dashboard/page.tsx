@@ -116,6 +116,10 @@ export default function Dashboard() {
         body: JSON.stringify({ userId: user?.id })
       });
       const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Timer konnte nicht gestoppt werden.');
+        return;
+      }
       if (data.entry) {
         setActiveEntry(null);
         fetchData(user!.id);
@@ -126,11 +130,16 @@ export default function Dashboard() {
     }
   };
   const handleConfirm = async (id: string) => {
-    await fetch(`/api/entries/${id}`, {
+    const response = await fetch(`/api/entries/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isConfirmed: true })
     });
+    if (!response.ok) {
+      const data = await response.json();
+      alert(data.error || 'Eintrag konnte nicht bestätigt werden.');
+      return;
+    }
     fetchData(user!.id);
   };
   

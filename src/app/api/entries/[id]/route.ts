@@ -2,6 +2,7 @@ import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { logActivity } from '@/lib/activityLogger';
+import { parseEntryTime, entryDurationError } from '@/lib/time-entry-validation';
 
 async function handleGET(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
@@ -21,30 +22,39 @@ async function handlePUT(req: Request, props: { params: Promise<{ id: string }> 
     const { startTime, endTime, isConfirmed, activity, isArchived, isSubmitted, note } = await req.json();
 
     const dataToUpdate: any = {};
-    if (startTime) dataToUpdate.startTime = new Date(startTime);
-    if (endTime) dataToUpdate.endTime = new Date(endTime);
+    if (startTime !== undefined) {
+      const parsed = parseEntryTime(startTime);
+      if (!parsed) return NextResponse.json({ error: 'Bitte eine gültige Startzeit eingeben.' }, { status: 400 });
+      dataToUpdate.startTime = parsed;
+    }
+    if (endTime !== undefined) {
+      const parsed = parseEntryTime(endTime);
+      if (!parsed) return NextResponse.json({ error: 'Bitte eine gültige Endzeit eingeben.' }, { status: 400 });
+      dataToUpdate.endTime = parsed;
+    }
     if (typeof isConfirmed === 'boolean') dataToUpdate.isConfirmed = isConfirmed;
     if (typeof isArchived === 'boolean') dataToUpdate.isArchived = isArchived;
     if (typeof isSubmitted === 'boolean') dataToUpdate.isSubmitted = isSubmitted;
     if (activity !== undefined) dataToUpdate.activity = activity;
     if (note !== undefined) dataToUpdate.note = note;
 
-    // Validation: 10 hour limit
-    const finalStart = dataToUpdate.startTime || new Date((await prisma.timeEntry.findUnique({ where: { id }, select: { startTime: true } }))!.startTime);
-    const finalEnd = dataToUpdate.endTime || (dataToUpdate.endTime === null ? null : new Date((await prisma.timeEntry.findUnique({ where: { id }, select: { endTime: true } }))?.endTime || Date.now()));
-    
-    if (finalEnd) {
-      const diffMs = new Date(finalEnd).getTime() - new Date(finalStart).getTime();
-      if (diffMs > 10 * 60 * 60 * 1000) {
-        return NextResponse.json({ error: 'Maximal 10 Stunden pro Eintrag erlaubt.' }, { status: 400 });
+    const result = await prisma.$transaction(async tx => {
+      const current = await tx.timeEntry.findUnique({ where: { id } });
+      if (!current) return { error: 'Zeiteintrag nicht gefunden.', status: 404 };
+      const finalStart = dataToUpdate.startTime ?? current.startTime;
+      const finalEnd = dataToUpdate.endTime ?? current.endTime;
+      if (finalEnd) {
+        const error = entryDurationError(finalStart, finalEnd);
+        if (error) return { error, status: 400 };
+      } else {
+        if (finalStart.getTime() > Date.now()) return { error: 'Ein laufender Timer darf nicht in der Zukunft starten.', status: 400 };
+        if (isConfirmed === true) return { error: 'Bitte den Timer vor dem Bestätigen stoppen.', status: 400 };
       }
-    }
-
-    const entry = await prisma.timeEntry.update({
-      where: { id },
-      data: dataToUpdate,
-      include: { user: true }
+      const entry = await tx.timeEntry.update({ where: { id }, data: dataToUpdate, include: { user: true } });
+      return { entry };
     });
+    if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status });
+    const { entry } = result;
 
     if (isConfirmed === true && entry.endTime) {
       const diffMs = new Date(entry.endTime).getTime() - new Date(entry.startTime).getTime();

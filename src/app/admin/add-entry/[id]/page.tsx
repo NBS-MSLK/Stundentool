@@ -30,7 +30,7 @@ export default function AddAdminEntry({ params }: { params: Promise<{ id: string
     const startObj = new Date(`${date}T08:00:00`); 
     const endObj = new Date(startObj.getTime() + parseInt(hours, 10) * 60 * 60 * 1000);
 
-    await fetch(`/api/entries`, {
+    const response = await fetch(`/api/entries`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -41,6 +41,12 @@ export default function AddAdminEntry({ params }: { params: Promise<{ id: string
         note 
       })
     });
+    if (!response.ok) {
+      const data = await response.json();
+      setLoading(false);
+      alert(data.error || 'Eintrag konnte nicht gespeichert werden.');
+      return;
+    }
     router.back();
   };
 

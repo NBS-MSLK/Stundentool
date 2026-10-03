@@ -58,7 +58,7 @@ export default function NewEntry() {
 
     const finalUserId = targetUserId || currentUser?.id;
 
-    await fetch(`/api/entries`, {
+    const response = await fetch(`/api/entries`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -70,6 +70,12 @@ export default function NewEntry() {
       })
     });
     
+    if (!response.ok) {
+      const data = await response.json();
+      setLoading(false);
+      alert(data.error || 'Eintrag konnte nicht gespeichert werden.');
+      return;
+    }
     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     setTimeout(() => {
       router.push('/dashboard');

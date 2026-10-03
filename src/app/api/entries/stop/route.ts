@@ -1,6 +1,7 @@
 import { secureRoute } from '@/lib/api-access';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { entryDurationError } from '@/lib/time-entry-validation';
 
 async function handlePOST(req: Request) {
   try {
@@ -22,6 +23,8 @@ async function handlePOST(req: Request) {
     const finalEndTime = elapsed > SIX_HOURS_MS 
       ? new Date(new Date(active.startTime).getTime() + SIX_HOURS_MS)
       : now;
+    const durationError = entryDurationError(active.startTime, finalEndTime);
+    if (durationError) return NextResponse.json({ error: durationError }, { status: 400 });
 
     const entry = await prisma.timeEntry.update({
       where: { id: active.id },
