@@ -106,7 +106,7 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
   const totalPrice = baseCost + totalMatCost;
 
   return (
-    <div className="container" style={{ maxWidth: '800px' }}>
+    <div className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <Link href="/dashboard?tab=EQUIPMENT" className="btn-primary" style={{ backgroundColor: 'var(--text-secondary)' }}>&larr; Zurück</Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

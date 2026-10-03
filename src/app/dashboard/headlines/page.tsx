@@ -30,7 +30,7 @@ export default function HeadlinesArchive() {
   if (loading) return <div className="container" style={{ textAlign: 'center', marginTop: '4rem' }}>Lade Kurzmeldungen...</div>;
 
   return (
-    <div className="container" style={{ maxWidth: '800px' }}>
+    <div className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Alle Kurzmeldungen</h1>
         <Link href="/dashboard" className="btn-primary" style={{ backgroundColor: 'var(--text-secondary)', padding: '0.4rem 1rem', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>

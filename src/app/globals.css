@@ -73,7 +73,8 @@ input {
 
 /* Utilities */
 .container {
-  max-width: 600px;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
 }

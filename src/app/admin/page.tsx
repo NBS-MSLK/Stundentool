@@ -112,7 +112,7 @@ export default function AdminView() {
   const currentEntries = entries.filter(e => activeTab === 'AKTUELL' ? !e.isArchived : e.isArchived);
 
   return (
-    <div className="container" style={{ maxWidth: '1200px' }}>
+    <div className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1>Admin Übersicht</h1>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>

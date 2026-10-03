@@ -282,7 +282,7 @@ export default function WebheimatAdmin({ user }: { user: any }) {
             });
             setNewCategoryTitle('');
             fetchData();
-          }} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', maxWidth: '600px' }}>
+          }} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem', maxWidth: '600px' }}>
             <input type="text" className="input-field" placeholder="Kategoriename (z.B. '3D-Drucker')" value={newCategoryTitle} onChange={e => setNewCategoryTitle(e.target.value)} required />
             <button type="submit" className="btn-success" style={{ padding: '0.5rem 1.2rem', fontSize: '1rem', whiteSpace: 'nowrap' }}>Hinzufügen</button>
           </form>
@@ -298,7 +298,7 @@ export default function WebheimatAdmin({ user }: { user: any }) {
                   fetchData();
                 }} className="btn-danger" style={{ padding: '0.3rem 0.7rem', height: 'auto', fontSize: '0.85rem' }}>Kategorie Löschen</button>
               </div>
-              <div style={{ marginTop: '1rem' }}>
+              <div style={{ marginTop: '1rem', overflowX: 'auto' }}>
                 {cat.suggestions.length === 0 ? <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Keine Vorschläge in dieser Kategorie.</p> : (
                   <table style={{ width: '100%', fontSize: '0.9rem', textAlign: 'left', borderCollapse: 'collapse' }}>
                     <thead>

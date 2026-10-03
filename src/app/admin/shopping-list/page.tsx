@@ -36,7 +36,7 @@ export default function ShoppingList() {
   );
 
   return (
-    <div className="container" style={{ maxWidth: '800px', backgroundColor: 'white', color: 'black', minHeight: '100vh', padding: '2rem' }}>
+    <div className="container" style={{ backgroundColor: 'white', color: 'black', minHeight: '100vh' }}>
       <style>{`
         @media print {
           .no-print { display: none !important; }
