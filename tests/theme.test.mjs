@@ -22,6 +22,9 @@ test('Blocked storage still uses the system theme', () => {
 });
 
 const css = readFileSync('src/app/globals.css', 'utf8');
+test('Theme variables do not reference themselves', () => {
+  for (const match of css.matchAll(/(--[\w-]+):\s*var\((--[\w-]+)\)/g)) assert.notEqual(match[1], match[2]);
+});
 const dark = css.match(/html\[data-theme="dark"\] \{([\s\S]*?)\n\}/)[1];
 const colors = Object.fromEntries([...dark.matchAll(/--([\w-]+): (#[\da-f]{6});/g)].map(m => [m[1], m[2]]));
 function luminance(hex) {
