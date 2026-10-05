@@ -216,6 +216,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         )}
       </div>
 
+      {(news.length > 0 || polls.length > 0) && <div className="maker-content-pair">
       {/* 4. News Section */}
       {news.length > 0 && (
         <div className="glass-card">
@@ -235,11 +236,11 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
             const content = isExpanded || !isLong ? n.content : n.content.substring(0, 150) + '...';
 
             return (
-              <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+              <div className="maker-news-story">
                 {n.imageUrl && (
-                  <div style={{ flex: '1 1 250px', minHeight: '250px', backgroundImage: `url(${n.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 'var(--radius-md)' }} />
+                  <div className="maker-news-image" role="img" aria-label={n.title} style={{ backgroundImage: `url(${n.imageUrl})` }} />
                 )}
-                <div style={{ flex: '2 1 300px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                   <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>{n.title}</h3>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
                     Von {n.author.name} am {new Date(n.createdAt).toLocaleDateString()}
@@ -352,11 +353,16 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         </div>
       )}
 
+      </div>}
+
+      <div className="maker-content-pair">
       {/* 6. Instagram Embed */}
       <div className="glass-card">
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Instagram Feed</h2>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <iframe 
+            title="Instagram – MakerSpace Lübbecke"
+            loading="lazy"
             src="https://www.instagram.com/makerspace_luebbecke/embed" 
             width="100%" 
             height="480" 
@@ -393,6 +399,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
           </div>
         </div>
       )}
+      </div>
       
       </>
 
