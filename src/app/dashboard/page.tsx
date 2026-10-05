@@ -7,6 +7,7 @@ import { ACTIVITIES } from '@/lib/activities';
 import confetti from 'canvas-confetti';
 import TaskManager from './components/TaskManager';
 import Webheimat from './components/Webheimat';
+import Headlines from './components/Headlines';
 import EquipmentSection from './components/EquipmentSection';
 
 type User = { id: string, name: string, role: string };
@@ -181,6 +182,7 @@ export default function Dashboard() {
       </aside>
       <main className="maker-main">
         <header className="maker-top"><span className="maker-eyebrow">MakerSpace Lübbecke / {currentLabel}</span><div className="maker-account">{user.role === 'ADMIN' && <Link href="/admin">Admin</Link>}<Link href="/dashboard/password">Einstellungen</Link><button onClick={async () => { const response = await fetch('/api/auth', { method: 'DELETE' }); if (!response.ok) { setError('Abmeldung fehlgeschlagen.'); return; } localStorage.removeItem('user'); router.replace('/'); }}>Abmelden</button></div></header>
+        <Headlines />
         <div className="maker-greeting"><div><h1>{activeTab === 'WEBHEIMAT' ? 'Moin ' + user.name.split(' ')[0] + '. Zeit, was zu machen.' : currentLabel}</h1><p>{activeTab === 'WEBHEIMAT' ? 'Deine Werkstatt, dein Beitrag, unser gemeinsames Projekt.' : activeTab === 'TASKS' ? 'Finde eine Aufgabe, die zu dir passt.' : activeTab === 'EQUIPMENT' ? 'Gestalte mit, was unsere Werkstatt möglich macht.' : 'Dein Einsatz macht den Unterschied.'}</p></div><Link href="/dashboard/new" className="maker-button secondary">＋ Stunden nachtragen</Link></div>
         {error && <div role="alert" className="maker-error">{error}</div>}
         <div className="maker-hero-grid">

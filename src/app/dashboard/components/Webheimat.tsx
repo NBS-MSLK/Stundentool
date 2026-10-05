@@ -2,11 +2,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import GlobalCalendar from './GlobalCalendar';
+import FinanceCard from './FinanceCard';
 
 export default function Webheimat({ user, stats }: { user: any, stats: any }) {
-  const [activeTab, setActiveTab] = useState('OVERVIEW');
   const [funding, setFunding] = useState<any>(null);
-  const [headlines, setHeadlines] = useState<any[]>([]);
   const [news, setNews] = useState<any[]>([]);
   const [polls, setPolls] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
@@ -15,18 +14,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
   const [equipmentCategories, setEquipmentCategories] = useState<any[]>([]);
   const [expandedNews, setExpandedNews] = useState<{[key: string]: boolean}>({});
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
-  const [currentHeadlineIndex, setCurrentHeadlineIndex] = useState(0);
   const [expandedFaq, setExpandedFaq] = useState<{[key: string]: boolean}>({});
-
-  useEffect(() => {
-    const count = Math.min(headlines.length, 3);
-    if (count > 1) {
-      const timer = setInterval(() => {
-        setCurrentHeadlineIndex((prev) => (prev + 1) % count);
-      }, 5000);
-      return () => clearInterval(timer);
-    }
-  }, [headlines.length]);
 
   useEffect(() => {
     if (news.length > 0 && currentNewsIndex >= news.length) {
@@ -38,9 +26,8 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
     const fetchData = async () => {
       try {
         const fetchOpts = { cache: 'no-store' as RequestCache };
-        const [fRes, hRes, nRes, pRes, faqRes, tasksRes, eqRes] = await Promise.all([
+        const [fRes, nRes, pRes, faqRes, tasksRes, eqRes] = await Promise.all([
           fetch('/api/funding', fetchOpts).then(r => r.json()),
-          fetch('/api/headlines', fetchOpts).then(r => r.json()),
           fetch('/api/news', fetchOpts).then(r => r.json()),
           fetch('/api/polls', fetchOpts).then(r => r.json()),
           fetch('/api/faqs', fetchOpts).then(r => r.json()),
@@ -48,7 +35,6 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
           fetch('/api/equipment', fetchOpts).then(r => r.json())
         ]);
         if (fRes.funding) setFunding(fRes.funding);
-        if (hRes.headlines) setHeadlines(hRes.headlines);
         if (nRes.news) setNews(nRes.news);
         if (pRes.polls) setPolls(pRes.polls.filter((p:any) => p.isActive && !p.isArchived));
         if (faqRes.faqs) setFaqs(faqRes.faqs);
@@ -107,7 +93,6 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
     return `vor ${weeks} Wochen${days > 0 ? ` und ${days} Tagen` : ''}`;
   };
 
-  const latestHeadlines = headlines.slice(0, 3);
 
   let eqSpentAmount = 0;
   let eqPlannedAmount = 0;
@@ -143,215 +128,57 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
   const eqSpentPercentage = eqTotalBudget > 0 ? (eqSpentAmount / eqTotalBudget) * 100 : 0;
   const eqPlannedDifference = eqPlannedAmount - eqTotalBudget;
 
+  const money = (value: number) => value.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const percent = (value: number, total: number) => total > 0 ? Math.max(0, value / total * 100) : 0;
+
   return (
     <div className="maker-overview" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
         <>
-          {/* 0. Kurzmeldungen (Headlines) */}
-      {latestHeadlines.length > 0 && (
-        <div style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '0.8rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', position: 'relative' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px', backgroundColor: 'rgba(0,0,0,0.2)', padding: '0.3rem 0.6rem', borderRadius: '4px', flexShrink: 0 }}>
-              Aktuell
-            </div>
-            
-            {latestHeadlines.length > 1 && (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '0 1rem' }}>
-                {latestHeadlines.map((_, idx) => (
-                  <button 
-                    key={idx}
-                    onClick={() => setCurrentHeadlineIndex(idx)}
-                    style={{ 
-                      width: '8px', 
-                      height: '8px', 
-                      borderRadius: '50%', 
-                      border: 'none',
-                      padding: 0,
-                      cursor: 'pointer',
-                      backgroundColor: idx === currentHeadlineIndex ? 'white' : 'rgba(255,255,255,0.4)',
-                      transition: 'background-color 0.3s'
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-
-            <a href="/dashboard/headlines" style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', textDecoration: 'underline', flexShrink: 0 }}>
-              Alle anzeigen
-            </a>
-          </div>
-          
-          <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {latestHeadlines.length > 1 && (
-              <button 
-                onClick={() => setCurrentHeadlineIndex(prev => prev === 0 ? latestHeadlines.length - 1 : prev - 1)}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', padding: '0 0.5rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center' }}
-              >
-                &#8249;
-              </button>
-            )}
-
-            <div style={{ flex: 1, textAlign: 'center', padding: '0 0.5rem' }}>
-              <span key={currentHeadlineIndex} style={{ fontSize: '1rem', whiteSpace: 'normal', display: 'inline-block', animation: 'fadeIn 0.5s ease-in-out', lineHeight: 1.5 }}>
-                {latestHeadlines[currentHeadlineIndex]?.content}
-              </span>
-            </div>
-
-            {latestHeadlines.length > 1 && (
-              <button 
-                onClick={() => setCurrentHeadlineIndex(prev => (prev + 1) % latestHeadlines.length)}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', padding: '0 0.5rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center' }}
-              >
-                &#8250;
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
       <div className="maker-finance-grid">
-      {/* 1. Fördergeld-Statusbalken */}
-      {funding && (() => {
-        const total = parseFloat(funding.totalAmount) || 0;
-        const disbursed = parseFloat(funding.disbursedAmount) || 0;
-        const submitted = parseFloat(funding.submittedAmount) || 0;
-        const totalSum = disbursed + submitted;
-        const disbursedPercent = total > 0 ? (disbursed / total) * 100 : 0;
-        const submittedPercent = total > 0 ? (submitted / total) * 100 : 0;
-
-        return (
-          <div className="glass-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span>Gesamtfinanzierung</span>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '1.2rem', color: 'var(--text-primary)' }}>
-                  {totalSum.toLocaleString('de-DE')} € / {total.toLocaleString('de-DE')} €
-                </span>
-              </div>
-            </div>
-            
-            <div style={{ width: '100%', backgroundColor: 'var(--bg-primary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
-              <div 
-                style={{ width: `${disbursedPercent}%`, backgroundColor: 'var(--success)', height: '100%', transition: 'width 0.5s ease-in-out' }} 
-                title="Ausgezahlt"
-              ></div>
-              <div 
-                style={{ width: `${submittedPercent}%`, backgroundColor: 'var(--accent-primary)', height: '100%', transition: 'width 0.5s ease-in-out' }} 
-                title="Eingereicht (Wartend)"
-              ></div>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></div>
-                  Bereits ausgezahlt: {disbursed.toLocaleString('de-DE')} €
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)' }}></div>
-                  Aktuell eingereicht: {submitted.toLocaleString('de-DE')} €
-                </div>
-              </div>
-              {funding.lastSubmittedDate && (
-                <div style={{ fontStyle: 'italic' }}>
-                  Letzte Einreichung am {new Date(funding.lastSubmittedDate).toLocaleDateString('de-DE')} ({calculateDaysAgo(funding.lastSubmittedDate)})
-                </div>
-              )}
-            </div>
-            <p className="maker-budget-note">Noch nicht ausgezahlt oder eingereicht: {Math.max(0, total - totalSum).toLocaleString('de-DE')} €</p>
-          </div>
-        );
-      })()}
-
-      {/* 2. Stundentool Balken */}
-      <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span>Projekt-Förderwert (Stunden)</span>
-            <a href="/dashboard?tab=STUNDEN" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', textDecoration: 'underline' }}>zum Stundentool</a>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '1.2rem', color: 'var(--text-primary)' }}>
-              {((stats.hardcodedBaseHours + stats.systemActiveHours) * 20).toLocaleString('de-DE')} € / {(stats.totalGoalHours * 20).toLocaleString('de-DE')} €
-            </span>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}>
-              ({stats.hardcodedBaseHours + stats.systemActiveHours} / {stats.totalGoalHours} Stunden)
-            </div>
-          </div>
-        </div>
-        <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
-          <div 
-            style={{ width: `${(stats.hardcodedBaseHours / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--success)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold' }} 
-            title="Eingereicht / Archiviert"
-          >
-            {(stats.hardcodedBaseHours / stats.totalGoalHours) * 100 > 10 && `${(stats.hardcodedBaseHours * 20).toLocaleString('de-DE')} €`}
-          </div>
-          <div 
-            style={{ width: `${(stats.systemActiveHours / stats.totalGoalHours) * 100}%`, backgroundColor: 'var(--accent-primary)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold' }} 
-            title="Offen / Neu"
-          >
-             {(stats.systemActiveHours / stats.totalGoalHours) * 100 > 5 && `${(stats.systemActiveHours * 20).toLocaleString('de-DE')} €`}
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></div>
-            Bereits eingereicht: {(stats.hardcodedBaseHours * 20).toLocaleString('de-DE')} € ({stats.hardcodedBaseHours}h)
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)' }}></div>
-            Offener Förderwert: {(stats.systemActiveHours * 20).toLocaleString('de-DE')} € ({stats.systemActiveHours}h)
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Equipment Balken */}
-      {equipmentBudget && (
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontWeight: 600, alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span>Ausstattungsbudget</span>
-              <a href="/dashboard?tab=EQUIPMENT" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', textDecoration: 'underline' }}>zur Ausstattung</a>
-            </div>
-          </div>
-          
-          <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', position: 'relative' }}>
-            <div 
-              style={{ 
-                position: 'absolute', left: 0, top: 0,
-                width: `${Math.min(eqSpentPercentage, 100)}%`, 
-                backgroundColor: eqSpentAmount > eqTotalBudget ? 'var(--danger)' : 'var(--success)', 
-                height: '100%', transition: 'width 0.5s ease-in-out', zIndex: 2
-              }} 
-            />
-            <div style={{ position: 'relative', zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 'bold' }}>
-              {Math.round(eqSpentPercentage)}%
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', marginTop: '1rem', fontSize: '0.95rem', fontWeight: 600 }}>
-            <div style={{ textAlign: 'left' }}>
-              <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Ausgegeben</span>
-              <span style={{ color: 'var(--text-primary)' }}>{eqSpentAmount.toLocaleString('de-DE')} €</span>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Budget</span>
-              <span>{eqTotalBudget.toLocaleString('de-DE')} €</span>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Geplant</span>
-              <span style={{ color: eqPlannedAmount > eqTotalBudget ? 'var(--danger)' : 'var(--success)' }}>
-                {eqPlannedAmount.toLocaleString('de-DE')} €
-                <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem', color: eqPlannedDifference > 0 ? 'var(--danger)' : 'var(--success)' }}>
-                  ({eqPlannedDifference > 0 ? '+' : ''}{eqPlannedDifference.toLocaleString('de-DE')} €)
-                </span>
-              </span>
-            </div>
-          </div>
-          <p className="maker-budget-note">Verfügbar nach Käufen: {(eqTotalBudget - eqSpentAmount).toLocaleString('de-DE')} €</p>
-        </div>
-      )}
-
+        {funding && <FinanceCard
+          title="Gesamtfinanzierung"
+          value={money(Number(funding.disbursedAmount) + Number(funding.submittedAmount))}
+          target={'von ' + money(Number(funding.totalAmount)) + ' Fördermitteln'}
+          progress={percent(Number(funding.disbursedAmount) + Number(funding.submittedAmount), Number(funding.totalAmount))}
+          progressLabel="Ausgezahlt & eingereicht"
+          amounts={[
+            {label: 'Ausgezahlt', value: money(Number(funding.disbursedAmount)), share: percent(Number(funding.disbursedAmount), Number(funding.totalAmount)), color: 'var(--success)'},
+            {label: 'Eingereicht', value: money(Number(funding.submittedAmount)), share: percent(Number(funding.submittedAmount), Number(funding.totalAmount)), color: 'var(--accent-primary)'},
+            {label: 'Noch offen', value: money(Math.max(0, Number(funding.totalAmount) - Number(funding.disbursedAmount) - Number(funding.submittedAmount)))}
+          ]}
+          footnote={funding.lastSubmittedDate ? 'Letzte Einreichung: ' + new Date(funding.lastSubmittedDate).toLocaleDateString('de-DE') + ' (' + calculateDaysAgo(funding.lastSubmittedDate) + ')' : 'Auszahlungen und eingereichte Fördermittel im Überblick.'}
+        />}
+        <FinanceCard
+          title="Stunden-Förderwert"
+          value={money((stats.hardcodedBaseHours + stats.systemActiveHours) * 20)}
+          target={'von ' + money(stats.totalGoalHours * 20) + ' · ' + (stats.hardcodedBaseHours + stats.systemActiveHours).toLocaleString('de-DE') + ' / ' + stats.totalGoalHours.toLocaleString('de-DE') + ' h'}
+          progress={percent(stats.hardcodedBaseHours + stats.systemActiveHours, stats.totalGoalHours)}
+          progressLabel="Gemeinsam erarbeitet"
+          amounts={[
+            {label: 'Eingereicht', value: money(stats.hardcodedBaseHours * 20) + ' · ' + stats.hardcodedBaseHours.toLocaleString('de-DE') + ' h', share: percent(stats.hardcodedBaseHours, stats.totalGoalHours), color: 'var(--success)'},
+            {label: 'Offen', value: money(stats.systemActiveHours * 20) + ' · ' + stats.systemActiveHours.toLocaleString('de-DE') + ' h', share: percent(stats.systemActiveHours, stats.totalGoalHours), color: 'var(--accent-primary)'},
+            {label: 'Bis zum Ziel', value: money(Math.max(0, stats.totalGoalHours - stats.hardcodedBaseHours - stats.systemActiveHours) * 20)}
+          ]}
+          footnote="Jede erfasste Stunde entspricht 20 € Förderwert."
+          link={{href: '/dashboard?tab=STUNDEN', label: 'Zur Zeiterfassung'}}
+        />
+        {equipmentBudget && <FinanceCard
+          title="Ausstattungsbudget"
+          value={money(eqSpentAmount)}
+          target={'von ' + money(eqTotalBudget) + ' Budget'}
+          progress={eqSpentPercentage}
+          progressLabel="Bereits ausgegeben"
+          amounts={[
+            {label: 'Ausgegeben', value: money(eqSpentAmount), share: eqSpentPercentage, color: eqSpentAmount > eqTotalBudget ? 'var(--danger)' : 'var(--success)'},
+            {label: 'Budget', value: money(eqTotalBudget)},
+            {label: 'Geplant gesamt', value: money(eqPlannedAmount)},
+            {label: 'Verfügbar nach Käufen', value: money(eqTotalBudget - eqSpentAmount)},
+            {label: eqPlannedDifference > 0 ? 'Planung über Budget' : 'Spielraum zur Planung', value: money(Math.abs(eqPlannedDifference))}
+          ]}
+          footnote={'Verfügbar nach Käufen: ' + money(eqTotalBudget - eqSpentAmount)}
+          link={{href: '/dashboard?tab=EQUIPMENT', label: 'Zur Ausstattung'}}
+        />}
       </div>
       <section className="glass-card maker-open-tasks">
         <div className="maker-section-heading"><h2>Hier kannst du anpacken</h2><a href="/dashboard?tab=TASKS">Alle Aufgaben ↗</a></div>
