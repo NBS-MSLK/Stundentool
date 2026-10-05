@@ -1,157 +1,51 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { upcomingEvents, type CalendarTask } from '@/lib/upcoming-events';
 
-// Help functions to generate dates for a 4 week view
-function get4Weeks() {
-  const dates = [];
-  const start = new Date();
-  start.setHours(0,0,0,0);
-  // Start from today, go 28 days forward
-  for (let i = 0; i < 28; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    dates.push(d);
-  }
-  return dates;
-}
+export default function GlobalCalendar({ tasks, user, refetch }: { tasks: CalendarTask[]; user: { id: string; name: string }; refetch: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const events = upcomingEvents(tasks);
+  const visible = expanded ? events : events.slice(0, 6);
+  const dateOptions = { timeZone: 'Europe/Berlin' };
 
-export default function GlobalCalendar({ tasks, user, refetch }: { tasks: any[], user: any, refetch: () => void }) {
-  const dates = get4Weeks();
-
-  const handleVote = async (proposalId: string, vote: string) => {
-    // find task id for this proposal
-    let tId = '';
-    for(const t of tasks) {
-      if (t.dateProposals?.find((p:any) => p.id === proposalId)) {
-        tId = t.id; break;
-      }
-    }
-
-    if (!tId) return;
-
-    await fetch(`/api/tasks/${tId}/proposals/${proposalId}/vote`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, userName: user.name, vote })
-    });
-    refetch();
+  const handleVote = async (taskId: string, proposalId: string, vote: string) => {
+    setSaving(proposalId);
+    setError('');
+    try {
+      const response = await fetch(`/api/tasks/${taskId}/proposals/${proposalId}/vote`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, userName: user.name, vote }),
+      });
+      if (!response.ok) throw new Error('Deine Antwort konnte nicht gespeichert werden. Bitte erneut versuchen.');
+      refetch();
+    } catch { setError('Deine Antwort konnte nicht gespeichert werden. Bitte erneut versuchen.'); }
+    finally { setSaving(null); }
   };
 
-
   return (
-    <div className="glass-card" style={{ marginBottom: '2rem', overflowX: 'auto' }}>
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Kalender: Terminvorschläge Abstimmung</h2>
-      
-      <div style={{ display: 'flex', gap: '0.5rem', minWidth: '800px' }}>
-        {dates.map((d, i) => {
-          const dayProposals: any[] = [];
-          
-          tasks.forEach(t => {
-            // Check for fixed dueDate
-            if (t.dueDate) {
-              const dDate = new Date(t.dueDate);
-              if (dDate.toDateString() === d.toDateString()) {
-                if (t.status === 'SCHEDULED') {
-                  dayProposals.push({ type: 'FIXED', taskTitle: t.title, taskId: t.id, task: t });
-                } else {
-                  dayProposals.push({ type: 'OPEN_DATE', taskTitle: t.title, taskId: t.id, task: t });
-                }
-              }
-            } else {
-              // Check for proposals
-              t.dateProposals?.forEach((p:any) => {
-                const pDate = new Date(p.date);
-                if (pDate.toDateString() === d.toDateString()) {
-                  dayProposals.push({ type: 'PROPOSAL', taskTitle: t.title, taskId: t.id, proposal: p });
-                }
-              });
-            }
-          });
-
-          const isToday = i === 0;
-          const weekDay = d.toLocaleDateString('de-DE', { weekday: 'short' });
-          const hasItems = dayProposals.length > 0;
-
-          return (
-            <div key={i} style={{ 
-              flex: '1 0 100px', 
-              minHeight: '120px', 
-              backgroundColor: isToday ? 'var(--bg-secondary)' : 'var(--bg-primary)',
-              border: hasItems ? '2px solid #8a2be2' : '1px solid var(--bg-hover)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '0.5rem',
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: hasItems ? '#8a2be2' : 'var(--text-secondary)', textAlign: 'center', marginBottom: '0.5rem' }}>
-                {weekDay} {d.getDate()}.{d.getMonth()+1}.
-              </div>
-              
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {dayProposals.map((item, idx) => {
-                  if (item.type === 'FIXED') {
-                    const matchingProposal = item.task.dateProposals?.find((p: any) => new Date(p.date).getTime() === new Date(item.task.dueDate).getTime());
-                    const timeString = matchingProposal ? `${matchingProposal.startTime} - ${matchingProposal.endTime} Uhr` : 'Fester Termin';
-                    
-                    return (
-                      <Link key={idx} href={`/dashboard/tasks/${item.taskId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <div style={{ backgroundColor: 'rgba(82, 196, 26, 0.2)', padding: '0.3rem', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid #52c41a' }}>
-                          <div style={{ fontWeight: 'bold', color: '#52c41a', lineHeight: 1.2 }}>✅ {item.taskTitle}</div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{timeString}</div>
-                        </div>
-                      </Link>
-                    );
-                  }
-                  
-                  if (item.type === 'OPEN_DATE') {
-                    return (
-                      <Link key={idx} href={`/dashboard/tasks/${item.taskId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <div style={{ backgroundColor: 'rgba(24, 144, 255, 0.2)', padding: '0.3rem', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid #1890ff' }}>
-                          <div style={{ fontWeight: 'bold', color: '#1890ff', lineHeight: 1.2 }}>🔵 {item.taskTitle}</div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Offen</div>
-                        </div>
-                      </Link>
-                    );
-                  }
-
-                  const p = item.proposal;
-                  const myVote = p.votes?.find((v:any) => v.userId === user.id)?.vote;
-                  const totalYes = p.votes?.filter((v:any) => v.vote === 'YES').length || 0;
-
-                  return (
-                    <div key={idx} style={{ backgroundColor: 'rgba(138, 43, 226, 0.1)', padding: '0.3rem', borderRadius: '4px', fontSize: '0.75rem' }}>
-                      <Link href={`/dashboard/tasks/${item.taskId}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                        <div style={{ fontWeight: 'bold', color: '#8a2be2', lineHeight: 1.2 }}>{item.taskTitle}</div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{p.startTime || '08:00'} - {p.endTime || '12:00'} Uhr</div>
-                        <div style={{ fontSize: '0.65rem', marginBottom: '0.3rem' }}>Zusagen: {totalYes}</div>
-                      </Link>
-                      
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.2rem' }}>
-                        <button 
-                          onClick={() => handleVote(p.id, 'NO')}
-                          style={{ flex: 1, background: myVote === 'NO' ? '#ff4d4f' : 'transparent', border: '1px solid #ff4d4f', borderRadius: '2px', cursor: 'pointer', padding: '0 2px' }}
-                          title="Ich kann gar nicht"
-                        >❌</button>
-                        <button 
-                          onClick={() => handleVote(p.id, 'MAYBE')}
-                          style={{ flex: 1, background: myVote === 'MAYBE' ? '#faad14' : 'transparent', border: '1px solid #faad14', borderRadius: '2px', cursor: 'pointer', padding: '0 2px' }}
-                          title="Vielleicht / Unter Vorbehalt"
-                        >❓</button>
-                        <button 
-                          onClick={() => handleVote(p.id, 'YES')}
-                          style={{ flex: 1, background: myVote === 'YES' ? '#52c41a' : 'transparent', border: '1px solid #52c41a', borderRadius: '2px', cursor: 'pointer', padding: '0 2px' }}
-                          title="Ich bin sicher dabei"
-                        >✅</button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    <section className="glass-card maker-agenda" aria-label="Nächste Termine">
+      <div className="maker-section-heading"><h2>Nächste Termine</h2><span className="maker-eyebrow">{events.length} {events.length === 1 ? 'Termin' : 'Termine'}</span></div>
+      {error && <p role="alert" className="maker-error">{error}</p>}
+      {!events.length && <p className="agenda-empty">Aktuell stehen keine kommenden Termine oder Terminvorschläge an.</p>}
+      <ol className="agenda-list">{visible.map(event => {
+        const date = new Date(event.date);
+        const proposal = event.proposal;
+        const myVote = proposal?.votes?.find(vote => vote.userId === user.id)?.vote;
+        const yes = proposal?.votes?.filter(vote => vote.vote === 'YES').length || 0;
+        const times = proposal?.startTime ? proposal.startTime + (proposal.endTime ? '–' + proposal.endTime : '') + ' Uhr' : 'Uhrzeit noch offen';
+        return <li key={event.id} className="agenda-event">
+          <div className="agenda-date" aria-hidden="true"><strong>{date.toLocaleDateString('de-DE', { ...dateOptions, day: '2-digit' })}</strong><span>{date.toLocaleDateString('de-DE', { ...dateOptions, month: 'short' })}</span></div>
+          <div className="agenda-content"><div className="agenda-title"><Link href={'/dashboard/tasks/' + event.taskId}>{event.title}</Link><span className={'agenda-status ' + (event.type === 'FIXED' ? 'fixed' : '')}>{event.type === 'FIXED' ? 'Fester Termin' : event.type === 'PROPOSAL' ? 'Terminvorschlag' : 'Noch offen'}</span></div>
+            <p><time dateTime={event.day}>{date.toLocaleDateString('de-DE', { ...dateOptions, weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' })}</time> · {times}{event.type === 'PROPOSAL' ? ' · ' + yes + ' Zusagen' : event.creatorName ? ' · ' + event.creatorName : ''}</p>
+          </div>
+          {event.type === 'PROPOSAL' && proposal && <div className="agenda-votes" aria-label={'Deine Teilnahme: ' + event.title}>{([{ value: 'NO', label: 'Kann nicht' }, { value: 'MAYBE', label: 'Vielleicht' }, { value: 'YES', label: 'Bin dabei' }] as const).map(option => <button key={option.value} aria-pressed={myVote === option.value} disabled={saving !== null} onClick={() => handleVote(event.taskId, proposal.id, option.value)}>{saving === proposal.id ? '…' : option.label}</button>)}</div>}
+          {event.type !== 'PROPOSAL' && <Link className="agenda-details" href={'/dashboard/tasks/' + event.taskId}>Details ↗</Link>}
+        </li>;
+      })}</ol>
+      {events.length > 6 && <button className="maker-button secondary agenda-more" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? 'Weniger anzeigen' : 'Alle ' + events.length + ' Termine anzeigen'}</button>}
+    </section>
   );
 }

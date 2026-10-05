@@ -185,36 +185,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         {tasks.filter(task => task.status === 'OPEN' || task.status === 'IN_PROGRESS').slice(0, 3).map(task => <Link key={task.id} href={'/dashboard/tasks/' + task.id} className="maker-task-row"><div><strong>{task.title}</strong><p>{task.status === 'IN_PROGRESS' ? 'In Bearbeitung' : 'Offen'} · {task.volunteers?.length || 0} Helfer dabei</p></div><span>Mitmachen ↗</span></Link>)}
         {!tasks.some(task => task.status === 'OPEN' || task.status === 'IN_PROGRESS') && <p className="maker-budget-note">Aktuell gibt es keine offenen Aufgaben. Im Kalender findest du unsere geplanten Arbeitsdienste.</p>}
       </section>
-      {/* 4. Kalender & Termine */}
-      <div className="glass-card">
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Kalender & Termine</h2>
-        <div style={{ marginBottom: '1.5rem' }}>
-          <GlobalCalendar tasks={tasks} user={user} refetch={fetchTasks} />
-        </div>
-        
-        <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Anstehende Arbeitsdienste</h3>
-        {tasks.filter(t => t.status === 'SCHEDULED').length > 0 ? (
-          <div style={{ display: 'grid', gap: '1rem' }}>
-            {tasks.filter(t => t.status === 'SCHEDULED').map(t => (
-              <div key={t.id} style={{ padding: '1rem', border: '1px solid #52c41a', backgroundColor: 'rgba(82, 196, 26, 0.05)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
-                <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#52c41a' }}>{t.title}</div>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                    Termin: {new Date(t.dueDate).toLocaleDateString('de-DE')}
-                    {t.dateProposals?.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()) && 
-                      ` (${t.dateProposals.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()).startTime} - ${t.dateProposals.find((p: any) => new Date(p.date).getTime() === new Date(t.dueDate).getTime()).endTime} Uhr)`}
-                  </div>
-                </div>
-                <div style={{ fontSize: '0.85rem' }}>
-                  Verantwortlich: {t.creator?.name || 'Unbekannt'}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>Aktuell sind keine Arbeitsdienste fest terminiert.</div>
-        )}
-      </div>
+      <GlobalCalendar tasks={tasks} user={user} refetch={fetchTasks} />
 
       {(news.length > 0 || polls.length > 0) && <div className="maker-content-pair">
       {/* 4. News Section */}
