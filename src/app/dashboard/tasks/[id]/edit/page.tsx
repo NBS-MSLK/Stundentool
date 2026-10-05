@@ -239,22 +239,20 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
                     />
                   </div>
                   <button 
-                    type="button" 
+                    type="button" aria-label="Video entfernen" title="Video entfernen"
                     onClick={() => {
                       const newVideos = [...videos];
                       newVideos.splice(idx, 1);
                       if (newVideos.length === 0) newVideos.push({ url: '', description: '' });
                       setVideos(newVideos);
                     }} 
-                    className="btn-danger" 
-                    style={{ padding: '0.5rem 0.75rem', height: 'auto' }}
+                    className="task-icon-button remove"
                   >×</button>
                   {idx === videos.length - 1 && (
                     <button 
                       type="button" 
                       aria-label="Video hinzufügen" title="Video hinzufügen" onClick={() => setVideos([...videos, { url: '', description: '' }])}
-                      className="btn-primary task-add-button"
-                      style={{ backgroundColor: 'var(--accent-primary)', padding: '0.5rem 0.75rem', height: 'auto' }}
+                      className="task-icon-button add"
                     >+</button>
                   )}
                 </div>
@@ -326,14 +324,14 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
                   newSteps[idx].estimatedHours = e.target.value;
                   setSteps(newSteps);
                 }} placeholder={`Std (opt)`} />
-                <button type="button" onClick={() => {
+                <button type="button" aria-label="Schritt entfernen" title="Schritt entfernen" onClick={() => {
                   const newSteps = [...steps];
                   newSteps.splice(idx, 1);
                   if (newSteps.length === 0) newSteps.push({ description: '', estimatedHours: '' });
                   setSteps(newSteps);
-                }} className="btn-danger" style={{ padding: '0 0.5rem' }}>×</button>
+                }} className="task-icon-button remove">×</button>
                 {idx === steps.length - 1 && (
-                  <button type="button" aria-label="Schritt hinzufügen" title="Schritt hinzufügen" onClick={() => setSteps([...steps, { description: '', estimatedHours: '' }])} className="btn-primary task-add-button" style={{ backgroundColor: 'var(--accent-primary)', padding: '0 0.5rem' }}>+</button>
+                  <button type="button" aria-label="Schritt hinzufügen" title="Schritt hinzufügen" onClick={() => setSteps([...steps, { description: '', estimatedHours: '' }])} className="task-icon-button add">+</button>
                 )}
               </div>
             ))}
@@ -353,14 +351,14 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
                   newMat[idx].buyLink = e.target.value;
                   setMaterials(newMat);
                 }} placeholder="Kauflink (Optional)" />
-                <button type="button" onClick={() => {
+                <button type="button" aria-label="Material entfernen" title="Material entfernen" onClick={() => {
                   const newMat = [...materials];
                   newMat.splice(idx, 1);
                   if (newMat.length === 0) newMat.push({ name: '', buyLink: '' });
                   setMaterials(newMat);
-                }} className="btn-danger" style={{ padding: '0 0.5rem' }}>×</button>
+                }} className="task-icon-button remove">×</button>
                 {idx === materials.length - 1 && (
-                  <button type="button" aria-label="Material hinzufügen" title="Material hinzufügen" onClick={() => setMaterials([...materials, { name: '', buyLink: '' }])} className="btn-primary task-add-button" style={{ backgroundColor: 'var(--accent-primary)', padding: '0 0.5rem' }}>+</button>
+                  <button type="button" aria-label="Material hinzufügen" title="Material hinzufügen" onClick={() => setMaterials([...materials, { name: '', buyLink: '' }])} className="task-icon-button add">+</button>
                 )}
               </div>
             ))}

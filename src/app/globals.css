@@ -826,3 +826,26 @@ select,textarea{
   line-height: 1;
   box-shadow: none;
 }
+
+/* Add/remove controls share size, alignment and shape. */
+.task-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  color: white;
+  box-shadow: none;
+}
+.task-icon-button.add { background: var(--accent-primary); }
+.task-icon-button.remove { background: var(--danger); }
+.task-icon-button.add:hover { background: var(--accent-primary-hover); }
+.task-icon-button.remove:hover { background: var(--danger-hover); }
