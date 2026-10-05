@@ -252,9 +252,9 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
                   {idx === videos.length - 1 && (
                     <button 
                       type="button" 
-                      onClick={() => setVideos([...videos, { url: '', description: '' }])} 
-                      className="btn-primary" 
-                      style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.5rem 0.75rem', height: 'auto' }}
+                      aria-label="Video hinzufügen" title="Video hinzufügen" onClick={() => setVideos([...videos, { url: '', description: '' }])}
+                      className="btn-primary task-add-button"
+                      style={{ backgroundColor: 'var(--accent-primary)', padding: '0.5rem 0.75rem', height: 'auto' }}
                     >+</button>
                   )}
                 </div>
@@ -262,9 +262,9 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
               {videos.length === 0 && (
                 <button 
                   type="button" 
-                  onClick={() => setVideos([{ url: '', description: '' }])} 
+                  aria-label="Video hinzufügen" title="Video hinzufügen" onClick={() => setVideos([{ url: '', description: '' }])}
                   className="btn-primary" 
-                  style={{ backgroundColor: 'var(--bg-secondary)', width: '100%' }}
+                  style={{ backgroundColor: 'var(--accent-primary)', width: '100%' }}
                 >
                   + Video hinzufügen
                 </button>
@@ -333,7 +333,7 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
                   setSteps(newSteps);
                 }} className="btn-danger" style={{ padding: '0 0.5rem' }}>×</button>
                 {idx === steps.length - 1 && (
-                  <button type="button" onClick={() => setSteps([...steps, { description: '', estimatedHours: '' }])} className="btn-primary" style={{ backgroundColor: 'var(--bg-secondary)', padding: '0 0.5rem' }}>+</button>
+                  <button type="button" aria-label="Schritt hinzufügen" title="Schritt hinzufügen" onClick={() => setSteps([...steps, { description: '', estimatedHours: '' }])} className="btn-primary task-add-button" style={{ backgroundColor: 'var(--accent-primary)', padding: '0 0.5rem' }}>+</button>
                 )}
               </div>
             ))}
@@ -360,7 +360,7 @@ export default function EditTask({ params }: { params: Promise<{ id: string }> }
                   setMaterials(newMat);
                 }} className="btn-danger" style={{ padding: '0 0.5rem' }}>×</button>
                 {idx === materials.length - 1 && (
-                  <button type="button" onClick={() => setMaterials([...materials, { name: '', buyLink: '' }])} className="btn-primary" style={{ backgroundColor: 'var(--bg-secondary)', padding: '0 0.5rem' }}>+</button>
+                  <button type="button" aria-label="Material hinzufügen" title="Material hinzufügen" onClick={() => setMaterials([...materials, { name: '', buyLink: '' }])} className="btn-primary task-add-button" style={{ backgroundColor: 'var(--accent-primary)', padding: '0 0.5rem' }}>+</button>
                 )}
               </div>
             ))}

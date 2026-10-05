@@ -488,7 +488,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
             {!isVolunteered ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <button onClick={() => handleVolunteer('HELPER')} className="btn-primary" style={{ backgroundColor: 'var(--accent-primary)' }}>Ich helfe mit</button>
-                <button onClick={() => handleVolunteer('CONTACT')} className="btn-primary" style={{ backgroundColor: 'var(--bg-secondary)', color: 'white' }}>Als Ansprechpartner melden</button>
+                <button onClick={() => handleVolunteer('CONTACT')} className="btn-primary" style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>Als Ansprechpartner melden</button>
               </div>
             ) : (
               <div style={{ display: 'flex', justifyContent: 'flex-start' }}>

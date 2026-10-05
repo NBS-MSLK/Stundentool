@@ -816,3 +816,13 @@ select,textarea{
 .agenda-more { margin-top: 16px; }
 @media (max-width: 1000px) { .agenda-event { flex-wrap: wrap; } .agenda-votes { margin-left: 70px; flex-basis: calc(100% - 70px); } }
 @media (max-width: 650px) { .agenda-event { gap: 12px; } .agenda-votes { margin-left: 64px; flex-basis: calc(100% - 64px); } .agenda-details { margin-left: 64px; } .agenda-title a { font-size: 14px; } }
+
+.task-add-button {
+  min-width: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
+  align-self: center;
+  font-size: 22px;
+  line-height: 1;
+  box-shadow: none;
+}

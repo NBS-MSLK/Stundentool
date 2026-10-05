@@ -197,9 +197,9 @@ export default function NewTask() {
                   {idx === videos.length - 1 && (
                     <button 
                       type="button" 
-                      onClick={() => setVideos([...videos, { url: '', description: '' }])} 
-                      className="btn-primary" 
-                      style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.5rem 0.75rem', height: 'auto' }}
+                      aria-label="Video hinzufügen" title="Video hinzufügen" onClick={() => setVideos([...videos, { url: '', description: '' }])}
+                      className="btn-primary task-add-button"
+                      style={{ backgroundColor: 'var(--accent-primary)', padding: '0.5rem 0.75rem', height: 'auto' }}
                     >+</button>
                   )}
                 </div>
@@ -260,7 +260,7 @@ export default function NewTask() {
                   setSteps(newSteps);
                 }} placeholder={`Std (opt)`} />
                 {idx === steps.length - 1 && (
-                  <button type="button" onClick={() => setSteps([...steps, { description: '', estimatedHours: '' }])} className="btn-primary" style={{ backgroundColor: 'var(--bg-secondary)' }}>+</button>
+                  <button type="button" aria-label="Schritt hinzufügen" title="Schritt hinzufügen" onClick={() => setSteps([...steps, { description: '', estimatedHours: '' }])} className="btn-primary task-add-button" style={{ backgroundColor: 'var(--accent-primary)' }}>+</button>
                 )}
               </div>
             ))}
@@ -281,7 +281,7 @@ export default function NewTask() {
                   setMaterials(newMat);
                 }} placeholder="Kauflink (Optional)" />
                 {idx === materials.length - 1 && (
-                  <button type="button" onClick={() => setMaterials([...materials, { name: '', buyLink: '' }])} className="btn-primary" style={{ backgroundColor: 'var(--bg-secondary)' }}>+</button>
+                  <button type="button" aria-label="Material hinzufügen" title="Material hinzufügen" onClick={() => setMaterials([...materials, { name: '', buyLink: '' }])} className="btn-primary task-add-button" style={{ backgroundColor: 'var(--accent-primary)' }}>+</button>
                 )}
               </div>
             ))}
