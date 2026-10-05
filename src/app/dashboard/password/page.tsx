@@ -93,7 +93,7 @@ export default function PasswordChange() {
             <label htmlFor="highscoreToggle" style={{ fontSize: '0.95rem' }}>Mich im Highscore anzeigen</label>
           </div>
 
-          {message && <div style={{ color: message.includes('erfolgreich') ? 'var(--success)' : 'var(--danger)', fontSize: '0.9rem', textAlign: 'center' }}>{message}</div>}
+          {message && <div style={{ color: message.includes('erfolgreich') ? 'var(--success-text)' : 'var(--danger-text)', fontSize: '0.9rem', textAlign: 'center' }}>{message}</div>}
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
             <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>
               Speichern

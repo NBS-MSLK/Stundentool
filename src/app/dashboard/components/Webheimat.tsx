@@ -143,8 +143,8 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
           progress={percent(Number(funding.disbursedAmount) + Number(funding.submittedAmount), Number(funding.totalAmount))}
           progressLabel="Ausgezahlt & eingereicht"
           amounts={[
-            {label: 'Ausgezahlt', value: money(Number(funding.disbursedAmount)), share: percent(Number(funding.disbursedAmount), Number(funding.totalAmount)), color: 'var(--success)'},
-            {label: 'Eingereicht', value: money(Number(funding.submittedAmount)), share: percent(Number(funding.submittedAmount), Number(funding.totalAmount)), color: 'var(--accent-primary)'},
+            {label: 'Ausgezahlt', value: money(Number(funding.disbursedAmount)), share: percent(Number(funding.disbursedAmount), Number(funding.totalAmount)), color: 'var(--success-text)'},
+            {label: 'Eingereicht', value: money(Number(funding.submittedAmount)), share: percent(Number(funding.submittedAmount), Number(funding.totalAmount)), color: 'var(--accent-text)'},
             {label: 'Noch offen', value: money(Math.max(0, Number(funding.totalAmount) - Number(funding.disbursedAmount) - Number(funding.submittedAmount)))}
           ]}
           footnote={funding.lastSubmittedDate ? 'Letzte Einreichung: ' + new Date(funding.lastSubmittedDate).toLocaleDateString('de-DE') + ' (' + calculateDaysAgo(funding.lastSubmittedDate) + ')' : 'Auszahlungen und eingereichte Fördermittel im Überblick.'}
@@ -156,8 +156,8 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
           progress={percent(stats.hardcodedBaseHours + stats.systemActiveHours, stats.totalGoalHours)}
           progressLabel="Gemeinsam erarbeitet"
           amounts={[
-            {label: 'Eingereicht', value: money(stats.hardcodedBaseHours * 20) + ' · ' + stats.hardcodedBaseHours.toLocaleString('de-DE') + ' h', share: percent(stats.hardcodedBaseHours, stats.totalGoalHours), color: 'var(--success)'},
-            {label: 'Offen', value: money(stats.systemActiveHours * 20) + ' · ' + stats.systemActiveHours.toLocaleString('de-DE') + ' h', share: percent(stats.systemActiveHours, stats.totalGoalHours), color: 'var(--accent-primary)'},
+            {label: 'Eingereicht', value: money(stats.hardcodedBaseHours * 20) + ' · ' + stats.hardcodedBaseHours.toLocaleString('de-DE') + ' h', share: percent(stats.hardcodedBaseHours, stats.totalGoalHours), color: 'var(--success-text)'},
+            {label: 'Offen', value: money(stats.systemActiveHours * 20) + ' · ' + stats.systemActiveHours.toLocaleString('de-DE') + ' h', share: percent(stats.systemActiveHours, stats.totalGoalHours), color: 'var(--accent-text)'},
             {label: 'Bis zum Ziel', value: money(Math.max(0, stats.totalGoalHours - stats.hardcodedBaseHours - stats.systemActiveHours) * 20)}
           ]}
           footnote="Jede erfasste Stunde entspricht 20 € Förderwert."
@@ -170,7 +170,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
           progress={eqSpentPercentage}
           progressLabel="Bereits ausgegeben"
           amounts={[
-            {label: 'Ausgegeben', value: money(eqSpentAmount), share: eqSpentPercentage, color: eqSpentAmount > eqTotalBudget ? 'var(--danger)' : 'var(--success)'},
+            {label: 'Ausgegeben', value: money(eqSpentAmount), share: eqSpentPercentage, color: eqSpentAmount > eqTotalBudget ? 'var(--danger-text)' : 'var(--success-text)'},
             {label: 'Budget', value: money(eqTotalBudget)},
             {label: 'Geplant gesamt', value: money(eqPlannedAmount)},
             {label: 'Verfügbar nach Käufen', value: money(eqTotalBudget - eqSpentAmount)},
@@ -316,7 +316,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
                       );
                     })}
                   </div>
-                  {userVote && <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--success)' }}>✅ Du hast abgestimmt.</div>}
+                  {userVote && <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--success-text)' }}>✅ Du hast abgestimmt.</div>}
                 </div>
               );
             })}

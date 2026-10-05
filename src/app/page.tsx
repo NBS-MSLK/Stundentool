@@ -77,7 +77,7 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
           />
-          {errorText && <div style={{ color: 'var(--danger)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{errorText}</div>}
+          {errorText && <div style={{ color: 'var(--danger-text)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{errorText}</div>}
           <button type="submit" className="btn-primary" disabled={loading || !name.trim() || !password.trim()}>
             {loading ? 'Lade...' : 'Los geht\'s'}
           </button>

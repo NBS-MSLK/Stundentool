@@ -170,7 +170,7 @@ export default function AdminView() {
                   <td style={{ padding: '1rem' }}>{startStr}</td>
                   <td style={{ padding: '1rem' }}>{endStr}</td>
                   <td style={{ padding: '1rem' }}>
-                    <span style={{ color: e.isConfirmed ? 'var(--success)' : 'var(--danger)', fontWeight: 'bold' }}>
+                    <span style={{ color: e.isConfirmed ? 'var(--success-text)' : 'var(--danger-text)', fontWeight: 'bold' }}>
                       {e.isConfirmed ? 'Ja' : 'Nein'}
                     </span>
                   </td>

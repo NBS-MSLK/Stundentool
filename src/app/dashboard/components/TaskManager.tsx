@@ -126,7 +126,7 @@ export default function TaskManager({ user }: { user: any }) {
 
       {scheduledTasks.length > 0 && (
         <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: '#8a2be2', fontWeight: 'bold' }}>🎉 Terminierte Arbeiten</h3>
+          <h3 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--accent-text)', fontWeight: 'bold' }}>🎉 Terminierte Arbeiten</h3>
           <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
             {scheduledTasks.map(task => {
               const diffMs = new Date(task.dueDate).getTime() - new Date().getTime();
@@ -141,7 +141,7 @@ export default function TaskManager({ user }: { user: any }) {
                       <div style={{ fontSize: '2rem' }}>⏰</div>
                       <div>
                         <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{task.title}</div>
-                        <div style={{ color: '#8a2be2', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                        <div style={{ color: 'var(--accent-text)', fontWeight: 'bold', fontSize: '0.9rem' }}>
                           Am {new Date(task.dueDate).toLocaleDateString('de-DE')}{timeString}
                           {diffDays > 0 && ` (In ${diffDays} Tagen!)`}
                           {diffDays === 0 && ` (HEUTE!)`}
@@ -165,7 +165,7 @@ export default function TaskManager({ user }: { user: any }) {
                     <div style={{ display: 'flex', gap: '0.2rem' }}>
                       <button 
                         onClick={(e) => { e.preventDefault(); handleRemoveVolunteer(task.id); }}
-                        style={{ flex: 1, padding: '0.3rem', background: !task.volunteers?.some((v: any) => v.userId === user.id) ? '#ff4d4f' : 'transparent', border: '1px solid #ff4d4f', borderRadius: '2px', cursor: 'pointer' }}
+                        style={{ flex: 1, padding: '0.3rem', background: !task.volunteers?.some((v: any) => v.userId === user.id) ? 'var(--danger)' : 'transparent', border: '1px solid var(--danger)', borderRadius: '2px', cursor: 'pointer' }}
                         title="Ich kann gar nicht"
                       >❌</button>
                       <button 
@@ -175,7 +175,7 @@ export default function TaskManager({ user }: { user: any }) {
                       >❓</button>
                       <button 
                         onClick={(e) => { e.preventDefault(); handleVolunteer(task.id, 'HELPER'); }}
-                        style={{ flex: 1, padding: '0.3rem', background: task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'HELPER' || task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'CONTACT' ? '#52c41a' : 'transparent', border: '1px solid #52c41a', borderRadius: '2px', cursor: 'pointer' }}
+                        style={{ flex: 1, padding: '0.3rem', background: task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'HELPER' || task.volunteers?.find((v: any) => v.userId === user.id)?.role === 'CONTACT' ? 'var(--success)' : 'transparent', border: '1px solid var(--success)', borderRadius: '2px', cursor: 'pointer' }}
                         title="Ich bin sicher dabei"
                       >✅</button>
                     </div>
@@ -231,9 +231,9 @@ export default function TaskManager({ user }: { user: any }) {
                       <div key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>{new Date(p.date).toLocaleDateString('de-DE')} <span style={{color: 'var(--text-secondary)'}}>({p.startTime || '08:00'} - {p.endTime || '12:00'})</span></div>
                         <div style={{ display: 'flex', gap: '0.2rem', width: '100px' }}>
-                          <button onClick={(e) => { e.preventDefault(); handleVote(task.id, p.id, 'NO'); }} style={{ flex: 1, padding: '0.2rem', background: myVote === 'NO' ? '#ff4d4f' : 'transparent', border: '1px solid #ff4d4f', borderRadius: '2px', cursor: 'pointer' }}>❌</button>
+                          <button onClick={(e) => { e.preventDefault(); handleVote(task.id, p.id, 'NO'); }} style={{ flex: 1, padding: '0.2rem', background: myVote === 'NO' ? 'var(--danger)' : 'transparent', border: '1px solid var(--danger)', borderRadius: '2px', cursor: 'pointer' }}>❌</button>
                           <button onClick={(e) => { e.preventDefault(); handleVote(task.id, p.id, 'MAYBE'); }} style={{ flex: 1, padding: '0.2rem', background: myVote === 'MAYBE' ? '#faad14' : 'transparent', border: '1px solid #faad14', borderRadius: '2px', cursor: 'pointer' }}>❓</button>
-                          <button onClick={(e) => { e.preventDefault(); handleVote(task.id, p.id, 'YES'); }} style={{ flex: 1, padding: '0.2rem', background: myVote === 'YES' ? '#52c41a' : 'transparent', border: '1px solid #52c41a', borderRadius: '2px', cursor: 'pointer' }}>✅</button>
+                          <button onClick={(e) => { e.preventDefault(); handleVote(task.id, p.id, 'YES'); }} style={{ flex: 1, padding: '0.2rem', background: myVote === 'YES' ? 'var(--success)' : 'transparent', border: '1px solid var(--success)', borderRadius: '2px', cursor: 'pointer' }}>✅</button>
                         </div>
                       </div>
                     );

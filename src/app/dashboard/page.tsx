@@ -199,7 +199,7 @@ export default function Dashboard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
           <Link href="/dashboard/highscore" className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: '#ffd700', color: 'black' }}>Trophäen / Highscore</Link>
           <Link href="/dashboard/new" className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem' }}>Nachtragen</Link>
-          <Link href="/report" style={{ color: 'var(--accent-primary)', fontWeight: 500, whiteSpace: 'nowrap' }}>Zur Druckansicht</Link>
+          <Link href="/report" style={{ color: 'var(--accent-text)', fontWeight: 500, whiteSpace: 'nowrap' }}>Zur Druckansicht</Link>
         </div>
       </div>
 

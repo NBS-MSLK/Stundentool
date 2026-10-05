@@ -105,7 +105,7 @@ export default function HighscorePage() {
                  <div key={cat} style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{cat}</div>
                     <div style={{ fontWeight: 600, marginTop: '0.2rem', fontSize: '1.1rem' }}>👑 {king.userName}</div>
-                    <div style={{ fontSize: '0.9rem', marginTop: '0.4rem', color: 'var(--accent-primary)' }}>{king.hours} Stunden</div>
+                    <div style={{ fontSize: '0.9rem', marginTop: '0.4rem', color: 'var(--accent-text)' }}>{king.hours} Stunden</div>
                  </div>
               ))}
               {Object.keys(categoryKings).length === 0 && (
@@ -154,7 +154,7 @@ export default function HighscorePage() {
                   </td>
                   <td style={{ padding: '1rem', fontWeight: index < 3 ? 'bold' : 'normal' }}>{s.name}</td>
                   <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 'bold' }}>
-                    <div style={{ color: '#ffd700', textShadow: '0 0 5px rgba(255,215,0,0.3)', fontSize: '1.1rem' }}>{(s.hours * 20).toLocaleString('de-DE')} €</div>
+                    <div style={{ color: 'var(--gold-text)', textShadow: '0 0 5px rgba(255,215,0,0.3)', fontSize: '1.1rem' }}>{(s.hours * 20).toLocaleString('de-DE')} €</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{s.hours} Stunden</div>
                   </td>
                 </tr>

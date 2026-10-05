@@ -260,7 +260,7 @@ export default function EquipmentSection({ user }: { user: any }) {
             }} 
           />
           <div style={{ position: 'relative', zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white', fontSize: '0.85rem', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
-            {Math.round(spentPercentage)}%
+            <span style={{ background: 'var(--brand-ink)', padding: '2px 8px', borderRadius: '6px', textShadow: 'none' }}>{Math.round(spentPercentage)}%</span>
           </div>
         </div>
 
@@ -277,9 +277,9 @@ export default function EquipmentSection({ user }: { user: any }) {
           </div>
           <div style={{ textAlign: 'right' }}>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'block' }}>Geplant</span>
-            <span style={{ color: plannedAmount > totalBudget ? 'var(--danger)' : 'var(--success)' }}>
+            <span style={{ color: plannedAmount > totalBudget ? 'var(--danger-text)' : 'var(--success-text)' }}>
               {plannedAmount.toLocaleString('de-DE')} €
-              <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem', color: plannedDifference > 0 ? 'var(--danger)' : 'var(--success)' }}>
+              <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem', color: plannedDifference > 0 ? 'var(--danger-text)' : 'var(--success-text)' }}>
                 ({plannedDifference > 0 ? '+' : ''}{plannedDifference.toLocaleString('de-DE')} €)
               </span>
             </span>

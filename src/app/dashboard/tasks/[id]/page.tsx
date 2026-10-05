@@ -8,7 +8,7 @@ const renderTextWithLinks = (text: string) => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   return text.split(urlRegex).map((part, i) => {
     if (part.match(urlRegex)) {
-      return <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'underline' }}>{part}</a>;
+      return <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-text)', textDecoration: 'underline' }}>{part}</a>;
     }
     return part;
   });
@@ -206,7 +206,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <Link href="/dashboard" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>&larr; Zurück zum Dashboard</Link>
           {canEdit && (
-             <Link href={`/dashboard/tasks/${taskId}/edit`} className="btn-primary" style={{ backgroundColor: 'transparent', color: 'var(--accent-primary)', border: '1px solid var(--accent-primary)' }}>
+             <Link href={`/dashboard/tasks/${taskId}/edit`} className="btn-primary" style={{ backgroundColor: 'transparent', color: 'var(--accent-text)', border: '1px solid var(--accent-primary)' }}>
                ✏️ Bearbeiten
              </Link>
           )}
@@ -228,7 +228,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
           <div>
             <h1 style={{ fontSize: '2rem', fontWeight: 600, marginBottom: '0.5rem' }}>{task.title}</h1>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-              Erstellt von {task.creatorName} | Status: <span style={{ fontWeight: 'bold', color: task.status === 'DONE' ? 'var(--success)' : task.status === 'IN_PROGRESS' || task.status === 'SCHEDULED' ? 'var(--warning)' : 'inherit' }}>{task.status}</span>
+              Erstellt von {task.creatorName} | Status: <span style={{ fontWeight: 'bold', color: task.status === 'DONE' ? 'var(--success-text)' : task.status === 'IN_PROGRESS' || task.status === 'SCHEDULED' ? 'var(--warning)' : 'inherit' }}>{task.status}</span>
               {task.estimatedHours !== null && <span> | Rest-Aufwand: {task.estimatedHours}h</span>}
             </div>
             {task.dueDate && task.status !== 'OPEN' && (() => {
@@ -300,7 +300,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
       {/* Date Proposals Section */}
       {(!task.dueDate || task.status === 'OPEN') && (
         <div className="glass-card" style={{ marginBottom: '2rem', border: '2px solid var(--accent-primary)' }}>
-          <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--accent-primary)' }}>📆 Terminvorschläge</h2>
+          <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--accent-text)' }}>📆 Terminvorschläge</h2>
           
           {task.dateProposals?.length > 0 ? (
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
@@ -316,7 +316,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
                     backgroundColor: 'var(--bg-primary)', 
                     padding: '1rem', 
                     borderRadius: 'var(--radius-md)', 
-                    border: myVote ? `2px solid ${myVote === 'YES' ? '#52c41a' : myVote === 'NO' ? '#ff4d4f' : '#faad14'}` : '1px solid var(--bg-hover)'
+                    border: myVote ? `2px solid ${myVote === 'YES' ? 'var(--success)' : myVote === 'NO' ? 'var(--danger)' : '#faad14'}` : '1px solid var(--bg-hover)'
                   }}>
                     <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.2rem' }}>
                       {new Date(p.date).toLocaleDateString('de-DE')}
@@ -329,19 +329,19 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
                       <button 
                         onClick={() => handleVote(p.id, 'NO')}
                         className="btn-primary"
-                        style={{ flex: 1, backgroundColor: myVote === 'NO' ? '#ff4d4f' : 'transparent', color: myVote === 'NO' ? 'white' : 'var(--text-primary)', border: '1px solid #ff4d4f', padding: '0.5rem', height: 'auto' }}
+                        style={{ flex: 1, backgroundColor: myVote === 'NO' ? 'var(--danger)' : 'transparent', color: myVote === 'NO' ? 'white' : 'var(--text-primary)', border: '1px solid var(--danger)', padding: '0.5rem', height: 'auto' }}
                         title="Kann nicht"
                       >❌ {totalNo}</button>
                       <button 
                         onClick={() => handleVote(p.id, 'MAYBE')}
                         className="btn-primary"
-                        style={{ flex: 1, backgroundColor: myVote === 'MAYBE' ? '#faad14' : 'transparent', color: myVote === 'MAYBE' ? 'white' : 'var(--text-primary)', border: '1px solid #faad14', padding: '0.5rem', height: 'auto' }}
+                        style={{ flex: 1, backgroundColor: myVote === 'MAYBE' ? '#faad14' : 'transparent', color: myVote === 'MAYBE' ? 'black' : 'var(--text-primary)', border: '1px solid #faad14', padding: '0.5rem', height: 'auto' }}
                         title="Vielleicht"
                       >❓ {totalMaybe}</button>
                       <button 
                         onClick={() => handleVote(p.id, 'YES')}
                         className="btn-primary"
-                        style={{ flex: 1, backgroundColor: myVote === 'YES' ? '#52c41a' : 'transparent', color: myVote === 'YES' ? 'white' : 'var(--text-primary)', border: '1px solid #52c41a', padding: '0.5rem', height: 'auto' }}
+                        style={{ flex: 1, backgroundColor: myVote === 'YES' ? 'var(--success)' : 'transparent', color: myVote === 'YES' ? 'white' : 'var(--text-primary)', border: '1px solid var(--success)', padding: '0.5rem', height: 'auto' }}
                         title="Bin dabei"
                       >✅ {totalYes}</button>
                     </div>
@@ -394,7 +394,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
             <button 
               onClick={() => setIsProposing(true)}
               className="btn-primary"
-              style={{ width: '100%', padding: '1rem', background: 'transparent', border: '1px dashed var(--accent-primary)', color: 'var(--accent-primary)', fontWeight: 'bold' }}
+              style={{ width: '100%', padding: '1rem', background: 'transparent', border: '1px dashed var(--accent-primary)', color: 'var(--accent-text)', fontWeight: 'bold' }}
             >
               + Neuen Terminvorschlag hinzufügen
             </button>
@@ -538,7 +538,7 @@ export default function TaskDetail({ params }: { params: Promise<{ id: string }>
                   
                   {/* Bearbeiten Knopf für eigene Anmerkung */}
                   {!isEditingNote && n.userId === user.id && (
-                    <button onClick={() => setIsEditingNote(true)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-primary)', fontSize: '0.85rem' }}>
+                    <button onClick={() => setIsEditingNote(true)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontSize: '0.85rem' }}>
                       ✏️ Bearbeiten
                     </button>
                   )}

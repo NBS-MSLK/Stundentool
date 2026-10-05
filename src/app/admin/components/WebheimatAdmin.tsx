@@ -424,7 +424,7 @@ export default function WebheimatAdmin({ user }: { user: any }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <strong style={{ fontSize: '1.1rem' }}>{p.question} {p.isAnonymous && <span style={{ fontSize: '0.8rem', color: 'var(--warning)', fontWeight: 'normal' }}>(Vertraulich)</span>}</strong>
                 <div style={{ display: 'flex', gap: '0.3rem' }}>
-                  <button onClick={() => handleTogglePoll(p.id, p.isActive)} style={{ backgroundColor: p.isActive ? '#faad14' : '#52c41a', padding: '0.3rem 0.7rem', height: 'auto', color: p.isActive ? 'black' : 'white', fontSize: '0.85rem', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                  <button onClick={() => handleTogglePoll(p.id, p.isActive)} style={{ backgroundColor: p.isActive ? '#faad14' : 'var(--success)', padding: '0.3rem 0.7rem', height: 'auto', color: p.isActive ? 'black' : 'white', fontSize: '0.85rem', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
                     {p.isActive ? 'Deaktivieren' : 'Aktivieren'}
                   </button>
                   <button onClick={() => handleArchivePoll(p.id, p.isArchived)} className="btn-primary" style={{ backgroundColor: 'var(--text-secondary)', padding: '0.3rem 0.7rem', height: 'auto', fontSize: '0.85rem' }}>
@@ -452,7 +452,7 @@ export default function WebheimatAdmin({ user }: { user: any }) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                     <strong style={{ fontSize: '1.1rem' }}>{p.question} (Archiviert)</strong>
                     <div style={{ display: 'flex', gap: '0.3rem' }}>
-                      <button onClick={() => handleArchivePoll(p.id, p.isArchived)} className="btn-primary" style={{ backgroundColor: '#52c41a', padding: '0.3rem 0.7rem', height: 'auto', fontSize: '0.85rem', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                      <button onClick={() => handleArchivePoll(p.id, p.isArchived)} className="btn-primary" style={{ backgroundColor: 'var(--success)', padding: '0.3rem 0.7rem', height: 'auto', fontSize: '0.85rem', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                         Wiederherstellen
                       </button>
                       <button onClick={() => handleDeletePoll(p.id)} className="btn-danger" style={{ padding: '0.3rem 0.7rem', height: 'auto', fontSize: '0.85rem' }}>Löschen</button>

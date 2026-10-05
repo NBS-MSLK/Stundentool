@@ -152,9 +152,9 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
           {canEdit && (
             <div>
               {suggestion.status === 'PURCHASED' ? (
-                <span style={{ backgroundColor: 'rgba(46, 204, 113, 0.2)', color: 'var(--success)', padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>✓ Angeschafft</span>
+                <span style={{ backgroundColor: 'rgba(46, 204, 113, 0.2)', color: 'var(--success-text)', padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>✓ Angeschafft</span>
               ) : suggestion.status === 'REJECTED' ? (
-                <span style={{ backgroundColor: 'rgba(231, 76, 60, 0.2)', color: 'var(--danger)', padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Abgelehnt</span>
+                <span style={{ backgroundColor: 'rgba(231, 76, 60, 0.2)', color: 'var(--danger-text)', padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Abgelehnt</span>
               ) : (
                 <button 
                   onClick={() => {
@@ -304,7 +304,7 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
                 {suggestion.materials.map((m: any) => (
                   <tr key={m.id} style={{ borderBottom: '1px solid var(--bg-secondary)' }}>
                     <td style={{ padding: '0.5rem' }}>{m.name}</td>
-                    <td style={{ padding: '0.5rem' }}>{m.buyLink ? <a href={m.buyLink} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'underline' }}>Link</a> : '-'}</td>
+                    <td style={{ padding: '0.5rem' }}>{m.buyLink ? <a href={m.buyLink} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-text)', textDecoration: 'underline' }}>Link</a> : '-'}</td>
                     <td style={{ padding: '0.5rem' }}>{m.quantity}</td>
                     <td style={{ padding: '0.5rem' }}>{m.pricePerUnit.toLocaleString('de-DE')} €</td>
                     <td style={{ padding: '0.5rem' }}>{(m.quantity * m.pricePerUnit).toLocaleString('de-DE')} €</td>
@@ -319,7 +319,7 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
               <tfoot>
                 <tr>
                   <td colSpan={4} style={{ textAlign: 'right', padding: '1rem', fontWeight: 'bold' }}>Gesamtkosten (Maschine + Zubehör):</td>
-                  <td colSpan={2} style={{ padding: '1rem', fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--accent-primary)' }}>{totalPrice.toLocaleString('de-DE')} €</td>
+                  <td colSpan={2} style={{ padding: '1rem', fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--accent-text)' }}>{totalPrice.toLocaleString('de-DE')} €</td>
                 </tr>
               </tfoot>
             </table>
