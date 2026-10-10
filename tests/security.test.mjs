@@ -89,6 +89,14 @@ test('session and API access integration', { timeout: 300000 }, async t => {
       const data = await (await request('/api/inventory', { cookie: root })).json();
       const number = data.items.find(item => item.id === another.id).inventoryNumber;
       const categoryId = data.categories[0].id;
+      // Even the item's creator cannot move it or clear its category.
+      for (const cookie of [a, b]) {
+        for (const target of [categoryId, null]) {
+          assert.equal((await request('/api/inventory', { method: 'PUT', cookie, body: { id: suggestion.id, categoryId: target } })).status, 403);
+        }
+      }
+      const unchanged = await (await request('/api/inventory', { cookie: root })).json();
+      assert.equal(unchanged.items.find(item => item.id === suggestion.id).categoryId, null);
       assert.equal((await request('/api/inventory', { method: 'PUT', cookie: a, body: { id: suggestion.id, inventoryNumber: 42 } })).status, 403);
       assert.equal((await request('/api/inventory', { method: 'PUT', cookie: root, body: { id: suggestion.id, inventoryNumber: number } })).status, 409);
       assert.equal((await request('/api/inventory', { method: 'PUT', cookie: root, body: { id: suggestion.id, inventoryNumber: -1 } })).status, 400);

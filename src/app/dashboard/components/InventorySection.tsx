@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import styles from './InventorySection.module.css';
 
 type Item = { id: string; title: string; quantity: number; inventoryNumber: number; categoryId: number | null };
 type Category = { id: number; name: string };
@@ -61,7 +62,7 @@ export default function InventorySection({ canManage = false }: { canManage?: bo
       if (await save('POST', { name: newCategory })) setNewCategory('');
     }} style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'end', marginBottom: '1.5rem' }}>
       <label>Neue Inventarkategorie<input className="input-field" placeholder="z. B. Holzwerkstatt" value={newCategory} onChange={event => setNewCategory(event.target.value)} required maxLength={100} disabled={busy} /></label>
-      <button className="btn-primary" disabled={busy || !newCategory.trim()}>Kategorie anlegen</button>
+      <button className={`${styles.button} ${styles.primary}`} disabled={busy || !newCategory.trim()}>Kategorie anlegen</button>
     </form>}
     {loading ? <p role="status">Inventar wird geladen …</p> : <>
       <p>{items.length} Inventarpositionen · {items.reduce((sum, item) => sum + item.quantity, 0)} Stück</p>
@@ -76,17 +77,17 @@ export default function InventorySection({ canManage = false }: { canManage?: bo
             if (await save('PUT', { id: group.id, name: categoryName }, '/api/inventory/categories')) setRenaming(null);
           }}>
             <input className="input-field" aria-label="Kategoriename" value={categoryName} onChange={event => setCategoryName(event.target.value)} required maxLength={100} disabled={busy} autoFocus />
-            <button className="btn-primary" disabled={busy || !categoryName.trim()}>Speichern</button>
-            <button type="button" className="btn-primary" disabled={busy} onClick={() => setRenaming(null)}>Abbrechen</button>
-          </form> : <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-            <button type="button" className="btn-primary" disabled={busy} onClick={() => { setRenaming(group.id); setCategoryName(group.name); }}>Umbenennen</button>
-            <button type="button" className="btn-danger" disabled={busy} onClick={async () => {
+            <button className={styles.button} disabled={busy || !categoryName.trim()}>Speichern</button>
+            <button type="button" className={styles.button} disabled={busy} onClick={() => setRenaming(null)}>Abbrechen</button>
+          </form> : <div className={styles.actions}>
+            <button type="button" className={styles.button} disabled={busy} onClick={() => { setRenaming(group.id); setCategoryName(group.name); }}>Umbenennen</button>
+            <button type="button" className={`${styles.button} ${styles.danger}`} disabled={busy} onClick={async () => {
               if (confirm(`Kategorie „${group.name}“ löschen? Alle Gegenstände bleiben erhalten und werden „Nicht zugeordnet“.`)) await save('DELETE', { id: group.id }, '/api/inventory/categories');
             }}>Kategorie löschen</button>
           </div>)}
           {!members.length ? <p>Diese Kategorie ist noch leer. Über „Verschieben“ kannst du Gegenstände zuordnen.</p> : <div style={{ overflowX: 'auto', marginTop: '0.75rem' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <caption className="sr-only">Inventar: {group.name}</caption>
+              <caption className={styles.visuallyHidden}>Inventar: {group.name}</caption>
               <thead><tr>{['Inventarnummer', 'Bezeichnung', 'Menge', ...(canManage ? ['Verschieben'] : [])].map(label => <th key={label} scope="col" style={{ padding: '0.75rem', borderBottom: '2px solid var(--border-color)' }}>{label}</th>)}</tr></thead>
               <tbody>{members.map(item => <tr key={item.id}>
                 <td style={{ padding: '0.75rem' }}>{editing === item.id ? <form onSubmit={async event => {
@@ -95,8 +96,8 @@ export default function InventorySection({ canManage = false }: { canManage?: bo
                 }}>
                   <label>INV-<input aria-label={`Inventarnummer für ${item.title}`} type="number" min="1" max="2147483647" step="1" required value={number} onChange={event => setNumber(event.target.value)} disabled={busy} style={{ width: '7rem' }} autoFocus /></label>
                   {duplicate && <p role="alert">Diese Nummer ist bereits vergeben.</p>}
-                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}><button className="btn-primary" disabled={busy || duplicate || !number}>Speichern</button><button type="button" className="btn-primary" disabled={busy} onClick={() => setEditing(null)}>Abbrechen</button></div>
-                </form> : <><span style={{ whiteSpace: 'nowrap' }}>{numberLabel(item.inventoryNumber)}</span>{canManage && <button type="button" disabled={busy} aria-label={`Inventarnummer für ${item.title} ändern`} onClick={() => { setEditing(item.id); setNumber(String(item.inventoryNumber)); setError(''); }} style={{ marginLeft: '0.5rem' }}>Ändern</button>}</>}</td>
+                  <div className={styles.actions}><button className={styles.button} disabled={busy || duplicate || !number}>Speichern</button><button type="button" className={styles.button} disabled={busy} onClick={() => setEditing(null)}>Abbrechen</button></div>
+                </form> : <><span style={{ whiteSpace: 'nowrap' }}>{numberLabel(item.inventoryNumber)}</span>{canManage && <button type="button" className={styles.button} disabled={busy} aria-label={`Inventarnummer für ${item.title} ändern`} onClick={() => { setEditing(item.id); setNumber(String(item.inventoryNumber)); setError(''); }} style={{ marginLeft: '0.5rem' }}>Ändern</button>}</>}</td>
                 <td style={{ padding: '0.75rem' }}><Link href={`/dashboard/equipment/${item.id}`}>{item.title}</Link></td>
                 <td style={{ padding: '0.75rem' }}>{item.quantity}</td>
                 {canManage && <td style={{ padding: '0.75rem' }}><select className="input-field" aria-label={`${item.title} in Kategorie verschieben`} value={item.categoryId ?? ''} disabled={busy} onChange={event => { void save('PUT', { id: item.id, categoryId: event.target.value ? Number(event.target.value) : null }); }}>
