@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { equipmentBudgetTotals } from '@/lib/equipment-budget';
 
 export default function EquipmentSection({ user }: { user: any }) {
   const [budget, setBudget] = useState<any>(null);
@@ -191,47 +192,10 @@ export default function EquipmentSection({ user }: { user: any }) {
     fetchData();
   };
 
-  if (loading) return <div>Lade Equipment...</div>;
+  if (loading) return <div>Lade Anschaffungen...</div>;
   if (!budget) return <div>Fehler beim Laden des Budgets.</div>;
 
-  // Calculate budget components
-  let spentAmount = 0;
-  let plannedAmount = 0;
-
-  categories.forEach(cat => {
-    if (!cat.suggestions || cat.suggestions.length === 0) return;
-
-    let topSuggestion = cat.suggestions[0];
-    let maxVotes = topSuggestion.priorityVotes?.length || 0;
-
-    cat.suggestions.forEach((s: any) => {
-      let sCost = (s.price * (s.quantity || 1)) || 0;
-      if (s.materials) {
-        s.materials.forEach((m: any) => {
-          sCost += (m.quantity * m.pricePerUnit) || 0;
-        });
-      }
-
-      if (s.status === 'PURCHASED') {
-        spentAmount += sCost;
-        topSuggestion = s;
-        maxVotes = 999999;
-      } else if (s.status !== 'REJECTED' && (s.priorityVotes?.length || 0) > maxVotes) {
-        maxVotes = s.priorityVotes?.length || 0;
-        topSuggestion = s;
-      }
-    });
-
-    if (topSuggestion && topSuggestion.status !== 'REJECTED') {
-      let topCost = (topSuggestion.price * (topSuggestion.quantity || 1)) || 0;
-      if (topSuggestion.materials) {
-        topSuggestion.materials.forEach((m: any) => {
-          topCost += (m.quantity * m.pricePerUnit) || 0;
-        });
-      }
-      plannedAmount += topCost;
-    }
-  });
+  const { spentAmount, plannedAmount } = equipmentBudgetTotals(categories);
 
   const totalBudget = budget.totalAmount;
   const budgetPercentage = totalBudget > 0 ? (plannedAmount / totalBudget) * 100 : 0;
@@ -243,7 +207,7 @@ export default function EquipmentSection({ user }: { user: any }) {
       
       {/* Budget Bar */}
       <div className="glass-card" style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Ausstattungsbudget</h2>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Anschaffungsbudget</h2>
         
         <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '1.8rem', borderRadius: 'var(--radius-full)', overflow: 'hidden', position: 'relative' }}>
           {/* Spent Progress */}
@@ -305,6 +269,7 @@ export default function EquipmentSection({ user }: { user: any }) {
         </div>
       )}
 
+      <p>Angeschaffte Dinge findest du unter <Link href="/dashboard?tab=INVENTORY">Ausstattung</Link>. Ihre Kosten bleiben hier im Budget enthalten.</p>
       {/* Categories and Suggestions */}
       {(() => {
         let maxCatStars = 0;
@@ -338,7 +303,9 @@ export default function EquipmentSection({ user }: { user: any }) {
           }
         });
 
+        const isCompleted = (cat: any) => cat.suggestions.some((s: any) => s.status === 'PURCHASED') && cat.suggestions.every((s: any) => s.status === 'PURCHASED' || s.status === 'REJECTED');
         const renderCategory = (cat: any, displayTitle: string) => {
+          if (isCompleted(cat)) return null;
           const isExpanded = expandedCategories[cat.id];
           const hasMostStars = maxCatStars > 0 && catStarCounts[cat.id] === maxCatStars;
           
@@ -410,7 +377,7 @@ export default function EquipmentSection({ user }: { user: any }) {
               {isExpanded && (
                 <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-color)', backgroundColor: 'rgba(0,0,0,0.1)' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                    {cat.suggestions.map((s: any) => {
+                    {cat.suggestions.filter((s: any) => s.status !== 'PURCHASED').map((s: any) => {
                       const hasVoted = s.votes.some((v: any) => v.userId === user.id);
                       const hasPriorityVote = s.priorityVotes.some((v: any) => v.userId === user.id);
                       let totalMatCost = 0;
@@ -530,6 +497,7 @@ export default function EquipmentSection({ user }: { user: any }) {
         };
 
         return groups.map(group => {
+          if (group.isGroup && group.categories.every(isCompleted)) return null;
           if (group.isGroup) {
             const isGroupExpanded = expandedGroups[group.id];
             

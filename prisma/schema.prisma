@@ -318,3 +318,9 @@ model EquipmentNote {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
+
+// Number registry survives deletion so inventory numbers are never reused.
+model InventoryNumber {
+  number Int @id @default(autoincrement())
+  suggestionId String @unique
+}

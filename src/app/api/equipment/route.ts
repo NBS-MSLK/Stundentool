@@ -24,7 +24,10 @@ async function handleGET() {
       orderBy: { order: 'asc' }
     });
 
-    return NextResponse.json({ budget: budget || { totalAmount: 0 }, categories });
+    const numbers = await prisma.$queryRaw<{ suggestionId: string; number: number }[]>`SELECT "suggestionId", "number" FROM "InventoryNumber"`;
+    const byId = new Map(numbers.map(entry => [entry.suggestionId, entry.number]));
+    const withInventory = categories.map(category => ({ ...category, suggestions: category.suggestions.map(item => ({ ...item, inventoryNumber: byId.get(item.id) ?? null })) }));
+    return NextResponse.json({ budget: budget || { totalAmount: 0 }, categories: withInventory });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Error fetching equipment data' }, { status: 500 });

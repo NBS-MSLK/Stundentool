@@ -108,7 +108,7 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
   return (
     <div className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <Link href="/dashboard?tab=EQUIPMENT" className="btn-primary" style={{ backgroundColor: 'var(--text-secondary)' }}>&larr; Zurück</Link>
+        <Link href={suggestion.status === 'PURCHASED' ? '/dashboard?tab=INVENTORY' : '/dashboard?tab=EQUIPMENT'} className="btn-primary" style={{ backgroundColor: 'var(--text-secondary)' }}>&larr; Zurück</Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontWeight: 'bold', color: 'var(--text-secondary)' }}>Kategorie:</span>
           {isAdmin ? (

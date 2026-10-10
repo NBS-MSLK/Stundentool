@@ -45,7 +45,8 @@ async function handlePUT(request: Request, { params }: { params: Promise<{ id: s
       await prisma.equipmentSuggestion.updateMany({
         where: { 
           categoryId: suggestion.categoryId,
-          id: { not: id }
+          id: { not: id },
+          status: { not: 'PURCHASED' }
         },
         data: { status: 'REJECTED' }
       });

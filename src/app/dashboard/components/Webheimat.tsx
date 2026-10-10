@@ -1,4 +1,5 @@
 'use client';
+import { equipmentBudgetTotals } from '@/lib/equipment-budget';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import GlobalCalendar from './GlobalCalendar';
@@ -94,36 +95,8 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
   };
 
 
-  let eqSpentAmount = 0;
-  let eqPlannedAmount = 0;
-  let eqTotalBudget = equipmentBudget ? equipmentBudget.totalAmount : 0;
-
-  equipmentCategories.forEach(cat => {
-    if (!cat.suggestions || cat.suggestions.length === 0) return;
-    let topSuggestion = cat.suggestions[0];
-    let maxVotes = topSuggestion.priorityVotes?.length || 0;
-    cat.suggestions.forEach((s: any) => {
-      let sCost = s.price || 0;
-      if (s.materials) {
-        s.materials.forEach((m: any) => { sCost += (m.quantity * m.pricePerUnit) || 0; });
-      }
-      if (s.status === 'PURCHASED') {
-        eqSpentAmount += sCost;
-        topSuggestion = s;
-        maxVotes = 999999;
-      } else if (s.status !== 'REJECTED' && (s.priorityVotes?.length || 0) > maxVotes) {
-        maxVotes = s.priorityVotes?.length || 0;
-        topSuggestion = s;
-      }
-    });
-    if (topSuggestion && topSuggestion.status !== 'REJECTED') {
-      let topCost = topSuggestion.price || 0;
-      if (topSuggestion.materials) {
-        topSuggestion.materials.forEach((m: any) => { topCost += (m.quantity * m.pricePerUnit) || 0; });
-      }
-      eqPlannedAmount += topCost;
-    }
-  });
+  const { spentAmount: eqSpentAmount, plannedAmount: eqPlannedAmount } = equipmentBudgetTotals(equipmentCategories);
+  const eqTotalBudget = equipmentBudget ? equipmentBudget.totalAmount : 0;
 
   const eqSpentPercentage = eqTotalBudget > 0 ? (eqSpentAmount / eqTotalBudget) * 100 : 0;
   const eqPlannedDifference = eqPlannedAmount - eqTotalBudget;
@@ -164,7 +137,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
           link={{href: '/dashboard?tab=STUNDEN', label: 'Zur Zeiterfassung'}}
         />
         {equipmentBudget && <FinanceCard
-          title="Ausstattungsbudget"
+          title="Anschaffungsbudget"
           value={money(eqSpentAmount)}
           target={'von ' + money(eqTotalBudget) + ' Budget'}
           progress={eqSpentPercentage}
@@ -177,7 +150,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
             {label: eqPlannedDifference > 0 ? 'Planung über Budget' : 'Spielraum zur Planung', value: money(Math.abs(eqPlannedDifference))}
           ]}
           footnote={'Verfügbar nach Käufen: ' + money(eqTotalBudget - eqSpentAmount)}
-          link={{href: '/dashboard?tab=EQUIPMENT', label: 'Zur Ausstattung'}}
+          link={{href: '/dashboard?tab=EQUIPMENT', label: 'Zu den Anschaffungen'}}
         />}
       </div>
       <section className="glass-card maker-open-tasks">

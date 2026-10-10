@@ -3,12 +3,13 @@
   "version": "0.2.1",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/prepare-inventory.mjs && next dev",
     "build": "prisma generate && next build",
-    "start": "node scripts/prepare-session-table.mjs && node scripts/migrate-passwords.mjs && next start",
+    "start": "node scripts/prepare-session-table.mjs && node scripts/migrate-passwords.mjs && node scripts/prepare-inventory.mjs && next start",
     "lint": "eslint",
     "db:session": "node scripts/prepare-session-table.mjs",
-    "test:security": "node --test tests/password.test.mjs tests/security.test.mjs"
+    "test:security": "node --test tests/password.test.mjs tests/security.test.mjs",
+    "db:inventory": "node scripts/prepare-inventory.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

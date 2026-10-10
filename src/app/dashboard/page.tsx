@@ -8,6 +8,7 @@ import confetti from 'canvas-confetti';
 import TaskManager from './components/TaskManager';
 import Webheimat from './components/Webheimat';
 import Headlines from './components/Headlines';
+import InventorySection from './components/InventorySection';
 import EquipmentSection from './components/EquipmentSection';
 
 type User = { id: string, name: string, role: string };
@@ -32,7 +33,7 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [stats, setStats] = useState({ systemActiveHours: 0, systemArchivedHours: 0, hardcodedBaseHours: 619, totalGoalHours: 2700 });
   const [selectedActivity, setSelectedActivity] = useState('');
-  const [activeTab, setActiveTab] = useState<'WEBHEIMAT' | 'STUNDEN' | 'TASKS' | 'EQUIPMENT'>('WEBHEIMAT');
+  const [activeTab, setActiveTab] = useState<'WEBHEIMAT' | 'STUNDEN' | 'TASKS' | 'EQUIPMENT' | 'INVENTORY'>('WEBHEIMAT');
   
   const [elapsedString, setElapsedString] = useState('00:00:00');
 
@@ -50,7 +51,7 @@ export default function Dashboard() {
 
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
-    if (tab === 'EQUIPMENT' || tab === 'TASKS' || tab === 'STUNDEN' || tab === 'WEBHEIMAT') {
+    if (tab === 'INVENTORY' || tab === 'EQUIPMENT' || tab === 'TASKS' || tab === 'STUNDEN' || tab === 'WEBHEIMAT') {
       setActiveTab(tab);
     }
   }, [router]);
@@ -167,7 +168,7 @@ export default function Dashboard() {
 
   const totalHours = entries.reduce((sum, entry) => sum + Math.max(1, Math.ceil((new Date(entry.endTime!).getTime() - new Date(entry.startTime).getTime()) / 3600000)), 0);
   const monthHours = entries.filter(entry => { const date = new Date(entry.startTime); const now = new Date(); return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear(); }).reduce((sum, entry) => sum + Math.max(1, Math.ceil((new Date(entry.endTime!).getTime() - new Date(entry.startTime).getTime()) / 3600000)), 0);
-  const tabs = [{id: 'WEBHEIMAT', label: 'Übersicht', icon: 'grid'}, {id: 'STUNDEN', label: 'Meine Stunden', icon: 'clock'}, {id: 'TASKS', label: 'Aufgaben', icon: 'tasks'}, {id: 'EQUIPMENT', label: 'Ausstattung', icon: 'box'}] as const;
+  const tabs = [{id: 'WEBHEIMAT', label: 'Übersicht', icon: 'grid'}, {id: 'STUNDEN', label: 'Meine Stunden', icon: 'clock'}, {id: 'TASKS', label: 'Aufgaben', icon: 'tasks'}, {id: 'EQUIPMENT', label: 'Anschaffungen', icon: 'box'}, {id: 'INVENTORY', label: 'Ausstattung', icon: 'box'}] as const;
   const currentLabel = tabs.find(tab => tab.id === activeTab)!.label;
   const showHours = activeTab === 'WEBHEIMAT' || activeTab === 'STUNDEN';
   const projectHours = stats.hardcodedBaseHours + stats.systemActiveHours;
@@ -193,7 +194,7 @@ export default function Dashboard() {
         </div>
         <section className="maker-metrics" aria-label="Deine Stunden"><div><span className="maker-eyebrow">Dein Beitrag</span><strong>{totalHours.toLocaleString('de-DE')} <small>h</small></strong><p>Insgesamt mit angepackt</p></div><div><span className="maker-eyebrow">Diesen Monat</span><strong>{monthHours.toLocaleString('de-DE')} <small>h</small></strong><p>Danke für deinen Einsatz!</p></div><Link href="/dashboard/highscore"><span className="maker-eyebrow">Zusammen machen</span><strong>Trophäen <small>↗</small></strong><p>Unsere gemeinsamen Erfolge</p></Link></section>
         </>}
-        {activeTab === 'WEBHEIMAT' ? <Webheimat user={user} stats={stats} /> : activeTab === 'TASKS' ? <TaskManager user={user} /> : activeTab === 'EQUIPMENT' ? <EquipmentSection user={user} /> : <>
+        {activeTab === 'WEBHEIMAT' ? <Webheimat user={user} stats={stats} /> : activeTab === 'TASKS' ? <TaskManager user={user} /> : activeTab === 'EQUIPMENT' ? <EquipmentSection user={user} /> : activeTab === 'INVENTORY' ? <InventorySection /> : <>
       <div style={{ marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontSize: '1.2rem', fontWeight: 600, whiteSpace: 'nowrap' }}>Letzte Einträge</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
