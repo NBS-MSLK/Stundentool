@@ -55,6 +55,7 @@ async function authorize(route: string, request: Request, params: Params, body: 
   switch (route) {
     case '/api/inventory': if (!read) admin(user); return;
     case '/api/inventory/categories': admin(user); return;
+    case '/api/inventory/locations': admin(user); return;
     case '/api/users': admin(user); return;
     case '/api/users/[id]':
       if (method === 'DELETE') admin(user); else own(user, id);

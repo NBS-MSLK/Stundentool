@@ -80,6 +80,25 @@ test('session and API access integration', { timeout: 300000 }, async t => {
     const b = await login(bob, 'bob-test-only');
     const root = await login(admin, 'admin-test-only');
 
+    await t.test('locations are preset without assigning items and only admins may add or assign them', async () => {
+      const data = await (await request('/api/inventory', { cookie: root })).json();
+      assert.deepEqual(data.locations.map(location => location.name).sort(), ['Holzwerkstatt', 'Elektronikbereich', 'Kreativraum', 'Keller'].sort());
+      assert.ok(data.items.every(item => item.locationId === null));
+      const locationId = data.locations[0].id;
+      assert.equal((await request('/api/inventory/locations', { method: 'POST', cookie: a, body: { name: 'Lager' } })).status, 403);
+      assert.equal((await request('/api/inventory/locations', { method: 'POST', cookie: root, body: { name: 'Lager' } })).status, 201);
+      assert.equal((await request('/api/inventory/locations', { method: 'POST', cookie: root, body: { name: ' lager ' } })).status, 409);
+      await prisma.equipmentSuggestion.update({ where: { id: suggestion.id }, data: { status: 'PURCHASED' } });
+      const before = await prisma.equipmentSuggestion.findUnique({ where: { id: suggestion.id } });
+      for (const cookie of [a, b]) assert.equal((await request('/api/inventory', { method: 'PUT', cookie, body: { id: suggestion.id, locationId } })).status, 403);
+      assert.equal((await request('/api/inventory', { method: 'PUT', cookie: root, body: { id: suggestion.id, locationId: 999999 } })).status, 404);
+      assert.equal((await request('/api/inventory', { method: 'PUT', cookie: root, body: { id: suggestion.id, locationId } })).status, 200);
+      const assigned = await (await request('/api/inventory', { cookie: a })).json();
+      assert.equal(assigned.items.find(item => item.id === suggestion.id).locationId, locationId);
+      assert.deepEqual(await prisma.equipmentSuggestion.findUnique({ where: { id: suggestion.id } }), before);
+      assert.equal((await request('/api/inventory', { method: 'PUT', cookie: root, body: { id: suggestion.id, locationId: null } })).status, 200);
+    });
+
     await t.test('inventory numbers reject duplicates and categories can be created and assigned by admins', async () => {
       assert.equal((await request('/api/inventory', { method: 'POST', cookie: a, body: { name: 'Forbidden' } })).status, 403);
       assert.equal((await request('/api/inventory', { method: 'POST', cookie: root, body: { name: 'Holzwerkstatt' } })).status, 201);

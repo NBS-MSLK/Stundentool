@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from './InventorySection.module.css';
 
-type Item = { id: string; title: string; quantity: number; inventoryNumber: number; categoryId: number | null };
+type Item = { id: string; title: string; quantity: number; inventoryNumber: number; categoryId: number | null; locationId: number | null };
 type Category = { id: number; name: string };
 const numberLabel = (number: number) => `INV-${String(number).padStart(4, '0')}`;
 
 export default function InventorySection({ canManage = false }: { canManage?: boolean }) {
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [locations, setLocations] = useState<Category[]>([]);
+  const [newLocation, setNewLocation] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -27,6 +29,7 @@ export default function InventorySection({ canManage = false }: { canManage?: bo
     const data = await response.json();
     setItems(data.items);
     setCategories(data.categories);
+    setLocations(data.locations);
   }
   useEffect(() => {
     load().catch(error => setError(error.message)).finally(() => setLoading(false));
@@ -64,6 +67,14 @@ export default function InventorySection({ canManage = false }: { canManage?: bo
       <label>Neue Inventarkategorie<input className="input-field" placeholder="z. B. Holzwerkstatt" value={newCategory} onChange={event => setNewCategory(event.target.value)} required maxLength={100} disabled={busy} /></label>
       <button className={`${styles.button} ${styles.primary}`} disabled={busy || !newCategory.trim()}>Kategorie anlegen</button>
     </form>}
+    <p style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>Orte: {locations.map(location => location.name).join(' · ') || 'werden geladen …'}. Die Zuordnung erfolgt manuell.</p>
+    {canManage && <form onSubmit={async event => {
+      event.preventDefault();
+      if (await save('POST', { name: newLocation }, '/api/inventory/locations')) setNewLocation('');
+    }} style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'end', marginBottom: '1.5rem' }}>
+      <label>Neuer Ort<input className="input-field" placeholder="z. B. Lager" value={newLocation} onChange={event => setNewLocation(event.target.value)} required maxLength={100} disabled={busy} /></label>
+      <button className={`${styles.button} ${styles.primary}`} disabled={busy || !newLocation.trim()}>Ort anlegen</button>
+    </form>}
     {loading ? <p role="status">Inventar wird geladen …</p> : <>
       <p>{items.length} Inventarpositionen · {items.reduce((sum, item) => sum + item.quantity, 0)} Stück</p>
       {!items.length && <p>Noch keine Anschaffungen als „Angeschafft“ markiert.</p>}
@@ -88,7 +99,7 @@ export default function InventorySection({ canManage = false }: { canManage?: bo
           {!members.length ? <p>Diese Kategorie ist noch leer. Über „Verschieben“ kannst du Gegenstände zuordnen.</p> : <div style={{ overflowX: 'auto', marginTop: '0.75rem' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <caption className={styles.visuallyHidden}>Inventar: {group.name}</caption>
-              <thead><tr>{['Inventarnummer', 'Bezeichnung', 'Menge', ...(canManage ? ['Verschieben'] : [])].map(label => <th key={label} scope="col" style={{ padding: '0.75rem', borderBottom: '2px solid var(--border-color)' }}>{label}</th>)}</tr></thead>
+              <thead><tr>{['Inventarnummer', 'Bezeichnung', 'Menge', 'Ort', ...(canManage ? ['Verschieben'] : [])].map(label => <th key={label} scope="col" style={{ padding: '0.75rem', borderBottom: '2px solid var(--border-color)' }}>{label}</th>)}</tr></thead>
               <tbody>{members.map(item => <tr key={item.id}>
                 <td style={{ padding: '0.75rem' }}>{editing === item.id ? <form onSubmit={async event => {
                   event.preventDefault();
@@ -100,6 +111,10 @@ export default function InventorySection({ canManage = false }: { canManage?: bo
                 </form> : <><span style={{ whiteSpace: 'nowrap' }}>{numberLabel(item.inventoryNumber)}</span>{canManage && <button type="button" className={styles.button} disabled={busy} aria-label={`Inventarnummer für ${item.title} ändern`} onClick={() => { setEditing(item.id); setNumber(String(item.inventoryNumber)); setError(''); }} style={{ marginLeft: '0.5rem' }}>Ändern</button>}</>}</td>
                 <td style={{ padding: '0.75rem' }}><Link href={`/dashboard/equipment/${item.id}`}>{item.title}</Link></td>
                 <td style={{ padding: '0.75rem' }}>{item.quantity}</td>
+                <td style={{ padding: '0.75rem' }}>{canManage ? <select className="input-field" aria-label={`Ort für ${item.title}`} value={item.locationId ?? ''} disabled={busy} onChange={event => { void save('PUT', { id: item.id, locationId: event.target.value ? Number(event.target.value) : null }); }}>
+                  <option value="">Kein Ort zugeordnet</option>
+                  {locations.map(location => <option key={location.id} value={location.id}>{location.name}</option>)}
+                </select> : locations.find(location => location.id === item.locationId)?.name || 'Kein Ort zugeordnet'}</td>
                 {canManage && <td style={{ padding: '0.75rem' }}><select className="input-field" aria-label={`${item.title} in Kategorie verschieben`} value={item.categoryId ?? ''} disabled={busy} onChange={event => { void save('PUT', { id: item.id, categoryId: event.target.value ? Number(event.target.value) : null }); }}>
                   <option value="">Nicht zugeordnet</option>
                   {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}

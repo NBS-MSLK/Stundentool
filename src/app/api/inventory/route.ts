@@ -5,12 +5,15 @@ import prisma from '@/lib/prisma';
 async function handleGET() {
   const categories = await prisma.$queryRaw<{ id: number; name: string }[]>`SELECT id, name FROM InventoryCategory`;
   categories.sort((a, b) => a.name.localeCompare(b.name, 'de', { numeric: true }));
+  const locations = await prisma.$queryRaw<{ id: number; name: string }[]>`SELECT id, name FROM InventoryLocation`;
+  locations.sort((a, b) => a.name.localeCompare(b.name, 'de', { numeric: true }));
   const items = await prisma.$queryRaw`
-    SELECT s.id, s.title, s.quantity, n.number AS inventoryNumber, a.categoryId
+    SELECT s.id, s.title, s.quantity, n.number AS inventoryNumber, a.categoryId, p.locationId
     FROM EquipmentSuggestion s JOIN InventoryNumber n ON n.suggestionId = s.id
     LEFT JOIN InventoryAssignment a ON a.suggestionId = s.id
+    LEFT JOIN InventoryPlacement p ON p.suggestionId = s.id
     WHERE s.status = 'PURCHASED' ORDER BY n.number`;
-  return NextResponse.json({ categories, items });
+  return NextResponse.json({ categories, locations, items });
 }
 
 async function handlePOST(request: Request) {
@@ -26,7 +29,8 @@ async function handlePOST(request: Request) {
 async function handlePUT(request: Request) {
   const body = await request.json();
   if (typeof body.id !== 'string') throw new AccessError(400, 'Ungültiger Inventareintrag.');
-  if (body.inventoryNumber === undefined && body.categoryId === undefined) throw new AccessError(400, 'Keine Änderung angegeben.');
+  if (body.inventoryNumber === undefined && body.categoryId === undefined && body.locationId === undefined) throw new AccessError(400, 'Keine Änderung angegeben.');
+  if (body.locationId !== undefined && body.locationId !== null && (!Number.isSafeInteger(body.locationId) || body.locationId < 1)) throw new AccessError(400, 'Ungültiger Ort.');
   if (body.inventoryNumber !== undefined && (!Number.isSafeInteger(body.inventoryNumber) || body.inventoryNumber < 1 || body.inventoryNumber > 2147483647)) {
     throw new AccessError(400, 'Die Inventarnummer muss eine positive ganze Zahl sein (maximal 2147483647).');
   }
@@ -34,6 +38,13 @@ async function handlePUT(request: Request) {
   await prisma.$transaction(async tx => {
     const item = await tx.equipmentSuggestion.findUnique({ where: { id: body.id } });
     if (!item || item.status !== 'PURCHASED') throw new AccessError(404, 'Inventareintrag nicht gefunden.');
+    if (body.locationId === null) {
+      await tx.$executeRaw`DELETE FROM InventoryPlacement WHERE suggestionId = ${body.id}`;
+    } else if (body.locationId !== undefined) {
+      const location = await tx.$queryRaw<{ id: number }[]>`SELECT id FROM InventoryLocation WHERE id = ${body.locationId}`;
+      if (!location.length) throw new AccessError(404, 'Ort nicht gefunden.');
+      await tx.$executeRaw`INSERT INTO InventoryPlacement (suggestionId, locationId) VALUES (${body.id}, ${body.locationId}) ON CONFLICT(suggestionId) DO UPDATE SET locationId = excluded.locationId`;
+    }
     if (body.inventoryNumber !== undefined) {
       // The primary key checks uniqueness atomically, including reserved numbers.
       const changed = await tx.$executeRaw`UPDATE OR IGNORE InventoryNumber SET number = ${body.inventoryNumber} WHERE suggestionId = ${body.id}`;

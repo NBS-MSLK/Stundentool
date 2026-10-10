@@ -334,3 +334,13 @@ model InventoryAssignment {
   suggestionId String @id
   categoryId Int
 }
+
+model InventoryLocation {
+  id Int @id @default(autoincrement())
+  name String @unique
+}
+
+model InventoryPlacement {
+  suggestionId String @id
+  locationId Int
+}

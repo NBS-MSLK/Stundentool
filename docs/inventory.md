@@ -46,3 +46,13 @@ Kategorien lassen sich als Administrator umbenennen und nach Bestätigung lösch
 Beim Löschen werden ausschließlich die Kategorie und ihre Zuordnungen entfernt;
 Gegenstände, Inventarnummern und Anschaffungskosten bleiben erhalten. Die
 betroffenen Gegenstände erscheinen anschließend unter „Nicht zugeordnet“.
+
+## Orte
+
+Orte werden unabhängig von Kategorien gespeichert. Holzwerkstatt,
+Elektronikbereich, Kreativraum und Keller sind vorbelegt. Die Vorbereitung
+legt keine Ortszuordnungen für Gegenstände an und erhält bestehende Zuordnungen.
+Administratoren können weitere Orte hinzufügen und über die Spalte „Ort“
+zuordnen oder die Zuordnung entfernen. Mitglieder sehen die Orte, dürfen sie
+aber weder anlegen noch zuweisen. Eine Inventarposition mit mehreren Stück
+hat einen gemeinsamen Ort.

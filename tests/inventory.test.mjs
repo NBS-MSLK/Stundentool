@@ -11,6 +11,8 @@ test('backfill and status changes assign stable numbers without duplicates or re
       INSERT INTO EquipmentSuggestion VALUES ('old', 'PURCHASED', '2020'), ('new', 'PROPOSED', '2021');`);
     for (const sql of inventoryStatements) db.exec(sql);
     for (const sql of inventoryStatements) db.exec(sql);
+    assert.equal(db.prepare('SELECT count(*) AS count FROM InventoryLocation').get().count, 4);
+    assert.equal(db.prepare('SELECT count(*) AS count FROM InventoryPlacement').get().count, 0);
     assert.equal(db.prepare('SELECT count(*) AS count FROM InventoryNumber').get().count, 1);
     db.exec(`UPDATE EquipmentSuggestion SET status = 'PURCHASED' WHERE id = 'new'`);
     const original = db.prepare("SELECT number FROM InventoryNumber WHERE suggestionId = 'new'").get().number;
