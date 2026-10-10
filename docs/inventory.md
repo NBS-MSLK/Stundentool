@@ -24,3 +24,25 @@ ausführen.
 
 Prüfung: `node --test tests/inventory.test.mjs` (Node mit `node:sqlite` und
 TypeScript-Unterstützung), `npm run build`.
+
+## Inventar verwalten
+
+Administratoren können Inventarnummern ändern, Inventarkategorien anlegen und
+Positionen über „Verschieben“ einer Kategorie zuweisen. Die Nummer bleibt eine
+positive ganze Zahl mit der Anzeige `INV-…`. Bereits belegte Nummern werden mit
+einer Fehlermeldung abgelehnt; der Datenbank-Primärschlüssel verhindert auch bei
+gleichzeitigen Änderungen Duplikate. Manuell freigegebene Nummern können erneut
+zugewiesen werden.
+
+Inventarkategorien sind unabhängig von Anschaffungskategorien und werden
+alphabetisch sortiert, die Gegenstände darin nach Inventarnummer. Bei der ersten
+Vorbereitung werden bestehende Positionen anhand ihrer Anschaffungskategorie
+gruppiert: etwa „1.2 Holzwerkstatt: Sägen“ unter „Holzwerkstatt“. Spätere neue
+Positionen erscheinen unter „Nicht zugeordnet“, bis sie zugewiesen werden.
+Manuelle Zuordnungen bleiben bei Neustarts erhalten. Das Verschieben verändert
+weder die ursprüngliche Anschaffungskategorie noch deren Budget.
+
+Kategorien lassen sich als Administrator umbenennen und nach Bestätigung löschen.
+Beim Löschen werden ausschließlich die Kategorie und ihre Zuordnungen entfernt;
+Gegenstände, Inventarnummern und Anschaffungskosten bleiben erhalten. Die
+betroffenen Gegenstände erscheinen anschließend unter „Nicht zugeordnet“.

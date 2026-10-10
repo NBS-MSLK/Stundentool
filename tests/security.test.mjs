@@ -9,6 +9,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { DatabaseSync } from 'node:sqlite';
 import { PrismaClient } from '@prisma/client';
+import { inventoryStatements } from '../scripts/inventory-schema.mjs';
 
 function files(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? files(path.join(dir, e.name)) : [path.join(dir, e.name)]);
@@ -28,6 +29,7 @@ test('session and API access integration', { timeout: 300000 }, async t => {
   const init = spawnSync(process.execPath, ['node_modules/prisma/build/index.js', 'db', 'push', '--skip-generate'], { env, encoding: 'utf8' });
   assert.equal(init.status, 0, init.stdout + init.stderr);
   const prisma = new PrismaClient({ datasources: { db: { url: databaseUrl } } });
+  for (const sql of inventoryStatements) await prisma.$executeRawUnsafe(sql);
   const admin = await prisma.user.create({ data: { name: 'Test Admin', password: 'admin-test-only', role: 'ADMIN' } });
   const alice = await prisma.user.create({ data: { name: 'Test Alice', password: 'alice-test-only' } });
   const bob = await prisma.user.create({ data: { name: 'Test Bob', password: 'bob-test-only' } });
@@ -77,6 +79,52 @@ test('session and API access integration', { timeout: 300000 }, async t => {
     let a = await login(alice, 'alice-test-only');
     const b = await login(bob, 'bob-test-only');
     const root = await login(admin, 'admin-test-only');
+
+    await t.test('inventory numbers reject duplicates and categories can be created and assigned by admins', async () => {
+      assert.equal((await request('/api/inventory', { method: 'POST', cookie: a, body: { name: 'Forbidden' } })).status, 403);
+      assert.equal((await request('/api/inventory', { method: 'POST', cookie: root, body: { name: 'Holzwerkstatt' } })).status, 201);
+      assert.equal((await request('/api/inventory', { method: 'POST', cookie: root, body: { name: 'Holzwerkstatt' } })).status, 409);
+      await prisma.equipmentSuggestion.update({ where: { id: suggestion.id }, data: { status: 'PURCHASED' } });
+      const another = await prisma.equipmentSuggestion.create({ data: { categoryId: category.id, title: 'Second', creatorId: bob.id, creatorName: bob.name, status: 'PURCHASED' } });
+      const data = await (await request('/api/inventory', { cookie: root })).json();
+      const number = data.items.find(item => item.id === another.id).inventoryNumber;
+      const categoryId = data.categories[0].id;
+      assert.equal((await request('/api/inventory', { method: 'PUT', cookie: a, body: { id: suggestion.id, inventoryNumber: 42 } })).status, 403);
+      assert.equal((await request('/api/inventory', { method: 'PUT', cookie: root, body: { id: suggestion.id, inventoryNumber: number } })).status, 409);
+      assert.equal((await request('/api/inventory', { method: 'PUT', cookie: root, body: { id: suggestion.id, inventoryNumber: -1 } })).status, 400);
+      assert.equal((await request('/api/inventory', { method: 'PUT', cookie: root, body: { id: suggestion.id, inventoryNumber: 42, categoryId } })).status, 200);
+      const updated = await (await request('/api/inventory', { cookie: root })).json();
+      assert.equal(updated.items.find(item => item.id === suggestion.id).inventoryNumber, 42);
+      assert.equal(updated.items.find(item => item.id === suggestion.id).categoryId, categoryId);
+      assert.equal((await request('/api/inventory', { method: 'PUT', cookie: root, body: { id: suggestion.id, categoryId: null } })).status, 200);
+    });
+
+    await t.test('inventory category management blocks unauthorized access and preserves inventory on deletion', async () => {
+      const url = '/api/inventory/categories';
+      const initial = await (await request('/api/inventory', { cookie: root })).json();
+      const id = initial.categories[0].id;
+      for (const method of ['PUT', 'DELETE']) {
+        assert.equal((await request(url, { method, cookie: a, body: { id, name: 'Unauthorized' } })).status, 403);
+        assert.equal((await request(url, { method, cookie: root, origin: 'https://attacker.example', body: { id, name: 'CSRF' } })).status, 403);
+        assert.equal((await request(url, { method, cookie: root, body: { id: '1 OR 1=1', name: 'Invalid' } })).status, 400);
+        assert.equal((await request(url, { method, cookie: root, body: { id: 999999, name: 'Missing' } })).status, 404);
+      }
+      assert.equal((await request('/api/inventory', { method: 'POST', cookie: root, body: { name: 'Elektronik' } })).status, 201);
+      assert.equal((await request(url, { method: 'PUT', cookie: root, body: { id, name: 'elektronik' } })).status, 409);
+      assert.equal((await request(url, { method: 'PUT', cookie: root, body: { id, name: '   ' } })).status, 400);
+      const name = "Holz & Metall'; DROP TABLE InventoryNumber; --";
+      assert.equal((await request(url, { method: 'PUT', cookie: root, body: { id, name } })).status, 200);
+      assert.equal((await request('/api/inventory', { method: 'PUT', cookie: root, body: { id: suggestion.id, categoryId: id } })).status, 200);
+      const renamed = await (await request('/api/inventory', { cookie: root })).json();
+      assert.equal(renamed.categories.find(category => category.id === id).name, name);
+      const before = await prisma.equipmentSuggestion.findUnique({ where: { id: suggestion.id }, include: { materials: true } });
+      assert.equal((await request(url, { method: 'DELETE', cookie: root, body: { id } })).status, 200);
+      const after = await (await request('/api/inventory', { cookie: root })).json();
+      assert.equal(after.categories.some(category => category.id === id), false);
+      assert.equal(after.items.find(item => item.id === suggestion.id).categoryId, null);
+      assert.equal(after.items.find(item => item.id === suggestion.id).inventoryNumber, 42);
+      assert.deepEqual(await prisma.equipmentSuggestion.findUnique({ where: { id: suggestion.id }, include: { materials: true } }), before);
+    });
 
     await t.test('every existing API handler rejects anonymous access', async () => {
       assert(routes.length > 60);

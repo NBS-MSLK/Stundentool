@@ -324,3 +324,13 @@ model InventoryNumber {
   number Int @id @default(autoincrement())
   suggestionId String @unique
 }
+
+model InventoryCategory {
+  id Int @id @default(autoincrement())
+  name String @unique
+}
+
+model InventoryAssignment {
+  suggestionId String @id
+  categoryId Int
+}
