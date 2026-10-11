@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { equipmentBudgetTotals } from '@/lib/equipment-budget';
-import PurchasedOverview from './PurchasedOverview';
 
 export default function EquipmentSection({ user }: { user: any }) {
   const [budget, setBudget] = useState<any>(null);
@@ -252,7 +251,7 @@ export default function EquipmentSection({ user }: { user: any }) {
         </div>
       </div>
 
-      <PurchasedOverview categories={categories} />
+      <Link href="/dashboard/equipment/purchased" style={{ alignSelf: 'flex-start', fontSize: '0.95rem' }}>Bereits angeschafft: Ausgaben nach Kategorie ansehen →</Link>
 
       {user?.role === 'ADMIN' && (
         <div className="glass-card" style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', padding: '1rem' }}>

@@ -25,6 +25,6 @@ export default function PurchasedOverview({ categories }: { categories: Paramete
         </li>)}</ul>
       </details>)}
     </div>}
-    <p className={styles.note}>Enthalten sind nur als „Angeschafft“ markierte Positionen, inklusive Mengen und Zubehör. Diese Ausgaben sind bereits im Budget oben verrechnet. <Link href="/dashboard?tab=INVENTORY">Zum Inventar →</Link></p>
+    <p className={styles.note}>Enthalten sind nur als „Angeschafft“ markierte Positionen, inklusive Mengen und Zubehör. Diese Ausgaben sind bereits im Anschaffungsbudget verrechnet. <Link href="/dashboard?tab=INVENTORY">Zum Inventar →</Link></p>
   </section>;
 }
