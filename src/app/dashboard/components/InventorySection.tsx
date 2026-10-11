@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from './InventorySection.module.css';
+import PurchaseForm from './PurchaseForm';
 
 type Item = { id: string; title: string; quantity: number; inventoryNumber: number; categoryId: number | null; locationId: number | null };
 type Category = { id: number; name: string };
@@ -60,6 +61,7 @@ export default function InventorySection({ canManage = false }: { canManage?: bo
     <p style={{ color: 'var(--text-secondary)', margin: '0.75rem 0 1.5rem' }}>Das Inventar unseres Makerspaces, nach Bereichen sortiert. Die Kosten bleiben im Anschaffungsbudget enthalten.</p>
     {error && <p role="alert" style={{ color: 'var(--danger-text)' }}>{error}</p>}
     {notice && <p role="status">{notice}</p>}
+    {canManage && <PurchaseForm categories={categories} locations={locations} busy={busy} onSave={body => save('POST', body, '/api/inventory/purchases')} />}
     {canManage && <form onSubmit={async event => {
       event.preventDefault();
       if (await save('POST', { name: newCategory })) setNewCategory('');

@@ -56,3 +56,12 @@ Administratoren können weitere Orte hinzufügen und über die Spalte „Ort“
 zuordnen oder die Zuordnung entfernen. Mitglieder sehen die Orte, dürfen sie
 aber weder anlegen noch zuweisen. Eine Inventarposition mit mehreren Stück
 hat einen gemeinsamen Ort.
+
+## Anschaffung nachtragen
+
+Admins können über „Anschaffung nachtragen“ bereits gekaufte Gegenstände mit
+Bezeichnung, Menge, Stückpreis, Inventarkategorie und optionalem Ort erfassen.
+Eine separate abgeschlossene Anschaffungsposition erhält automatisch eine
+Inventarnummer. Die Kosten erscheinen im Budget und in der gruppierten
+Ausgabenübersicht. Bestehende Vorschläge werden nicht abgelehnt oder verändert.
+Das wiederholte Absenden derselben Formularanfrage erzeugt keinen zweiten Eintrag.

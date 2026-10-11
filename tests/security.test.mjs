@@ -10,6 +10,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { DatabaseSync } from 'node:sqlite';
 import { PrismaClient } from '@prisma/client';
 import { inventoryStatements } from '../scripts/inventory-schema.mjs';
+import { equipmentBudgetTotals, purchasedGroups } from '../src/lib/equipment-budget.ts';
+import { randomUUID } from 'node:crypto';
 
 function files(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? files(path.join(dir, e.name)) : [path.join(dir, e.name)]);
@@ -151,6 +153,32 @@ test('session and API access integration', { timeout: 300000 }, async t => {
       assert.equal(after.items.find(item => item.id === suggestion.id).categoryId, null);
       assert.equal(after.items.find(item => item.id === suggestion.id).inventoryNumber, 42);
       assert.deepEqual(await prisma.equipmentSuggestion.findUnique({ where: { id: suggestion.id }, include: { materials: true } }), before);
+    });
+
+    await t.test('purchase backfill is admin-only, atomic, counted in spending and safe to retry', async () => {
+      const inventory = await (await request('/api/inventory', { cookie: root })).json();
+      const before = await (await request('/api/equipment', { cookie: root })).json();
+      const body = { requestId: randomUUID(), title: 'Nachgetragener Computer', quantity: 2, price: 123.45, categoryId: inventory.categories[0].id, locationId: inventory.locations[0].id };
+      const send = (cookie, payload, origin = base) => request('/api/inventory/purchases', { method: 'POST', cookie, body: payload, origin });
+      assert.equal((await send(a, body)).status, 403);
+      assert.equal((await send(root, body, 'https://attacker.example')).status, 403);
+      assert.equal((await send(root, { ...body, price: -1 })).status, 400);
+      assert.equal((await send(root, { ...body, quantity: 1.5 })).status, 400);
+      assert.equal((await send(root, { ...body, locationId: 999999 })).status, 404);
+      assert.equal((await prisma.equipmentSuggestion.findUnique({ where: { id: body.requestId } })), null);
+      const response = await send(root, body);
+      assert.equal(response.status, 201, await response.clone().text());
+      assert.equal((await send(root, body)).status, 201);
+      const updated = await (await request('/api/inventory', { cookie: root })).json();
+      const item = updated.items.find(item => item.id === body.requestId);
+      assert.ok(item.inventoryNumber > 0);
+      assert.equal(item.categoryId, body.categoryId);
+      assert.equal(item.locationId, body.locationId);
+      assert.equal(updated.items.filter(item => item.id === body.requestId).length, 1);
+      const after = await (await request('/api/equipment', { cookie: root })).json();
+      const difference = equipmentBudgetTotals(after.categories).spentAmount - equipmentBudgetTotals(before.categories).spentAmount;
+      assert.ok(Math.abs(difference - 246.9) < 0.000001);
+      assert.ok(purchasedGroups(after.categories).some(group => group.items.some(item => item.id === body.requestId)));
     });
 
     await t.test('every existing API handler rejects anonymous access', async () => {
