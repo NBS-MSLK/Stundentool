@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { inventoryStatements } from '../scripts/inventory-schema.mjs';
-import { equipmentBudgetTotals } from '../src/lib/equipment-budget.ts';
+import { equipmentBudgetTotals, purchasedGroups } from '../src/lib/equipment-budget.ts';
 
 test('backfill and status changes assign stable numbers without duplicates or reuse', () => {
   const db = new DatabaseSync(':memory:');
@@ -31,4 +31,19 @@ test('inventory remains in budget, including quantities and accessories', () => 
     { suggestions: [item('PURCHASED', 20), item('PURCHASED', 30)] },
   ]);
   assert.deepEqual(totals, { spentAmount: 280, plannedAmount: 380 });
+});
+
+test('purchased overview combines furniture subcategories and excludes open or rejected alternatives', () => {
+  const item = (id, status, price, quantity = 1, materials = []) => ({ id, title: id, status, price, quantity, materials });
+  const categories = [
+    { title: '2.1 Möbel: Tische', suggestions: [item('tables', 'PURCHASED', 100, 3, [{ quantity: 2, pricePerUnit: 15 }]), item('alternative', 'REJECTED', 999)] },
+    { title: '2.2 Möbel: Stühle', suggestions: [item('chairs', 'PURCHASED', 50, 4), item('planned', 'PROPOSED', 999)] },
+    { title: '3. Elektronik', suggestions: [item('gift', 'PURCHASED', 0)] },
+    { title: '4. Werkzeuge', suggestions: [item('open', 'PROPOSED', 500)] },
+  ];
+  const groups = purchasedGroups(categories);
+  assert.deepEqual(groups.map(group => [group.title, group.total]), [['Elektronik', 0], ['Möbel', 530]]);
+  assert.deepEqual(groups[1].items.map(item => item.id), ['tables', 'chairs']);
+  assert.equal(groups.reduce((sum, group) => sum + group.total, 0), equipmentBudgetTotals(categories).spentAmount);
+  assert.deepEqual(purchasedGroups([]), []);
 });

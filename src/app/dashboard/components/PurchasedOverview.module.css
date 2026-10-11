@@ -1,0 +1,27 @@
+.overview h2 { margin: 0; font-size: 1.25rem; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.header p, .note { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; }
+.header p { margin: 0.4rem 0 0; }
+.total { display: flex; flex-direction: column; gap: 0.3rem; }
+.total span { font-size: 0.8rem; color: var(--text-secondary); }
+.total strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; color: var(--success-text); }
+.groups { display: grid; gap: 0.6rem; }
+.group { border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
+.summary { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1rem; cursor: pointer; list-style: none; background: var(--bg-secondary); }
+.summary::-webkit-details-marker { display: none; }
+.summary:hover { background: var(--bg-hover); }
+.summary:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: -3px; }
+.chevron { font-size: 1.5rem; transition: transform 0.15s; }
+.group[open] .chevron { transform: rotate(90deg); }
+.name { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.name small, .items small { color: var(--text-secondary); font-size: 0.8rem; }
+.amount { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.items { margin: 0; padding: 0 1rem; list-style: none; }
+.items li { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.85rem 0; border-top: 1px solid var(--border-color); }
+.items li div { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; overflow-wrap: anywhere; }
+.note { margin: 1rem 0 0; }
+.note a { white-space: nowrap; }
+@media (max-width: 480px) {
+  .summary { padding: 0.75rem; gap: 0.5rem; }
+  .items li { align-items: flex-start; flex-direction: column; gap: 0.4rem; }
+}
