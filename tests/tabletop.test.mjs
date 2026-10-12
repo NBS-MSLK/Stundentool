@@ -8,6 +8,7 @@ import { PrismaClient } from '@prisma/client';
 import { DatabaseSync } from 'node:sqlite';
 import { splitTabletop, tabletopGroups } from '../scripts/tabletop-categories.mjs';
 import { equipmentBudgetTotals } from '../src/lib/equipment-budget.ts';
+import { splitSmallTools, smallToolsGroups } from '../scripts/small-tools-categories.mjs';
 
 test('Tabletop split preserves records, keeps cutter alternatives and runs only once', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tabletop-test-'));
@@ -34,5 +35,16 @@ test('Tabletop split preserves records, keeps cutter alternatives and runs only 
     assert.equal(equipmentBudgetTotals(categories).plannedAmount, 11 * 23);
     assert.equal(await splitTabletop(db), 0);
     assert.deepEqual(await db.equipmentSuggestion.findMany({ include, orderBy: { id: 'asc' } }), after);
+    const tools = await db.equipmentCategory.create({ data: { title: '26. Feinwerkzeug', order: 26, creatorId: user.id } });
+    const prices = [15.99, 62.43, 16.51, 11.99];
+    for (const [index, [title, ids]] of smallToolsGroups.entries()) await db.equipmentSuggestion.create({ data: { id: ids[0], title, categoryId: tools.id, creatorId: user.id, creatorName: user.name, quantity: 2, price: prices[index] } });
+    const toolsBefore = await db.equipmentSuggestion.findMany({ where: { categoryId: tools.id }, orderBy: { id: 'asc' } });
+    assert.equal(await splitSmallTools(db), 4);
+    const toolCategories = await db.equipmentCategory.findMany({ where: { title: { startsWith: '26.' } }, include: { suggestions: true }, orderBy: { order: 'asc' } });
+    assert.deepEqual(toolCategories.map(category => category.title), ['26.1 Feinwerkzeug: Schraubendreher', '26.2 Feinwerkzeug: Zangen', '26.3 Feinwerkzeug: Seitenschneider', '26.4 Feinwerkzeug: Pinzetten']);
+    assert.ok(Math.abs(equipmentBudgetTotals(toolCategories).plannedAmount - 213.84) < 0.000001);
+    const toolsAfter = await db.equipmentSuggestion.findMany({ where: { id: { in: smallToolsGroups.flatMap(([, ids]) => ids) } }, orderBy: { id: 'asc' } });
+    assert.deepEqual(stable(toolsAfter), stable(toolsBefore));
+    assert.equal(await splitSmallTools(db), 0);
   } finally { await db.$disconnect(); }
 });

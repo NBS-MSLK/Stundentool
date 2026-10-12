@@ -14,22 +14,26 @@ export const tabletopGroups = [
   ['Trockenpinsel', ['805e6e0f-ac1c-49e3-b084-20cb401d258c']],
 ];
 
-export async function splitTabletop(prisma) {
+export function splitTabletop(prisma) {
+  return splitReviewedCategory(prisma, 'Geländebau Tabletop', tabletopGroups);
+}
+
+export async function splitReviewedCategory(prisma, label, reviewedGroups) {
   return prisma.$transaction(async tx => {
     const categories = await tx.equipmentCategory.findMany({ orderBy: [{ order: 'asc' }, { createdAt: 'asc' }], include: { suggestions: { select: { id: true } } } });
-    const source = categories.find(category => /^\d+\. Geländebau Tabletop$/.test(category.title) && category.suggestions.some(item => tabletopGroups.some(([, ids]) => ids.includes(item.id))));
+    const source = categories.find(category => category.title.replace(/^\d+\. /, '') === label && /^\d+\. /.test(category.title) && category.suggestions.some(item => reviewedGroups.some(([, ids]) => ids.includes(item.id))));
     if (!source) return 0; // Already split, or this database does not contain the reviewed category.
     const prefix = source.title.match(/^\d+/)[0];
-    if (categories.some(category => category.id !== source.id && category.title.startsWith(`${prefix}.`) && /^\d+\.\d+\s/.test(category.title))) throw new Error('Tabletop: category number already used by another group; refusing to merge.');
+    if (categories.some(category => category.id !== source.id && category.title.startsWith(`${prefix}.`) && /^\d+\.\d+\s/.test(category.title))) throw new Error(`${label}: category number already used by another group; refusing to merge.`);
     const existingIds = new Set(source.suggestions.map(item => item.id));
-    const groups = tabletopGroups.map(([name, ids]) => [name, ids.filter(id => existingIds.has(id))]).filter(([, ids]) => ids.length);
+    const groups = reviewedGroups.map(([name, ids]) => [name, ids.filter(id => existingIds.has(id))]).filter(([, ids]) => ids.length);
     const known = new Set(groups.flatMap(([, ids]) => ids));
     const remaining = [...existingIds].filter(id => !known.has(id));
     if (remaining.length) groups.push(['Weitere Vorschläge', remaining]);
     const expanded = [];
     for (let index = 0; index < groups.length; index++) {
       const [name, ids] = groups[index];
-      const title = `${prefix}.${index + 1} Geländebau Tabletop: ${name}`;
+      const title = `${prefix}.${index + 1} ${label}: ${name}`;
       const category = index === 0
         ? await tx.equipmentCategory.update({ where: { id: source.id }, data: { title } })
         : await tx.equipmentCategory.create({ data: { title, creatorId: source.creatorId, description: source.description } });
