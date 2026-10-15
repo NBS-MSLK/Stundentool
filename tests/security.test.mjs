@@ -277,7 +277,7 @@ test('session and API access integration', { timeout: 300000 }, async t => {
       const url = '/api/users/' + alice.id;
       assert.equal((await request(url, { cookie: a, method: 'PUT', body: { role: 'ADMIN' } })).status, 403);
       assert.equal((await request(url, { cookie: b, method: 'PUT', body: { role: 'ADMIN' } })).status, 403);
-      for (const role of ['OWNER', '', null, {}, 'USER']) {
+      for (const role of ['OWNER', '', null, {}]) {
         assert.equal((await request(url, { cookie: root, method: 'PUT', body: { role } })).status, 400);
       }
       assert.equal((await prisma.user.findUnique({ where: { id: alice.id } })).role, 'USER');
@@ -289,7 +289,14 @@ test('session and API access integration', { timeout: 300000 }, async t => {
       assert(!('passwordHash' in user));
       assert.equal((await request('/api/users', { cookie: a })).status, 200);
       assert.equal((await request('/api/users/missing-user', { cookie: root, method: 'PUT', body: { role: 'ADMIN' } })).status, 404);
-      await prisma.user.update({ where: { id: alice.id }, data: { role: 'USER' } });
+      assert.equal((await request(url, { cookie: root, method: 'PUT', body: { role: 'USER' } })).status, 200);
+      assert.equal((await request('/api/users', { cookie: a })).status, 403);
+      assert.equal((await request('/api/users/' + admin.id, { cookie: root, method: 'PUT', body: { role: 'USER' } })).status, 409);
+      assert.equal((await prisma.user.findUnique({ where: { id: admin.id } })).role, 'ADMIN');
+      // Self-demotion works when another admin remains; the session loses admin access immediately.
+      assert.equal((await request(url, { cookie: root, method: 'PUT', body: { role: 'ADMIN' } })).status, 200);
+      assert.equal((await request(url, { cookie: a, method: 'PUT', body: { role: 'USER' } })).status, 200);
+      assert.equal((await request('/api/users', { cookie: a })).status, 403);
     });
     await t.test('new users store hashes and administrators can reset passwords', async () => {
       const created = await request('/api/users', { method: 'POST', cookie: root, body: { name: 'New member', password: 'new-member-test-only' } });

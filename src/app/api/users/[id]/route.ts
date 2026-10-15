@@ -1,5 +1,6 @@
 import { hashPassword } from '@/lib/password.mjs';
-import { secureRoute } from '@/lib/api-access';
+import { AccessError, secureRoute } from '@/lib/api-access';
+import { isUserRole } from '@/lib/user-roles';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
@@ -29,7 +30,7 @@ async function handlePUT(req: Request, props: { params: Promise<{ id: string }> 
 
     const data: Prisma.UserUpdateInput = {};
     if (role !== undefined) {
-      if (role !== 'ADMIN') return NextResponse.json({ error: 'Ungültige Rolle. Hier kann nur die Rolle Admin zugewiesen werden.' }, { status: 400 });
+      if (!isUserRole(role)) return NextResponse.json({ error: 'Ungültige Rolle.' }, { status: 400 });
       data.role = role;
     }
     if (password !== undefined) {
@@ -44,6 +45,12 @@ async function handlePUT(req: Request, props: { params: Promise<{ id: string }> 
     }
 
     const updatedUser = await prisma.$transaction(async (tx) => {
+      if (role !== undefined && role !== 'ADMIN') {
+        const current = await tx.user.findUnique({ where: { id } });
+        if (current?.role === 'ADMIN' && await tx.user.count({ where: { role: 'ADMIN' } }) <= 1) {
+          throw new AccessError(409, 'Der letzte Admin muss seine Admin-Rolle behalten. Weise zuerst einem anderen Benutzer die Rolle Admin zu.');
+        }
+      }
       const updated = await tx.user.update({ where: { id }, data });
       if (password !== undefined) await tx.session.deleteMany({ where: { userId: id } });
       return updated;
@@ -51,6 +58,7 @@ async function handlePUT(req: Request, props: { params: Promise<{ id: string }> 
 
     return NextResponse.json({ user: updatedUser });
   } catch (error) {
+    if (error instanceof AccessError) return NextResponse.json({ error: error.message }, { status: error.status });
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
       return NextResponse.json({ error: 'Benutzer nicht gefunden.' }, { status: 404 });
     }

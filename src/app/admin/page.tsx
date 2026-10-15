@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import WebheimatAdmin from './components/WebheimatAdmin';
+import { USER_ROLES, isUserRole, type UserRole } from '@/lib/user-roles';
 
 export default function AdminView() {
   const [entries, setEntries] = useState<any[]>([]);
@@ -13,7 +14,7 @@ export default function AdminView() {
   const [passwords, setPasswords] = useState<{[key: string]: string}>({});
   const [newUserName, setNewUserName] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
-  const [promotingUsers, setPromotingUsers] = useState<string[]>([]);
+  const [savingRoles, setSavingRoles] = useState<string[]>([]);
   const [roleError, setRoleError] = useState('');
   const [roleNotice, setRoleNotice] = useState('');
   const router = useRouter();
@@ -78,24 +79,29 @@ export default function AdminView() {
     setPasswords(prev => ({...prev, [targetUserId]: ''}));
   };
 
-  const makeAdmin = async (targetUserId: string, name: string) => {
+  const changeRole = async (targetUserId: string, name: string, role: UserRole) => {
     setRoleError('');
     setRoleNotice('');
-    setPromotingUsers(previous => [...previous, targetUserId]);
+    setSavingRoles(previous => [...previous, targetUserId]);
     try {
       const response = await fetch(`/api/users/${targetUserId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: 'ADMIN' })
+        body: JSON.stringify({ role })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Admin-Rolle konnte nicht zugewiesen werden.');
+      if (!response.ok) throw new Error(data.error || 'Rolle konnte nicht gespeichert werden.');
       setUsers(previous => previous.map(member => member.id === targetUserId ? data.user : member));
-      setRoleNotice(`${name} hat jetzt die Rolle Admin.`);
+      setRoleNotice(`${name} hat jetzt die Rolle ${USER_ROLES.find(option => option.value === role)?.label}.`);
+      if (targetUserId === user.id) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        if (role !== 'ADMIN') router.replace('/dashboard');
+      }
     } catch (error) {
-      setRoleError(error instanceof Error ? error.message : 'Admin-Rolle konnte nicht zugewiesen werden.');
+      setRoleError(error instanceof Error ? error.message : 'Rolle konnte nicht gespeichert werden.');
     } finally {
-      setPromotingUsers(previous => previous.filter(id => id !== targetUserId));
+      setSavingRoles(previous => previous.filter(id => id !== targetUserId));
     }
   };
 
@@ -246,6 +252,7 @@ export default function AdminView() {
       {activeTab === 'BENUTZER' && (
         <div className="glass-card" style={{ overflowX: 'auto' }}>
           <h2 style={{ marginBottom: '1rem' }}>Benutzerverwaltung</h2>
+          <p>Rollenänderungen werden direkt gespeichert.</p>
           {roleError && <p role="alert" style={{ color: 'var(--danger-text)' }}>{roleError}</p>}
           {roleNotice && <p role="status">{roleNotice}</p>}
           
@@ -278,14 +285,16 @@ export default function AdminView() {
                 <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1rem', fontWeight: 600 }}>{u.name}</td>
                   <td style={{ padding: '1rem' }}>
-                    {u.role === 'ADMIN' ? 'Admin' : 'Benutzer'}
-                    {u.role !== 'ADMIN' && (
-                      <button type="button" className="btn-primary" style={{ display: 'block', marginTop: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-                        disabled={promotingUsers.includes(u.id)} onClick={() => makeAdmin(u.id, u.name)}
-                        aria-label={`${u.name} zum Admin machen`}>
-                        {promotingUsers.includes(u.id) ? 'Wird gespeichert …' : 'Zum Admin machen'}
-                      </button>
-                    )}
+                    <select className="input-field" value={u.role}
+                      style={{ minWidth: '140px', padding: '0.4rem', fontSize: '0.9rem' }}
+                      disabled={savingRoles.includes(u.id)} aria-label={`Rolle für ${u.name}`}
+                      onChange={event => {
+                        const role = event.target.value;
+                        if (isUserRole(role)) void changeRole(u.id, u.name, role);
+                      }}>
+                      {USER_ROLES.map(role => <option key={role.value} value={role.value}>{role.label}</option>)}
+                    </select>
+                    {savingRoles.includes(u.id) && <small role="status">Wird gespeichert …</small>}
                   </td>
                   <td style={{ padding: '1rem' }}>
                     <input 
