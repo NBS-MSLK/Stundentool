@@ -273,6 +273,24 @@ test('session and API access integration', { timeout: 300000 }, async t => {
       assert.equal(stored.emailPref, 'SPECIFIC');
       assert(stored.subscribedTasks.some(item => item.id === task.id));
     });
+    await t.test('only admins can promote users and existing sessions receive the new permissions', async () => {
+      const url = '/api/users/' + alice.id;
+      assert.equal((await request(url, { cookie: a, method: 'PUT', body: { role: 'ADMIN' } })).status, 403);
+      assert.equal((await request(url, { cookie: b, method: 'PUT', body: { role: 'ADMIN' } })).status, 403);
+      for (const role of ['OWNER', '', null, {}, 'USER']) {
+        assert.equal((await request(url, { cookie: root, method: 'PUT', body: { role } })).status, 400);
+      }
+      assert.equal((await prisma.user.findUnique({ where: { id: alice.id } })).role, 'USER');
+      const response = await request(url, { cookie: root, method: 'PUT', body: { role: 'ADMIN' } });
+      assert.equal(response.status, 200);
+      const { user } = await response.json();
+      assert.equal(user.role, 'ADMIN');
+      assert(!('password' in user));
+      assert(!('passwordHash' in user));
+      assert.equal((await request('/api/users', { cookie: a })).status, 200);
+      assert.equal((await request('/api/users/missing-user', { cookie: root, method: 'PUT', body: { role: 'ADMIN' } })).status, 404);
+      await prisma.user.update({ where: { id: alice.id }, data: { role: 'USER' } });
+    });
     await t.test('new users store hashes and administrators can reset passwords', async () => {
       const created = await request('/api/users', { method: 'POST', cookie: root, body: { name: 'New member', password: 'new-member-test-only' } });
       assert.equal(created.status, 200);

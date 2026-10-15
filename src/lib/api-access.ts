@@ -60,6 +60,7 @@ async function authorize(route: string, request: Request, params: Params, body: 
     case '/api/users': admin(user); return;
     case '/api/users/[id]':
       if (method === 'DELETE') admin(user); else own(user, id);
+      if (!read && body.role !== undefined) admin(user);
       return;
     case '/api/logs': admin(user); return;
     case '/api/entries':

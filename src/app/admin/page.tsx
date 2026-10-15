@@ -13,6 +13,9 @@ export default function AdminView() {
   const [passwords, setPasswords] = useState<{[key: string]: string}>({});
   const [newUserName, setNewUserName] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
+  const [promotingUsers, setPromotingUsers] = useState<string[]>([]);
+  const [roleError, setRoleError] = useState('');
+  const [roleNotice, setRoleNotice] = useState('');
   const router = useRouter();
 
   const fetchEntries = () => {
@@ -73,6 +76,27 @@ export default function AdminView() {
     });
     alert('Passwort erfolgreich gesetzt.');
     setPasswords(prev => ({...prev, [targetUserId]: ''}));
+  };
+
+  const makeAdmin = async (targetUserId: string, name: string) => {
+    setRoleError('');
+    setRoleNotice('');
+    setPromotingUsers(previous => [...previous, targetUserId]);
+    try {
+      const response = await fetch(`/api/users/${targetUserId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'ADMIN' })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Admin-Rolle konnte nicht zugewiesen werden.');
+      setUsers(previous => previous.map(member => member.id === targetUserId ? data.user : member));
+      setRoleNotice(`${name} hat jetzt die Rolle Admin.`);
+    } catch (error) {
+      setRoleError(error instanceof Error ? error.message : 'Admin-Rolle konnte nicht zugewiesen werden.');
+    } finally {
+      setPromotingUsers(previous => previous.filter(id => id !== targetUserId));
+    }
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -222,6 +246,8 @@ export default function AdminView() {
       {activeTab === 'BENUTZER' && (
         <div className="glass-card" style={{ overflowX: 'auto' }}>
           <h2 style={{ marginBottom: '1rem' }}>Benutzerverwaltung</h2>
+          {roleError && <p role="alert" style={{ color: 'var(--danger-text)' }}>{roleError}</p>}
+          {roleNotice && <p role="status">{roleNotice}</p>}
           
           <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
             <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Neuen Benutzer anlegen</h3>
@@ -251,7 +277,16 @@ export default function AdminView() {
               {users.map(u => (
                 <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1rem', fontWeight: 600 }}>{u.name}</td>
-                  <td style={{ padding: '1rem' }}>{u.role}</td>
+                  <td style={{ padding: '1rem' }}>
+                    {u.role === 'ADMIN' ? 'Admin' : 'Benutzer'}
+                    {u.role !== 'ADMIN' && (
+                      <button type="button" className="btn-primary" style={{ display: 'block', marginTop: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                        disabled={promotingUsers.includes(u.id)} onClick={() => makeAdmin(u.id, u.name)}
+                        aria-label={`${u.name} zum Admin machen`}>
+                        {promotingUsers.includes(u.id) ? 'Wird gespeichert …' : 'Zum Admin machen'}
+                      </button>
+                    )}
+                  </td>
                   <td style={{ padding: '1rem' }}>
                     <input 
                       type="text" 

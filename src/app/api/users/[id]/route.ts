@@ -25,9 +25,13 @@ async function handlePUT(req: Request, props: { params: Promise<{ id: string }> 
     const bodyText = await req.text();
 
     const body = JSON.parse(bodyText);
-    const { password, showInHighscore } = body;
+    const { password, showInHighscore, role } = body;
 
-    const data: any = {};
+    const data: Prisma.UserUpdateInput = {};
+    if (role !== undefined) {
+      if (role !== 'ADMIN') return NextResponse.json({ error: 'Ungültige Rolle. Hier kann nur die Rolle Admin zugewiesen werden.' }, { status: 400 });
+      data.role = role;
+    }
     if (password !== undefined) {
       if (typeof password !== 'string' || !password.trim() || password.length > 4096) return NextResponse.json({ error: 'Passwort darf nicht leer sein.' }, { status: 400 });
       data.password = '';
@@ -47,6 +51,9 @@ async function handlePUT(req: Request, props: { params: Promise<{ id: string }> 
 
     return NextResponse.json({ user: updatedUser });
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      return NextResponse.json({ error: 'Benutzer nicht gefunden.' }, { status: 404 });
+    }
     console.error('User update failed');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
