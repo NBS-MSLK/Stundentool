@@ -503,20 +503,8 @@ export default function EquipmentSection({ user }: { user: any }) {
           if (group.isGroup) {
             const isGroupExpanded = expandedGroups[group.id];
             
-            let groupSum = 0;
-            let groupSpent = 0;
-            group.categories.forEach((cat: any) => {
-              if (cat.suggestions && cat.suggestions.length > 0) {
-                 let top = cat.suggestions[0];
-                 cat.suggestions.forEach((s: any) => {
-                   if (s.status === 'PURCHASED' || ((s.priorityVotes?.length || 0) > (top.priorityVotes?.length || 0) && s.status !== 'REJECTED')) top = s;
-                 });
-                 let sSum = top.price * (top.quantity || 1);
-                 top.materials.forEach((m: any) => { sSum += m.quantity * m.pricePerUnit; });
-                 groupSum += sSum;
-                 if (top.status === 'PURCHASED') groupSpent += sSum;
-              }
-            });
+            const { plannedAmount: groupSum, spentAmount: groupSpent } = equipmentBudgetTotals(group.categories);
+            const groupOpen = groupSum - groupSpent;
             const percent = groupSum > 0 ? (groupSpent / groupSum) * 100 : 0;
 
             return (
@@ -573,7 +561,7 @@ export default function EquipmentSection({ user }: { user: any }) {
                       <span title="Enthält das Gerät mit der höchsten Priorität!" style={{ fontSize: '1.2rem' }}>⭐</span>
                     )}
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)', padding: '0.2rem 0.6rem', borderRadius: '1rem' }}>
-                      ~ {groupSum.toLocaleString('de-DE')} €
+                      Noch offen: {groupOpen.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                     </span>
                     {user?.role === 'ADMIN' && (
                       <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto', marginRight: '1rem' }}>
