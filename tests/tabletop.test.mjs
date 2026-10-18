@@ -9,6 +9,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { splitTabletop, tabletopGroups } from '../scripts/tabletop-categories.mjs';
 import { equipmentBudgetTotals } from '../src/lib/equipment-budget.ts';
 import { splitSmallTools, smallToolsGroups } from '../scripts/small-tools-categories.mjs';
+import { splitPresses, pressGroups } from '../scripts/press-categories.mjs';
 
 test('Tabletop split preserves records, keeps cutter alternatives and runs only once', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tabletop-test-'));
@@ -46,5 +47,17 @@ test('Tabletop split preserves records, keeps cutter alternatives and runs only 
     const toolsAfter = await db.equipmentSuggestion.findMany({ where: { id: { in: smallToolsGroups.flatMap(([, ids]) => ids) } }, orderBy: { id: 'asc' } });
     assert.deepEqual(stable(toolsAfter), stable(toolsBefore));
     assert.equal(await splitSmallTools(db), 0);
+    for (const [index, [title, ids]] of pressGroups.entries()) await db.equipmentSuggestion.create({ data: { id: ids[0], title, categoryId: next.id, creatorId: user.id, creatorName: user.name, price: [230, 360][index], quantity: 1, buyLink: 'https://example.com/press', notes: { create: { userId: user.id, userName: user.name, content: 'Preserve press note' } } } });
+    const pressIds = pressGroups.flatMap(([, ids]) => ids);
+    const pressesBefore = await db.equipmentSuggestion.findMany({ where: { id: { in: pressIds } }, include, orderBy: { id: 'asc' } });
+    assert.equal(await splitPresses(db), 2);
+    const pressCategories = await db.equipmentCategory.findMany({ where: { title: { startsWith: '25.' } }, include: { suggestions: true }, orderBy: { order: 'asc' } });
+    assert.deepEqual(pressCategories.map(category => category.title), ['25.1 EasyPress: Mugpress für Tassen', '25.2 EasyPress: Wonderpress für Stoffe']);
+    assert.deepEqual(pressCategories.map(category => category.suggestions.length), [1, 1]);
+    assert.deepEqual(equipmentBudgetTotals(pressCategories), { plannedAmount: 590, spentAmount: 0 });
+    const pressesAfter = await db.equipmentSuggestion.findMany({ where: { id: { in: pressIds } }, include, orderBy: { id: 'asc' } });
+    assert.deepEqual(stable(pressesAfter), stable(pressesBefore));
+    assert.equal(await splitPresses(db), 0);
+    assert.deepEqual(await db.equipmentSuggestion.findMany({ where: { id: { in: pressIds } }, include, orderBy: { id: 'asc' } }), pressesAfter);
   } finally { await db.$disconnect(); }
 });
