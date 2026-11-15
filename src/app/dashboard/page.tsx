@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import DashboardSidebar from './components/DashboardSidebar';
 import { ACTIVITIES } from '@/lib/activities';
 import confetti from 'canvas-confetti';
 import TaskManager from './components/TaskManager';
@@ -34,7 +33,9 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [stats, setStats] = useState({ systemActiveHours: 0, systemArchivedHours: 0, hardcodedBaseHours: 619, totalGoalHours: 2700 });
   const [selectedActivity, setSelectedActivity] = useState('');
-  const [activeTab, setActiveTab] = useState<'WEBHEIMAT' | 'STUNDEN' | 'TASKS' | 'EQUIPMENT' | 'INVENTORY' | 'LEADER'>('WEBHEIMAT');
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const activeTab = requestedTab && ['WEBHEIMAT', 'STUNDEN', 'TASKS', 'EQUIPMENT', 'INVENTORY', 'LEADER'].includes(requestedTab) ? requestedTab : 'WEBHEIMAT';
   
   const [elapsedString, setElapsedString] = useState('00:00:00');
 
@@ -50,11 +51,6 @@ export default function Dashboard() {
     setUser(u);
     fetchData(u.id);
 
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
-    if (tab === 'LEADER' || tab === 'INVENTORY' || tab === 'EQUIPMENT' || tab === 'TASKS' || tab === 'STUNDEN' || tab === 'WEBHEIMAT') {
-      setActiveTab(tab);
-    }
   }, [router]);
 
   const fetchData = async (userId: string) => {
@@ -182,8 +178,7 @@ export default function Dashboard() {
         <section className="maker-metrics" aria-label="Deine Stunden"><div><span className="maker-eyebrow">Dein Beitrag</span><strong>{totalHours.toLocaleString('de-DE')} <small>h</small></strong><p>Insgesamt mit angepackt</p></div><div><span className="maker-eyebrow">Diesen Monat</span><strong>{monthHours.toLocaleString('de-DE')} <small>h</small></strong><p>Danke für deinen Einsatz!</p></div><Link href="/dashboard/highscore"><span className="maker-eyebrow">Zusammen machen</span><strong>Trophäen <small>↗</small></strong><p>Unsere gemeinsamen Erfolge</p></Link></section>
         </>);
   return (
-    <div className="maker-shell">
-      <DashboardSidebar user={user} activeTab={activeTab} onSelect={tab => { setActiveTab(tab); window.history.replaceState(null, '', '/dashboard?tab=' + tab); }} />
+    <>
       <main className="maker-main">
         <header className="maker-top"><span className="maker-eyebrow">MakerSpace Lübbecke / {currentLabel}</span><div className="maker-account">{user.role === 'ADMIN' && <Link href="/admin">Admin</Link>}<Link href="/dashboard/password">Einstellungen</Link><button onClick={async () => { const response = await fetch('/api/auth', { method: 'DELETE' }); if (!response.ok) { setError('Abmeldung fehlgeschlagen.'); return; } localStorage.removeItem('user'); router.replace('/'); }}>Abmelden</button></div></header>
         {activeTab === 'WEBHEIMAT' && <Headlines />}
@@ -277,6 +272,6 @@ export default function Dashboard() {
       }
       <footer className="maker-footer">Mit Herz und Händen. MakerSpace Lübbecke e. V.</footer>
       </main>
-    </div>
+    </>
   );
 }

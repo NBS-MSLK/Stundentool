@@ -35,6 +35,7 @@ export default function AuthBoundary({ children }: { children: React.ReactNode }
 
   if (pathname === '/') return children;
   if (failedPath === pathname) return <div className="container">Anmeldung konnte nicht geprüft werden. Bitte lade die Seite erneut.</div>;
-  if (verifiedPath !== pathname) return <div className="container">Anmeldung wird geprüft …</div>;
+  const navigatingWithinDashboard = verifiedPath?.startsWith('/dashboard') && pathname.startsWith('/dashboard');
+  if (verifiedPath !== pathname && !navigatingWithinDashboard) return <div className="container">Anmeldung wird geprüft …</div>;
   return children;
 }
