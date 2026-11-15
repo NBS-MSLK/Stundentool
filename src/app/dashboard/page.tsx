@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import DashboardSidebar from './components/DashboardSidebar';
 import { ACTIVITIES } from '@/lib/activities';
 import confetti from 'canvas-confetti';
 import TaskManager from './components/TaskManager';
@@ -175,13 +175,7 @@ export default function Dashboard() {
   const percentage = stats.totalGoalHours > 0 ? Math.min(100, Math.max(0, projectHours / stats.totalGoalHours * 100)) : 0;
   return (
     <div className="maker-shell">
-      <aside className="maker-sidebar">
-        <Link href="/dashboard" aria-label="MakerSpace Übersicht"><Image src="/brand/makerspace.png" alt="MakerSpace Lübbecke e. V." className="maker-logo" width={938} height={530} sizes="(max-width: 650px) 135px, 196px" /></Link>
-        <span className="maker-eyebrow sidebar-caption">Dein Makerspace</span>
-        <nav className="maker-navigation" aria-label="Hauptnavigation">{tabs.map(tab => <button key={tab.id} className={activeTab === tab.id ? 'maker-nav active' : 'maker-nav'} aria-current={activeTab === tab.id ? 'page' : undefined} onClick={() => { setActiveTab(tab.id); window.history.replaceState(null, '', '/dashboard?tab=' + tab.id); }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">{tab.icon === 'grid' ? <><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></> : tab.icon === 'clock' ? <><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></> : tab.icon === 'tasks' ? <><rect x="4" y="3" width="16" height="18" rx="3"/><path d="m8 12 3 3 5-6"/></> : tab.icon === 'money' ? <><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M5 9h2m10 6h2"/></> : <path d="m12 3 9 5v9l-9 5-9-5V8zm0 10v9M3 8l9 5 9-5M8 5l9 5"/>}</svg>{tab.label}</button>)}<Link href="/dashboard/forum" className="maker-nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-3 3V11.5a8.5 8.5 0 0 1 8.5-8.5h3a8.5 8.5 0 0 1 8.5 8.5Z"/><path d="M7 9h8M7 13h6"/></svg>Forum</Link></nav>
-        <div className="maker-sidebar-note"><span className="maker-eyebrow">Zusammen machen</span><strong>Jede Stunde zählt.</strong><p>Dein Einsatz bringt unsere Werkstatt ein Stück weiter.</p></div>
-        <div className="maker-profile"><span className="maker-avatar">{user.name.split(' ').map(part => part[0]).slice(0,2).join('')}</span><div><strong>{user.name}</strong><p>{user.role === 'ADMIN' ? 'Administrator' : 'Mitglied'}</p></div></div>
-      </aside>
+      <DashboardSidebar user={user} activeTab={activeTab} onSelect={tab => { setActiveTab(tab); window.history.replaceState(null, '', '/dashboard?tab=' + tab); }} />
       <main className="maker-main">
         <header className="maker-top"><span className="maker-eyebrow">MakerSpace Lübbecke / {currentLabel}</span><div className="maker-account">{user.role === 'ADMIN' && <Link href="/admin">Admin</Link>}<Link href="/dashboard/password">Einstellungen</Link><button onClick={async () => { const response = await fetch('/api/auth', { method: 'DELETE' }); if (!response.ok) { setError('Abmeldung fehlgeschlagen.'); return; } localStorage.removeItem('user'); router.replace('/'); }}>Abmelden</button></div></header>
         {activeTab === 'WEBHEIMAT' && <Headlines />}
