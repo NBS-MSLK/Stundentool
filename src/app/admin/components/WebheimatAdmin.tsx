@@ -1,5 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
+import NewsImageInput from '@/app/components/NewsImageInput';
+import LinkedText from '@/app/components/LinkedText';
 
 function safeParseFloat(val: any): number {
   if (val === undefined || val === null || val === '') return 0;
@@ -92,11 +94,12 @@ export default function WebheimatAdmin({ user }: { user: any }) {
   // --- News Actions ---
   const handleCreateNews = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch('/api/news', {
+    const response = await fetch('/api/news', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...newNews, authorId: user.id })
     });
+    if (!response.ok) { alert((await response.json()).error || 'Nachricht konnte nicht gespeichert werden.'); return; }
     setNewNews({ title: '', content: '', imageUrl: '' });
     fetchData();
   };
@@ -108,11 +111,12 @@ export default function WebheimatAdmin({ user }: { user: any }) {
   };
 
   const handleUpdateNews = async (id: string) => {
-    await fetch(`/api/news/${id}`, {
+    const response = await fetch(`/api/news/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editNewsData)
     });
+    if (!response.ok) { alert((await response.json()).error || 'Nachricht konnte nicht gespeichert werden.'); return; }
     setEditingNewsId(null);
     fetchData();
   };
@@ -354,7 +358,7 @@ export default function WebheimatAdmin({ user }: { user: any }) {
           <h2 style={{ marginBottom: '1rem' }}>Neue Nachricht verfassen</h2>
           <form onSubmit={handleCreateNews} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', maxWidth: '600px' }}>
             <input type="text" className="input-field" placeholder="Überschrift" value={newNews.title} onChange={e => setNewNews({...newNews, title: e.target.value})} required />
-            <input type="url" className="input-field" placeholder="Bild URL (Optional)" value={newNews.imageUrl} onChange={e => setNewNews({...newNews, imageUrl: e.target.value})} />
+            <NewsImageInput value={newNews.imageUrl} onChange={imageUrl => setNewNews(previous => ({ ...previous, imageUrl }))} />
             <textarea className="input-field" rows={4} placeholder="Inhalt der Nachricht..." value={newNews.content} onChange={e => setNewNews({...newNews, content: e.target.value})} required />
             <button type="submit" className="btn-success" style={{ width: 'fit-content', padding: '0.5rem 1.2rem', fontSize: '1rem' }}>Nachricht veröffentlichen</button>
           </form>
@@ -365,11 +369,11 @@ export default function WebheimatAdmin({ user }: { user: any }) {
               {editingNewsId === n.id ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <input type="text" className="input-field" value={editNewsData.title} onChange={e => setEditNewsData({...editNewsData, title: e.target.value})} required />
-                  <input type="url" className="input-field" placeholder="Bild URL (Optional)" value={editNewsData.imageUrl} onChange={e => setEditNewsData({...editNewsData, imageUrl: e.target.value})} />
+                  <NewsImageInput value={editNewsData.imageUrl} onChange={imageUrl => setEditNewsData(previous => ({ ...previous, imageUrl }))} />
                   <textarea className="input-field" rows={4} value={editNewsData.content} onChange={e => setEditNewsData({...editNewsData, content: e.target.value})} required />
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={() => handleUpdateNews(n.id)} className="btn-success" style={{ padding: '0.5rem 1rem' }}>Speichern</button>
-                    <button onClick={() => setEditingNewsId(null)} className="btn-danger" style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--text-secondary)' }}>Abbrechen</button>
+                    <button onClick={() => handleUpdateNews(n.id)} className="btn-success btn-compact" style={{ padding: '0.5rem 1rem' }}>Speichern</button>
+                    <button onClick={() => setEditingNewsId(null)} className="btn-danger btn-compact" style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--text-secondary)' }}>Abbrechen</button>
                   </div>
                 </div>
               ) : (
@@ -382,7 +386,7 @@ export default function WebheimatAdmin({ user }: { user: any }) {
                     </div>
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Von {n.author?.name || 'Unbekannt'} am {new Date(n.createdAt).toLocaleDateString()}</div>
-                  <p style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>{n.content}</p>
+                  <p style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}><LinkedText text={n.content} /></p>
                 </>
               )}
             </div>

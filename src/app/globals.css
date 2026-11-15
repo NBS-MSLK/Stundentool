@@ -921,3 +921,13 @@ body { padding-bottom: 72px; }
   .theme-toggle { display: none; }
   body { padding-bottom: 0; }
 }
+
+/* Compact actions in forms, including news editing and image removal. */
+.btn-success.btn-compact,
+.btn-danger.btn-compact {
+  width: fit-content;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: none;
+}

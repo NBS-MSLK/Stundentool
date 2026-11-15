@@ -1,4 +1,5 @@
 'use client';
+import LinkedText from '@/app/components/LinkedText';
 import { equipmentBudgetTotals } from '@/lib/equipment-budget';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -177,7 +178,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
             if (!n) return null;
             const isExpanded = expandedNews[n.id];
             const isLong = n.content.length > 150;
-            const content = isExpanded || !isLong ? n.content : n.content.substring(0, 150) + '...';
+
 
             return (
               <div className="maker-news-story">
@@ -189,7 +190,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
                     Von {n.author.name} am {new Date(n.createdAt).toLocaleDateString()}
                   </div>
-                  <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6, flex: 1, fontSize: '1rem' }}>{content}</p>
+                  <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6, flex: 1, fontSize: '1rem' }}><LinkedText text={n.content} limit={isExpanded || !isLong ? n.content.length : 150} /></p>
                   {isLong && (
                     <button 
                       onClick={() => setExpandedNews({...expandedNews, [n.id]: !isExpanded})} 
