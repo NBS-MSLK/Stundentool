@@ -945,3 +945,32 @@ body { padding-bottom: 72px; }
 .maker-event-form input, .maker-event-form textarea { width: 100%; min-width: 0; padding: .7rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font: inherit; }
 .maker-event-datetime { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
 .maker-overview > .maker-content-pair { align-items: start; }
+
+/* Start: news first, a compact agenda, then reference and community. */
+.maker-nav-group { display: block; margin: 22px 12px 8px; padding-top: 18px; border-top: 1px solid var(--border-color); }
+.maker-start-top { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+.maker-start-top .maker-section-heading { flex-wrap: wrap; gap: 12px; }
+.maker-start-top .maker-section-heading h2 { margin-top: 6px; }
+.maker-start-top .maker-news-image { aspect-ratio: 2 / 1; max-height: 360px; }
+.maker-start-top .maker-events { padding: 24px; }
+.maker-start-top .maker-event { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 12px; padding: 18px 0 18px 12px; border-left: 3px solid var(--event-color); margin: 16px 0; border-bottom: none; }
+.maker-event-general { --event-color: #a78bfa; }
+.maker-event-work { --event-color: #40bfb2; }
+.maker-event-meeting { --event-color: #edac43; }
+.maker-event-date { display: flex; flex-direction: column; align-items: center; line-height: 1.2; padding-top: 2px; }
+.maker-event-date strong { font-size: 26px; font-weight: 800; }
+.maker-event-date span { font-size: 12px; color: var(--text-secondary); }
+.maker-event-category { display: inline-block; border-bottom: 2px solid var(--event-color); font-size: 11px; font-weight: 700; letter-spacing: .03em; padding-bottom: 3px; }
+.maker-event-body { min-width: 0; }
+.maker-event-body h3 { font-size: 16px; line-height: 1.4; margin: 7px 0; }
+.maker-event-body time, .maker-event-body > p { font-size: 12px; line-height: 1.6; color: var(--text-secondary); }
+.maker-event-body summary { cursor: pointer; font-size: 12px; color: var(--text-secondary); }
+.maker-event-description p { margin-top: 8px; font-size: 14px; }
+.maker-event-task-link { display: inline-block; margin-top: 8px; font-size: 12px; color: var(--accent-text); }
+.maker-event-actions button, .maker-event-history { background: transparent; border: 0; color: var(--text-secondary); cursor: pointer; font: inherit; font-size: 12px; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+.maker-event-actions { gap: 14px; }
+.maker-event-history { display: block; margin-top: 16px; }
+.maker-event-form select { width: 100%; padding: .7rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font: inherit; }
+@media (max-width: 1100px) { .maker-start-top { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 650px) { .maker-nav-group { flex-basis: 100%; margin: 8px 0 0; padding-top: 12px; } .maker-start-top .maker-events { padding: 18px; } }
+@media (max-width: 650px) { .maker-navigation { flex-wrap: wrap; overflow: visible; } }

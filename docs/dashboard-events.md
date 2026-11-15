@@ -1,8 +1,8 @@
 # Dashboard, Termine und LEADER-Förderung
 
-Die Übersicht zeigt zuerst allgemeine Termine und Nachrichten. Administratoren können Termine direkt dort anlegen, bearbeiten und löschen. Alle angemeldeten Mitglieder können sie lesen. Datum und Uhrzeit beziehen sich auf Europe/Berlin; Termine bleiben am Veranstaltungstag sichtbar. Vergangene Termine lassen sich einblenden. Die bisherigen Arbeitseinsätze und Terminvorschläge bleiben separat erhalten.
+Start zeigt Nachrichten links auf zwei Dritteln und eine gemeinsame Terminliste rechts auf einem Drittel. Darunter stehen FAQ und Instagram jeweils auf halber Breite; auf kleinen Bildschirmen stehen die Bereiche untereinander. Zeiterfassung, Stundenkennzahlen und Nachtragen erscheinen ausschließlich unter Stunden. Administratoren können Termine direkt dort anlegen, bearbeiten und löschen. Alle angemeldeten Mitglieder können sie lesen. Datum und Uhrzeit beziehen sich auf Europe/Berlin; Termine bleiben am Veranstaltungstag sichtbar. Vergangene Termine lassen sich einblenden. Die bisherigen Arbeitseinsätze und Terminvorschläge erscheinen in derselben Liste mit Links zur Aufgabe und Teilnahme. Terminarten: Arbeitseinsatz (Türkis), Versammlung (Gold), Treffen & Sonstiges (Violett). Beschriftungen ergänzen die Farben. Die additive Migration versieht bisherige allgemeine Termine mit GENERAL und erhält alle Einträge.
 
-Förderkacheln und gemeinsames Stundenziel stehen unter `/dashboard?tab=LEADER` (Sidebar: LEADER-Förderung).
+Förderkacheln und gemeinsames Stundenziel stehen unter `/dashboard?tab=LEADER` (Sidebar-Gruppe LEADER-Förderung → Übersicht). Die Gruppe enthält außerdem Stunden und Anschaffungen.
 
 ## Betrieb
 

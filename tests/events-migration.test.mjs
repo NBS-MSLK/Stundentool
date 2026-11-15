@@ -17,8 +17,12 @@ test('event startup migration is repeatable and preserves existing data', async 
   try {
     await prisma.$executeRawUnsafe('CREATE TABLE ExistingData (value TEXT)');
     await prisma.$executeRawUnsafe("INSERT INTO ExistingData VALUES ('preserved')");
+    // Simulate the previous production schema, with an existing appointment.
+    await prisma.$executeRawUnsafe('CREATE TABLE "Event" ("id" TEXT PRIMARY KEY NOT NULL, "title" TEXT NOT NULL, "date" TEXT NOT NULL, "time" TEXT NOT NULL, "location" TEXT NOT NULL DEFAULT \'\', "description" TEXT NOT NULL DEFAULT \'\', "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" DATETIME NOT NULL)');
+    await prisma.$executeRawUnsafe("INSERT INTO Event (id, title, date, time, updatedAt) VALUES ('legacy', 'Bestehender Termin', '2027-04-01', '19:00', CURRENT_TIMESTAMP)");
     migrate();
-    const event = await prisma.event.create({ data: { title: 'Werkstatt', date: '2027-04-01', time: '18:00' } });
+    assert.equal((await prisma.event.findUnique({ where: { id: 'legacy' } })).category, 'GENERAL');
+    const event = await prisma.event.create({ data: { title: 'Werkstatt', date: '2027-04-01', time: '18:00', category: 'WORK' } });
     migrate();
     assert.deepEqual(await prisma.event.findUnique({ where: { id: event.id } }), event);
     assert.deepEqual(await prisma.$queryRawUnsafe('SELECT value FROM ExistingData'), [{ value: 'preserved' }]);

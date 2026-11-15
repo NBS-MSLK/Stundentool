@@ -166,6 +166,7 @@ model TaskVideo {
 model Event {
   id          String   @id @default(uuid())
   title       String
+  category    String   @default("GENERAL")
   date        String
   time        String
   location    String   @default("")

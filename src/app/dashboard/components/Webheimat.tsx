@@ -1,16 +1,12 @@
 'use client';
 import LinkedText from '@/app/components/LinkedText';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import GlobalCalendar from './GlobalCalendar';
 import Events from './Events';
-import type { ReactNode } from 'react';
 
-export default function Webheimat({ user, children }: { user: any, children?: ReactNode }) {
+export default function Webheimat({ user }: { user: { role: string } }) {
   const [news, setNews] = useState<any[]>([]);
   const [polls, setPolls] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
-  const [tasks, setTasks] = useState<any[]>([]);
   const [expandedNews, setExpandedNews] = useState<{[key: string]: boolean}>({});
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [expandedFaq, setExpandedFaq] = useState<{[key: string]: boolean}>({});
@@ -25,32 +21,20 @@ export default function Webheimat({ user, children }: { user: any, children?: Re
     const fetchData = async () => {
       try {
         const fetchOpts = { cache: 'no-store' as RequestCache };
-        const [nRes, pRes, faqRes, tasksRes] = await Promise.all([
+        const [nRes, pRes, faqRes] = await Promise.all([
           fetch('/api/news', fetchOpts).then(r => r.json()),
           fetch('/api/polls', fetchOpts).then(r => r.json()),
-          fetch('/api/faqs', fetchOpts).then(r => r.json()),
-          fetch('/api/tasks', fetchOpts).then(r => r.json())
+          fetch('/api/faqs', fetchOpts).then(r => r.json())
         ]);
         if (nRes.news) setNews(nRes.news);
         if (pRes.polls) setPolls(pRes.polls.filter((p:any) => p.isActive && !p.isArchived));
         if (faqRes.faqs) setFaqs(faqRes.faqs);
-        if (tasksRes.tasks) setTasks(tasksRes.tasks);
       } catch (e) {
         console.error(e);
       }
     };
     fetchData();
   }, []);
-
-  const fetchTasks = async () => {
-    try {
-      const res = await fetch('/api/tasks', { cache: 'no-store' });
-      const data = await res.json();
-      if (data.tasks) setTasks(data.tasks);
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   const handleVote = async (pollId: string, optionId: string) => {
     if (!user) return;
@@ -72,21 +56,20 @@ export default function Webheimat({ user, children }: { user: any, children?: Re
 
   return (
     <div className="maker-overview" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      
+
         <>
-      <div className="maker-content-pair">
-      <Events canManage={user.role === 'ADMIN'} />
+      <div className="maker-content-pair maker-start-top">
       {/* 4. News Section */}
       {(
         <div className="glass-card">
           <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Neueste Nachrichten</h2>
-          
+
           {news.length === 0 && (
             <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
               Noch keine Nachrichten vorhanden.
             </div>
           )}
-          
+
           {(() => {
             const n = news[currentNewsIndex];
             if (!n) return null;
@@ -106,13 +89,13 @@ export default function Webheimat({ user, children }: { user: any, children?: Re
                   </div>
                   <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6, flex: 1, fontSize: '1rem' }}><LinkedText text={n.content} limit={isExpanded || !isLong ? n.content.length : 150} /></p>
                   {isLong && (
-                    <button 
-                      onClick={() => setExpandedNews({...expandedNews, [n.id]: !isExpanded})} 
-                      className="btn-primary" 
-                      style={{ 
-                        alignSelf: 'flex-start', 
+                    <button
+                      onClick={() => setExpandedNews({...expandedNews, [n.id]: !isExpanded})}
+                      className="btn-primary"
+                      style={{
+                        alignSelf: 'flex-start',
                         marginTop: '1rem',
-                        padding: '0.5rem 1.5rem', 
+                        padding: '0.5rem 1.5rem',
                         backgroundColor: 'var(--accent-primary)',
                         color: 'white',
                         fontWeight: 'bold',
@@ -129,7 +112,7 @@ export default function Webheimat({ user, children }: { user: any, children?: Re
 
           {news.length > 1 && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-              <button 
+              <button
                 onClick={() => setCurrentNewsIndex(prev => prev > 0 ? prev - 1 : news.length - 1)}
                 className="btn-primary"
                 style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
@@ -139,7 +122,7 @@ export default function Webheimat({ user, children }: { user: any, children?: Re
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                 {currentNewsIndex + 1} von {news.length}
               </div>
-              <button 
+              <button
                 onClick={() => setCurrentNewsIndex(prev => prev < news.length - 1 ? prev + 1 : 0)}
                 className="btn-primary"
                 style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
@@ -151,15 +134,54 @@ export default function Webheimat({ user, children }: { user: any, children?: Re
         </div>
       )}
 
+      <Events canManage={user.role === 'ADMIN'} />
       </div>
-      {children}
-      <section className="glass-card maker-open-tasks">
-        <div className="maker-section-heading"><h2>Hier kannst du anpacken</h2><a href="/dashboard?tab=TASKS">Alle Aufgaben ↗</a></div>
-        {tasks.filter(task => task.status === 'OPEN' || task.status === 'IN_PROGRESS').slice(0, 3).map(task => <Link key={task.id} href={'/dashboard/tasks/' + task.id} className="maker-task-row"><div><strong>{task.title}</strong><p>{task.status === 'IN_PROGRESS' ? 'In Bearbeitung' : 'Offen'} · {task.volunteers?.length || 0} Helfer dabei</p></div><span>Mitmachen ↗</span></Link>)}
-        {!tasks.some(task => task.status === 'OPEN' || task.status === 'IN_PROGRESS') && <p className="maker-budget-note">Aktuell gibt es keine offenen Aufgaben. Im Kalender findest du unsere geplanten Arbeitsdienste.</p>}
-      </section>
-      <GlobalCalendar tasks={tasks} user={user} refetch={fetchTasks} />
+      <div className="maker-content-pair">
+      {/* 7. FAQ */}
+      {(
+        <div className="glass-card">
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Gut zu wissen · FAQ</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {faqs.length === 0 && <p className="agenda-empty">Hier findest du bald Antworten auf häufige Fragen.</p>}
+            {faqs.map(faq => {
+              const isExpanded = expandedFaq[faq.id];
+              return (
+                <div key={faq.id} style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+                  <button
+                    onClick={() => setExpandedFaq({...expandedFaq, [faq.id]: !isExpanded})}
+                    style={{ width: '100%', padding: '1rem', textAlign: 'left', backgroundColor: isExpanded ? 'var(--bg-hover)' : 'var(--bg-primary)', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--text-primary)' }}
+                  >
+                    {faq.question}
+                    <span>{isExpanded ? '−' : '+'}</span>
+                  </button>
+                  {isExpanded && (
+                    <div style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                      {faq.answer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {/* 6. Instagram Embed */}
+      <div className="glass-card">
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Instagram Feed</h2>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <iframe
+            title="Instagram – MakerSpace Lübbecke"
+            loading="lazy"
+            src="https://www.instagram.com/makerspace_luebbecke/embed"
+            width="100%"
+            height="480"
+            scrolling="no"
+            style={{ border: 'none', overflow: 'hidden', borderRadius: 'var(--radius-md)', maxWidth: '500px' }}
+          ></iframe>
+        </div>
+      </div>
 
+      </div>
       <div>
       {/* 5. Aktuelle Umfrage */}
       {polls.length > 0 && (
@@ -185,13 +207,13 @@ export default function Webheimat({ user, children }: { user: any, children?: Re
 
                       return (
                         <div key={opt.id}>
-                          <button 
+                          <button
                             onClick={() => handleVote(poll.id, opt.id)}
                             className="btn-primary"
-                            style={{ 
-                              width: '100%', 
-                              textAlign: 'left', 
-                              backgroundColor: isSelected ? 'var(--accent-primary)' : 'var(--bg-secondary)', 
+                            style={{
+                              width: '100%',
+                              textAlign: 'left',
+                              backgroundColor: isSelected ? 'var(--accent-primary)' : 'var(--bg-secondary)',
                               border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
                               padding: '1rem',
                               position: 'relative',
@@ -224,52 +246,6 @@ export default function Webheimat({ user, children }: { user: any, children?: Re
 
       </div>
 
-      <div className="maker-content-pair">
-      {/* 6. Instagram Embed */}
-      <div className="glass-card">
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Instagram Feed</h2>
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <iframe 
-            title="Instagram – MakerSpace Lübbecke"
-            loading="lazy"
-            src="https://www.instagram.com/makerspace_luebbecke/embed" 
-            width="100%" 
-            height="480" 
-            scrolling="no" 
-            style={{ border: 'none', overflow: 'hidden', borderRadius: 'var(--radius-md)', maxWidth: '500px' }}
-          ></iframe>
-        </div>
-      </div>
-
-      {/* 7. FAQ */}
-      {faqs.length > 0 && (
-        <div className="glass-card">
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Häufig gestellte Fragen (FAQ)</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {faqs.map(faq => {
-              const isExpanded = expandedFaq[faq.id];
-              return (
-                <div key={faq.id} style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
-                  <button 
-                    onClick={() => setExpandedFaq({...expandedFaq, [faq.id]: !isExpanded})} 
-                    style={{ width: '100%', padding: '1rem', textAlign: 'left', backgroundColor: isExpanded ? 'var(--bg-hover)' : 'var(--bg-primary)', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--text-primary)' }}
-                  >
-                    {faq.question}
-                    <span>{isExpanded ? '−' : '+'}</span>
-                  </button>
-                  {isExpanded && (
-                    <div style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                      {faq.answer}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-      </div>
-      
       </>
 
       <div style={{ paddingBottom: '3rem' }}></div>

@@ -1,5 +1,6 @@
 import { secureRoute, AccessError } from '@/lib/api-access';
 import prisma from '@/lib/prisma';
+import { isEventCategory } from '@/lib/event-categories';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,9 @@ function eventData(body: Record<string, unknown>) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
     throw new AccessError(400, 'Bitte ein gültiges Datum und eine gültige Uhrzeit angeben.');
   }
-  return { title, date, time, location: field('location', 250), description: field('description', 5000) };
+  const category = body.category ?? 'GENERAL';
+  if (!isEventCategory(category)) throw new AccessError(400, 'Bitte eine gültige Terminart wählen.');
+  return { title, date, time, category, location: field('location', 250), description: field('description', 5000) };
 }
 
 export const GET = secureRoute("/api/events", async () => {
