@@ -26,7 +26,8 @@ test('session and API access integration', { timeout: 300000 }, async t => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'stundentool-security-'));
   const databaseUrl = 'file:' + path.join(dir, 'test.sqlite').replaceAll('\\', '/');
   new DatabaseSync(path.join(dir, 'test.sqlite')).close();
-  const env = { ...process.env, DATABASE_URL: databaseUrl, NEXT_TELEMETRY_DISABLED: '1', NODE_ENV: 'development' };
+  const production = process.env.SECURITY_TEST_MODE === 'production';
+  const env = { ...process.env, FORUM_UPLOAD_DIR: path.join(dir, 'uploads'), DATABASE_URL: databaseUrl, NEXT_TELEMETRY_DISABLED: '1', NODE_ENV: production ? 'production' : 'development' };
   delete env.APP_ORIGIN;
   const init = spawnSync(process.execPath, ['node_modules/prisma/build/index.js', 'db', 'push', '--skip-generate'], { env, encoding: 'utf8' });
   assert.equal(init.status, 0, init.stdout + init.stderr);
@@ -49,9 +50,11 @@ test('session and API access integration', { timeout: 300000 }, async t => {
   await new Promise(resolve => probe.listen(0, '127.0.0.1', resolve));
   const port = probe.address().port;
   await new Promise(resolve => probe.close(resolve));
-  const base = `http://localhost:${port}`;
+  const base = `http://127.0.0.1:${port}`;
+  // Override deployment origins loaded from .env in this isolated local server.
+  env.APP_ORIGIN = base;
   let log = '';
-  const server = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'dev', '--webpack', '--port', String(port)], { env, stdio: ['ignore', 'pipe', 'pipe'] });
+  const server = spawn(process.execPath, ['node_modules/next/dist/bin/next', ...(production ? ['start'] : ['dev', '--webpack']), '--hostname', '127.0.0.1', '--port', String(port)], { env, stdio: ['ignore', 'pipe', 'pipe'] });
   server.stdout.on('data', chunk => { log = (log + chunk).slice(-12000); });
   server.stderr.on('data', chunk => { log = (log + chunk).slice(-12000); });
   async function request(url, { method = 'GET', cookie, body, origin = base, contentType = 'application/json' } = {}) {
@@ -74,13 +77,37 @@ test('session and API access integration', { timeout: 300000 }, async t => {
   try {
     let ready = false;
     for (let i = 0; i < 120; i++) {
-      try { if ((await fetch(base + '/api/auth')).status === 401) { ready = true; break; } } catch {}
+      try { if ((await fetch(base + '/api/auth', {signal: AbortSignal.timeout(10000)})).status === 401) { ready = true; break; } } catch {}
       await delay(500);
     }
     assert(ready, log);
     let a = await login(alice, 'alice-test-only');
     const b = await login(bob, 'bob-test-only');
     const root = await login(admin, 'admin-test-only');
+
+
+    await t.test('forum uploads, ownership, replies and moderation are protected', async () => {
+      const makeForm = () => { const form = new FormData(); form.set('title', 'Forum test'); form.set('description', 'Discussion'); form.set('pdf', new Blob(['%PDF-1.4\n%%EOF'], {type:'application/pdf'}), 'test.pdf'); return form; };
+      const upload = cookie => fetch(base+'/api/forum', {method:'POST',headers:{Origin:base,...(cookie?{Cookie:cookie}:{})},body:makeForm()});
+      assert.equal((await upload()).status,401);
+      assert.equal((await upload(a)).status,403);
+      const created=await upload(root); assert.equal(created.status,201,await created.clone().text());
+      const {id}=await created.json();
+      assert.equal((await fetch(base+'/api/forum/'+id+'/pdf')).status,401);
+      const pdf=await request('/api/forum/'+id+'/pdf',{cookie:a});assert.equal(pdf.status,200);assert.equal(pdf.headers.get('content-type'),'application/pdf');
+      assert.equal((await request('/api/forum/'+id+'/comments',{method:'POST',cookie:a,body:{content:'Question',reference:'Page 1'}})).status,201);
+      let topic=(await (await request('/api/forum/'+id,{cookie:a})).json()).topic;
+      const commentId=topic.comments[0].id;
+      assert.equal((await request('/api/forum/comments/'+commentId,{method:'PUT',cookie:b,body:{content:'Impersonation'}})).status,403);
+      assert.equal((await request('/api/forum/comments/'+commentId,{method:'PUT',cookie:a,body:{content:'Edited'}})).status,200);
+      assert.equal((await request('/api/forum/'+id+'/comments',{method:'POST',cookie:b,body:{content:'Reply',parentId:commentId}})).status,201);
+      assert.equal((await request('/api/forum/comments/'+commentId,{method:'DELETE',cookie:a})).status,403);
+      assert.equal((await request('/api/forum/comments/'+commentId,{method:'DELETE',cookie:root})).status,200);
+      topic=(await (await request('/api/forum/'+id,{cookie:a})).json()).topic;
+      assert.equal(topic.comments[0].content,'');assert.equal(topic.comments[0].reference,null);assert.equal(topic.comments.length,2);
+      assert.equal((await request('/api/forum/'+id+'/comments',{method:'POST',cookie:a,body:{content:'Blocked reply',parentId:commentId}})).status,400);
+      assert.equal((await request('/api/forum/'+id+'/comments',{method:'POST',cookie:a,body:{content:'   '}})).status,400);
+    });
 
     await t.test('locations are preset without assigning items and only admins may add or assign them', async () => {
       const data = await (await request('/api/inventory', { cookie: root })).json();

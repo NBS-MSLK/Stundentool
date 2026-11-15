@@ -62,3 +62,10 @@ Ausstattung/
 
 # Local design exploration (the live app uses public/brand)
 /public/design-preview/
+
+/uploads/
+
+# Local verification artifacts
+/.next-forum-*/
+/.next-security-*/
+/local-check-*/

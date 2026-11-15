@@ -53,6 +53,17 @@ async function authorize(route: string, request: Request, params: Params, body: 
   identity(body, user, route === '/api/entries' || route === '/api/entries/start' || route === '/api/entries/stop');
 
   switch (route) {
+    case '/api/forum': if (!read) admin(user); return;
+    case '/api/forum/[id]': if (!read) admin(user); return;
+    case '/api/forum/[id]/pdf': return;
+    case '/api/forum/[id]/comments': return;
+    case '/api/forum/comments/[id]': {
+      const comment = exists(await prisma.forumComment.findUnique({ where: { id } }));
+      if (method === 'DELETE') admin(user);
+      else if (comment.userId !== user.id) deny();
+      if (comment.hiddenAt) throw new AccessError(409, 'Beitrag wurde entfernt.');
+      return;
+    }
     case '/api/inventory': if (!read) admin(user); return;
     case '/api/inventory/categories': admin(user); return;
     case '/api/inventory/locations': admin(user); return;
@@ -144,7 +155,11 @@ export function secureRoute<R extends Request, C>(route: string, handler: (reque
       if (!session) throw new AccessError(401, 'Bitte erneut anmelden.');
       checkOrigin(request);
       let body: Body = {};
-      const bodyText = request.body === null ? '' : await request.clone().text();
+      const multipart = route === '/api/forum' && request.method === 'POST' && request.headers.get('content-type')?.startsWith('multipart/form-data');
+      if (multipart) {
+        if (session.user.role !== 'ADMIN') deny();
+      }
+      const bodyText = multipart || request.body === null ? '' : await request.clone().text();
       if (bodyText) {
         if (!request.headers.get('content-type')?.includes('application/json')) throw new AccessError(415, 'JSON erforderlich.');
         try { body = JSON.parse(bodyText); } catch { throw new AccessError(400, 'Ungültiges JSON.'); }

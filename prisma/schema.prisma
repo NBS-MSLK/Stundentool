@@ -8,6 +8,8 @@ datasource db {
 }
 
 model User {
+  forumTopics ForumTopic[]
+  forumComments ForumComment[]
   sessions         Session[]
   id               String          @id @default(uuid())
   name             String          @unique
@@ -343,4 +345,34 @@ model InventoryLocation {
 model InventoryPlacement {
   suggestionId String @id
   locationId Int
+}
+
+model ForumTopic {
+ id String @id @default(uuid())
+ title String
+ description String
+ authorId String?
+ author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+ pdfKey String?
+ pdfName String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ comments ForumComment[]
+}
+model ForumComment {
+ id String @id @default(uuid())
+ topicId String
+ topic ForumTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+ userId String?
+ user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+ parentId String?
+ parent ForumComment? @relation("ForumReplies", fields: [parentId], references: [id], onDelete: Restrict)
+ replies ForumComment[] @relation("ForumReplies")
+ content String
+ reference String?
+ hiddenAt DateTime?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@index([topicId, createdAt])
+ @@index([parentId])
 }
