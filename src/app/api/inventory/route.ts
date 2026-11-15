@@ -8,7 +8,7 @@ async function handleGET() {
   const locations = await prisma.$queryRaw<{ id: number; name: string }[]>`SELECT id, name FROM InventoryLocation`;
   locations.sort((a, b) => a.name.localeCompare(b.name, 'de', { numeric: true }));
   const items = await prisma.$queryRaw`
-    SELECT s.id, s.title, s.quantity, n.number AS inventoryNumber, a.categoryId, p.locationId
+    SELECT s.id, s.title, s.imageUrl, s.description, s.quantity, n.number AS inventoryNumber, a.categoryId, p.locationId
     FROM EquipmentSuggestion s JOIN InventoryNumber n ON n.suggestionId = s.id
     LEFT JOIN InventoryAssignment a ON a.suggestionId = s.id
     LEFT JOIN InventoryPlacement p ON p.suggestionId = s.id
