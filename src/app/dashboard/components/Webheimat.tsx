@@ -1,19 +1,16 @@
 'use client';
 import LinkedText from '@/app/components/LinkedText';
-import { equipmentBudgetTotals } from '@/lib/equipment-budget';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import GlobalCalendar from './GlobalCalendar';
-import FinanceCard from './FinanceCard';
+import Events from './Events';
+import type { ReactNode } from 'react';
 
-export default function Webheimat({ user, stats }: { user: any, stats: any }) {
-  const [funding, setFunding] = useState<any>(null);
+export default function Webheimat({ user, children }: { user: any, children?: ReactNode }) {
   const [news, setNews] = useState<any[]>([]);
   const [polls, setPolls] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
-  const [equipmentBudget, setEquipmentBudget] = useState<any>(null);
-  const [equipmentCategories, setEquipmentCategories] = useState<any[]>([]);
   const [expandedNews, setExpandedNews] = useState<{[key: string]: boolean}>({});
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [expandedFaq, setExpandedFaq] = useState<{[key: string]: boolean}>({});
@@ -28,21 +25,16 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
     const fetchData = async () => {
       try {
         const fetchOpts = { cache: 'no-store' as RequestCache };
-        const [fRes, nRes, pRes, faqRes, tasksRes, eqRes] = await Promise.all([
-          fetch('/api/funding', fetchOpts).then(r => r.json()),
+        const [nRes, pRes, faqRes, tasksRes] = await Promise.all([
           fetch('/api/news', fetchOpts).then(r => r.json()),
           fetch('/api/polls', fetchOpts).then(r => r.json()),
           fetch('/api/faqs', fetchOpts).then(r => r.json()),
-          fetch('/api/tasks', fetchOpts).then(r => r.json()),
-          fetch('/api/equipment', fetchOpts).then(r => r.json())
+          fetch('/api/tasks', fetchOpts).then(r => r.json())
         ]);
-        if (fRes.funding) setFunding(fRes.funding);
         if (nRes.news) setNews(nRes.news);
         if (pRes.polls) setPolls(pRes.polls.filter((p:any) => p.isActive && !p.isArchived));
         if (faqRes.faqs) setFaqs(faqRes.faqs);
         if (tasksRes.tasks) setTasks(tasksRes.tasks);
-        if (eqRes.budget) setEquipmentBudget(eqRes.budget);
-        if (eqRes.categories) setEquipmentCategories(eqRes.categories);
       } catch (e) {
         console.error(e);
       }
@@ -78,92 +70,14 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
     });
   };
 
-  const calculateDaysAgo = (dateStr: string) => {
-    if (!dateStr) return null;
-    const past = new Date(dateStr);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - past.getTime());
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'heute';
-    if (diffDays === 1) return 'gestern';
-    
-    const weeks = Math.floor(diffDays / 7);
-    const days = diffDays % 7;
-    
-    if (weeks === 0) return `vor ${days} Tagen`;
-    return `vor ${weeks} Wochen${days > 0 ? ` und ${days} Tagen` : ''}`;
-  };
-
-
-  const { spentAmount: eqSpentAmount, plannedAmount: eqPlannedAmount } = equipmentBudgetTotals(equipmentCategories);
-  const eqTotalBudget = equipmentBudget ? equipmentBudget.totalAmount : 0;
-
-  const eqSpentPercentage = eqTotalBudget > 0 ? (eqSpentAmount / eqTotalBudget) * 100 : 0;
-  const eqPlannedDifference = eqPlannedAmount - eqTotalBudget;
-
-  const money = (value: number) => value.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const percent = (value: number, total: number) => total > 0 ? Math.max(0, value / total * 100) : 0;
-
   return (
     <div className="maker-overview" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
         <>
-      <div className="maker-finance-grid">
-        {funding && <FinanceCard
-          title="Gesamtfinanzierung"
-          value={money(Number(funding.disbursedAmount) + Number(funding.submittedAmount))}
-          target={'von ' + money(Number(funding.totalAmount)) + ' Fördermitteln'}
-          progress={percent(Number(funding.disbursedAmount) + Number(funding.submittedAmount), Number(funding.totalAmount))}
-          progressLabel="Ausgezahlt & eingereicht"
-          amounts={[
-            {label: 'Ausgezahlt', value: money(Number(funding.disbursedAmount)), share: percent(Number(funding.disbursedAmount), Number(funding.totalAmount)), color: 'var(--success-text)'},
-            {label: 'Eingereicht', value: money(Number(funding.submittedAmount)), share: percent(Number(funding.submittedAmount), Number(funding.totalAmount)), color: 'var(--accent-text)'},
-            {label: 'Noch offen', value: money(Math.max(0, Number(funding.totalAmount) - Number(funding.disbursedAmount) - Number(funding.submittedAmount)))}
-          ]}
-          footnote={funding.lastSubmittedDate ? 'Letzte Einreichung: ' + new Date(funding.lastSubmittedDate).toLocaleDateString('de-DE') + ' (' + calculateDaysAgo(funding.lastSubmittedDate) + ')' : 'Auszahlungen und eingereichte Fördermittel im Überblick.'}
-        />}
-        <FinanceCard
-          title="Stunden-Förderwert"
-          value={money((stats.hardcodedBaseHours + stats.systemActiveHours) * 20)}
-          target={'von ' + money(stats.totalGoalHours * 20) + ' · ' + (stats.hardcodedBaseHours + stats.systemActiveHours).toLocaleString('de-DE') + ' / ' + stats.totalGoalHours.toLocaleString('de-DE') + ' h'}
-          progress={percent(stats.hardcodedBaseHours + stats.systemActiveHours, stats.totalGoalHours)}
-          progressLabel="Gemeinsam erarbeitet"
-          amounts={[
-            {label: 'Eingereicht', value: money(stats.hardcodedBaseHours * 20) + ' · ' + stats.hardcodedBaseHours.toLocaleString('de-DE') + ' h', share: percent(stats.hardcodedBaseHours, stats.totalGoalHours), color: 'var(--success-text)'},
-            {label: 'Offen', value: money(stats.systemActiveHours * 20) + ' · ' + stats.systemActiveHours.toLocaleString('de-DE') + ' h', share: percent(stats.systemActiveHours, stats.totalGoalHours), color: 'var(--accent-text)'},
-            {label: 'Bis zum Ziel', value: money(Math.max(0, stats.totalGoalHours - stats.hardcodedBaseHours - stats.systemActiveHours) * 20)}
-          ]}
-          footnote="Jede erfasste Stunde entspricht 20 € Förderwert."
-          link={{href: '/dashboard?tab=STUNDEN', label: 'Zur Zeiterfassung'}}
-        />
-        {equipmentBudget && <FinanceCard
-          title="Anschaffungsbudget"
-          value={money(eqSpentAmount)}
-          target={'von ' + money(eqTotalBudget) + ' Budget'}
-          progress={eqSpentPercentage}
-          progressLabel="Bereits ausgegeben"
-          amounts={[
-            {label: 'Ausgegeben', value: money(eqSpentAmount), share: eqSpentPercentage, color: eqSpentAmount > eqTotalBudget ? 'var(--danger-text)' : 'var(--success-text)'},
-            {label: 'Budget', value: money(eqTotalBudget)},
-            {label: 'Geplant gesamt', value: money(eqPlannedAmount)},
-            {label: 'Verfügbar nach Käufen', value: money(eqTotalBudget - eqSpentAmount)},
-            {label: eqPlannedDifference > 0 ? 'Planung über Budget' : 'Spielraum zur Planung', value: money(Math.abs(eqPlannedDifference))}
-          ]}
-          footnote={'Verfügbar nach Käufen: ' + money(eqTotalBudget - eqSpentAmount)}
-          link={{href: '/dashboard?tab=EQUIPMENT', label: 'Zu den Anschaffungen'}}
-        />}
-      </div>
-      <section className="glass-card maker-open-tasks">
-        <div className="maker-section-heading"><h2>Hier kannst du anpacken</h2><a href="/dashboard?tab=TASKS">Alle Aufgaben ↗</a></div>
-        {tasks.filter(task => task.status === 'OPEN' || task.status === 'IN_PROGRESS').slice(0, 3).map(task => <Link key={task.id} href={'/dashboard/tasks/' + task.id} className="maker-task-row"><div><strong>{task.title}</strong><p>{task.status === 'IN_PROGRESS' ? 'In Bearbeitung' : 'Offen'} · {task.volunteers?.length || 0} Helfer dabei</p></div><span>Mitmachen ↗</span></Link>)}
-        {!tasks.some(task => task.status === 'OPEN' || task.status === 'IN_PROGRESS') && <p className="maker-budget-note">Aktuell gibt es keine offenen Aufgaben. Im Kalender findest du unsere geplanten Arbeitsdienste.</p>}
-      </section>
-      <GlobalCalendar tasks={tasks} user={user} refetch={fetchTasks} />
-
-      {(news.length > 0 || polls.length > 0) && <div className="maker-content-pair">
+      <div className="maker-content-pair">
+      <Events canManage={user.role === 'ADMIN'} />
       {/* 4. News Section */}
-      {news.length > 0 && (
+      {(
         <div className="glass-card">
           <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Neueste Nachrichten</h2>
           
@@ -237,6 +151,16 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         </div>
       )}
 
+      </div>
+      {children}
+      <section className="glass-card maker-open-tasks">
+        <div className="maker-section-heading"><h2>Hier kannst du anpacken</h2><a href="/dashboard?tab=TASKS">Alle Aufgaben ↗</a></div>
+        {tasks.filter(task => task.status === 'OPEN' || task.status === 'IN_PROGRESS').slice(0, 3).map(task => <Link key={task.id} href={'/dashboard/tasks/' + task.id} className="maker-task-row"><div><strong>{task.title}</strong><p>{task.status === 'IN_PROGRESS' ? 'In Bearbeitung' : 'Offen'} · {task.volunteers?.length || 0} Helfer dabei</p></div><span>Mitmachen ↗</span></Link>)}
+        {!tasks.some(task => task.status === 'OPEN' || task.status === 'IN_PROGRESS') && <p className="maker-budget-note">Aktuell gibt es keine offenen Aufgaben. Im Kalender findest du unsere geplanten Arbeitsdienste.</p>}
+      </section>
+      <GlobalCalendar tasks={tasks} user={user} refetch={fetchTasks} />
+
+      <div>
       {/* 5. Aktuelle Umfrage */}
       {polls.length > 0 && (
         <div className="glass-card">
@@ -298,7 +222,7 @@ export default function Webheimat({ user, stats }: { user: any, stats: any }) {
         </div>
       )}
 
-      </div>}
+      </div>
 
       <div className="maker-content-pair">
       {/* 6. Instagram Embed */}

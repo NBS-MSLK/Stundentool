@@ -3,9 +3,9 @@
   "version": "0.2.1",
   "private": true,
   "scripts": {
-    "dev": "node scripts/prepare-inventory.mjs && node scripts/prepare-tabletop.mjs && node scripts/prepare-forum.mjs && next dev",
+    "dev": "node scripts/prepare-inventory.mjs && node scripts/prepare-tabletop.mjs && node scripts/prepare-forum.mjs && node scripts/prepare-events.mjs && next dev",
     "build": "prisma generate && next build",
-    "start": "node scripts/prepare-session-table.mjs && node scripts/migrate-passwords.mjs && node scripts/prepare-inventory.mjs && node scripts/prepare-tabletop.mjs && node scripts/prepare-forum.mjs && next start",
+    "start": "node scripts/start.mjs",
     "lint": "eslint",
     "db:session": "node scripts/prepare-session-table.mjs",
     "test:security": "node --test tests/password.test.mjs tests/security.test.mjs",

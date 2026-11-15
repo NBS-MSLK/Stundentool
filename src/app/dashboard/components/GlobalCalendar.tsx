@@ -26,8 +26,8 @@ export default function GlobalCalendar({ tasks, user, refetch }: { tasks: Calend
   };
 
   return (
-    <section className="glass-card maker-agenda" aria-label="Nächste Termine">
-      <div className="maker-section-heading"><h2>Nächste Termine</h2><span className="maker-eyebrow">{events.length} {events.length === 1 ? 'Termin' : 'Termine'}</span></div>
+    <section className="glass-card maker-agenda" aria-label="Arbeitseinsätze und Terminvorschläge">
+      <div className="maker-section-heading"><h2>Arbeitseinsätze & Terminvorschläge</h2><span className="maker-eyebrow">{events.length} {events.length === 1 ? 'Termin' : 'Termine'}</span></div>
       {error && <p role="alert" className="maker-error">{error}</p>}
       {!events.length && <p className="agenda-empty">Aktuell stehen keine kommenden Termine oder Terminvorschläge an.</p>}
       <ol className="agenda-list">{visible.map(event => {

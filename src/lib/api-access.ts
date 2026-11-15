@@ -53,6 +53,7 @@ async function authorize(route: string, request: Request, params: Params, body: 
   identity(body, user, route === '/api/entries' || route === '/api/entries/start' || route === '/api/entries/stop');
 
   switch (route) {
+    case '/api/events': if (!read) admin(user); return;
     case '/api/forum': if (!read) admin(user); return;
     case '/api/forum/[id]': if (!read) admin(user); return;
     case '/api/forum/[id]/pdf': return;

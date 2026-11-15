@@ -931,3 +931,17 @@ body { padding-bottom: 72px; }
   line-height: 1.4;
   box-shadow: none;
 }
+
+/* General dates and admin editor */
+.maker-events { min-width: 0; }
+.maker-event { padding: 1.25rem 0; border-bottom: 1px solid var(--border-color); overflow-wrap: anywhere; }
+.maker-event time { color: var(--accent-text); font-size: .85rem; }
+.maker-event h3 { margin: .4rem 0; }
+.maker-event-description { white-space: pre-wrap; margin-top: .5rem; }
+.maker-event-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .8rem; }
+.maker-event-form { padding: 1rem 0; }
+.maker-event-form fieldset { border: 0; padding: 0; min-width: 0; }
+.maker-event-form label { display: grid; gap: .35rem; margin: .8rem 0; }
+.maker-event-form input, .maker-event-form textarea { width: 100%; min-width: 0; padding: .7rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font: inherit; }
+.maker-event-datetime { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.maker-overview > .maker-content-pair { align-items: start; }

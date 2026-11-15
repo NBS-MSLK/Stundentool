@@ -1,9 +1,9 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-export type DashboardTab = 'WEBHEIMAT' | 'STUNDEN' | 'TASKS' | 'EQUIPMENT' | 'INVENTORY';
+export type DashboardTab = 'WEBHEIMAT' | 'STUNDEN' | 'TASKS' | 'EQUIPMENT' | 'INVENTORY' | 'LEADER';
 export default function DashboardSidebar({user, activeTab, onSelect}: {user: {name: string; role: string}; activeTab: DashboardTab | 'FORUM'; onSelect?: (tab: DashboardTab) => void}) {
-  const tabs = [{id: 'WEBHEIMAT', label: 'Übersicht', icon: 'grid'}, {id: 'STUNDEN', label: 'Meine Stunden', icon: 'clock'}, {id: 'TASKS', label: 'Aufgaben', icon: 'tasks'}, {id: 'EQUIPMENT', label: 'Anschaffungen', icon: 'money'}, {id: 'INVENTORY', label: 'Ausstattung', icon: 'box'}] as const;
+  const tabs = [{id: 'WEBHEIMAT', label: 'Übersicht', icon: 'grid'}, {id: 'STUNDEN', label: 'Meine Stunden', icon: 'clock'}, {id: 'TASKS', label: 'Aufgaben', icon: 'tasks'}, {id: 'EQUIPMENT', label: 'Anschaffungen', icon: 'money'}, {id: 'INVENTORY', label: 'Ausstattung', icon: 'box'}, {id: 'LEADER', label: 'LEADER-Förderung', icon: 'money'}] as const;
   return (
       <aside className="maker-sidebar">
         <Link href="/dashboard" aria-label="MakerSpace Übersicht"><Image src="/brand/makerspace.png" alt="MakerSpace Lübbecke e. V." className="maker-logo" width={938} height={530} sizes="(max-width: 650px) 135px, 196px" /></Link>

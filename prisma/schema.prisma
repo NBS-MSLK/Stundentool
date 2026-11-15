@@ -163,6 +163,19 @@ model TaskVideo {
   description String?
 }
 
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  date        String
+  time        String
+  location    String   @default("")
+  description String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([date, time])
+}
+
 model FundingStatus {
   id                String    @id @default("singleton")
   totalAmount       Float     @default(125409.53)

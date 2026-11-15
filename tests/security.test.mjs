@@ -85,6 +85,23 @@ test('session and API access integration', { timeout: 300000 }, async t => {
     const b = await login(bob, 'bob-test-only');
     const root = await login(admin, 'admin-test-only');
 
+    await t.test('general events require admin writes and validate dates', async () => {
+      const body = { title: 'Offene Werkstatt', date: '2027-03-15', time: '18:30', location: 'MakerSpace', description: 'Alle willkommen' };
+      assert.equal((await request('/api/events', { method: 'POST', cookie: a, body })).status, 403);
+      assert.equal((await request('/api/events', { method: 'POST', cookie: root, body: { ...body, date: '2027-02-30' } })).status, 400);
+      assert.equal((await request('/api/events', { method: 'POST', cookie: root, body: { ...body, time: '25:00' } })).status, 400);
+      const created = await request('/api/events', { method: 'POST', cookie: root, body });
+      assert.equal(created.status, 201, await created.clone().text());
+      const { event } = await created.json();
+      assert.equal((await (await request('/api/events', { cookie: a })).json()).events[0].id, event.id);
+      assert.equal((await request('/api/events', { method: 'PUT', cookie: a, body: { ...body, id: event.id } })).status, 403);
+      assert.equal((await request('/api/events', { method: 'PUT', cookie: root, body: { ...body, id: event.id, title: 'Neuer Titel' } })).status, 200);
+      assert.equal((await (await request('/api/events', { cookie: a })).json()).events[0].title, 'Neuer Titel');
+      assert.equal((await request('/api/events', { method: 'DELETE', cookie: a, body: { id: event.id } })).status, 403);
+      assert.equal((await request('/api/events', { method: 'DELETE', cookie: root, body: { id: event.id } })).status, 200);
+      assert.equal((await request('/api/events', { method: 'DELETE', cookie: root, body: { id: event.id } })).status, 404);
+    });
+
 
     await t.test('forum uploads, ownership, replies and moderation are protected', async () => {
       const makeForm = () => { const form = new FormData(); form.set('title', 'Forum test'); form.set('description', 'Discussion'); form.set('pdf', new Blob(['%PDF-1.4\n%%EOF'], {type:'application/pdf'}), 'test.pdf'); return form; };

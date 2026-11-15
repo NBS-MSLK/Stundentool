@@ -7,6 +7,7 @@ import { ACTIVITIES } from '@/lib/activities';
 import confetti from 'canvas-confetti';
 import TaskManager from './components/TaskManager';
 import Webheimat from './components/Webheimat';
+import LeaderFunding from './components/LeaderFunding';
 import Headlines from './components/Headlines';
 import InventorySection from './components/InventorySection';
 import EquipmentSection from './components/EquipmentSection';
@@ -33,7 +34,7 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [stats, setStats] = useState({ systemActiveHours: 0, systemArchivedHours: 0, hardcodedBaseHours: 619, totalGoalHours: 2700 });
   const [selectedActivity, setSelectedActivity] = useState('');
-  const [activeTab, setActiveTab] = useState<'WEBHEIMAT' | 'STUNDEN' | 'TASKS' | 'EQUIPMENT' | 'INVENTORY'>('WEBHEIMAT');
+  const [activeTab, setActiveTab] = useState<'WEBHEIMAT' | 'STUNDEN' | 'TASKS' | 'EQUIPMENT' | 'INVENTORY' | 'LEADER'>('WEBHEIMAT');
   
   const [elapsedString, setElapsedString] = useState('00:00:00');
 
@@ -51,7 +52,7 @@ export default function Dashboard() {
 
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
-    if (tab === 'INVENTORY' || tab === 'EQUIPMENT' || tab === 'TASKS' || tab === 'STUNDEN' || tab === 'WEBHEIMAT') {
+    if (tab === 'LEADER' || tab === 'INVENTORY' || tab === 'EQUIPMENT' || tab === 'TASKS' || tab === 'STUNDEN' || tab === 'WEBHEIMAT') {
       setActiveTab(tab);
     }
   }, [router]);
@@ -168,11 +169,18 @@ export default function Dashboard() {
 
   const totalHours = entries.reduce((sum, entry) => sum + Math.max(1, Math.ceil((new Date(entry.endTime!).getTime() - new Date(entry.startTime).getTime()) / 3600000)), 0);
   const monthHours = entries.filter(entry => { const date = new Date(entry.startTime); const now = new Date(); return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear(); }).reduce((sum, entry) => sum + Math.max(1, Math.ceil((new Date(entry.endTime!).getTime() - new Date(entry.startTime).getTime()) / 3600000)), 0);
-  const tabs = [{id: 'WEBHEIMAT', label: 'Übersicht', icon: 'grid'}, {id: 'STUNDEN', label: 'Meine Stunden', icon: 'clock'}, {id: 'TASKS', label: 'Aufgaben', icon: 'tasks'}, {id: 'EQUIPMENT', label: 'Anschaffungen', icon: 'money'}, {id: 'INVENTORY', label: 'Ausstattung', icon: 'box'}] as const;
+  const tabs = [{id: 'WEBHEIMAT', label: 'Übersicht', icon: 'grid'}, {id: 'STUNDEN', label: 'Meine Stunden', icon: 'clock'}, {id: 'TASKS', label: 'Aufgaben', icon: 'tasks'}, {id: 'EQUIPMENT', label: 'Anschaffungen', icon: 'money'}, {id: 'INVENTORY', label: 'Ausstattung', icon: 'box'}, {id: 'LEADER', label: 'LEADER-Förderung', icon: 'money'}] as const;
   const currentLabel = tabs.find(tab => tab.id === activeTab)!.label;
   const showHours = activeTab === 'WEBHEIMAT' || activeTab === 'STUNDEN';
   const projectHours = stats.hardcodedBaseHours + stats.systemActiveHours;
   const percentage = stats.totalGoalHours > 0 ? Math.min(100, Math.max(0, projectHours / stats.totalGoalHours * 100)) : 0;
+  const hoursContent = (        <>
+        <div className="maker-hero-grid" style={{ gridTemplateColumns: '1fr' }}>
+          <section className="maker-timer" aria-label="Zeiterfassung"><div className="maker-timer-heading"><span className="maker-eyebrow">Deine Zeiterfassung</span><span>{activeEntry ? '● Dein Timer läuft' : '● Bereit für deinen Einsatz'}</span></div><div className="maker-clock">{elapsedString}</div><div className="maker-timer-controls">{activeEntry ? <><span className="maker-running-activity">{activeEntry.activity || 'Aktiver Einsatz'}</span><button onClick={handleStop} className="maker-button" disabled={saving}>{saving ? 'Wird gespeichert …' : '■ Zeit stoppen'}</button></> : <><select value={selectedActivity} onChange={e => setSelectedActivity(e.target.value)} aria-label="Tätigkeit" disabled={saving}><option value="">Tätigkeit auswählen …</option>{Object.entries(ACTIVITIES).map(([group, acts]) => <optgroup key={group} label={group}>{acts.map(a => <option key={a} value={a}>{a}</option>)}</optgroup>)}</select><button onClick={handleStart} className="maker-button" disabled={!selectedActivity || saving}>{saving ? 'Startet …' : '▶ Zeit starten'}</button></>}</div><p>{activeEntry ? 'Läuft weiter, während du dich im Makerspace umschaust.' : 'Tätigkeit auswählen und loslegen. Schön, dass du dabei bist.'}</p></section>
+
+        </div>
+        <section className="maker-metrics" aria-label="Deine Stunden"><div><span className="maker-eyebrow">Dein Beitrag</span><strong>{totalHours.toLocaleString('de-DE')} <small>h</small></strong><p>Insgesamt mit angepackt</p></div><div><span className="maker-eyebrow">Diesen Monat</span><strong>{monthHours.toLocaleString('de-DE')} <small>h</small></strong><p>Danke für deinen Einsatz!</p></div><Link href="/dashboard/highscore"><span className="maker-eyebrow">Zusammen machen</span><strong>Trophäen <small>↗</small></strong><p>Unsere gemeinsamen Erfolge</p></Link></section>
+        </>);
   return (
     <div className="maker-shell">
       <DashboardSidebar user={user} activeTab={activeTab} onSelect={tab => { setActiveTab(tab); window.history.replaceState(null, '', '/dashboard?tab=' + tab); }} />
@@ -181,14 +189,9 @@ export default function Dashboard() {
         {activeTab === 'WEBHEIMAT' && <Headlines />}
         <div className="maker-greeting"><div><h1>{activeTab === 'WEBHEIMAT' ? 'Moin ' + user.name.split(' ')[0] + '. Zeit, was zu machen.' : currentLabel}</h1><p>{activeTab === 'WEBHEIMAT' ? 'Deine Werkstatt, dein Beitrag, unser gemeinsames Projekt.' : activeTab === 'TASKS' ? 'Finde eine Aufgabe, die zu dir passt.' : activeTab === 'EQUIPMENT' ? 'Gestalte mit, was unsere Werkstatt möglich macht.' : 'Dein Einsatz macht den Unterschied.'}</p></div><>{showHours && <Link href="/dashboard/new" className="maker-button secondary">＋ Stunden nachtragen</Link>}</></div>
         {error && <div role="alert" className="maker-error">{error}</div>}
-        {showHours && <>
-        <div className="maker-hero-grid">
-          <section className="maker-timer" aria-label="Zeiterfassung"><div className="maker-timer-heading"><span className="maker-eyebrow">Deine Zeiterfassung</span><span>{activeEntry ? '● Dein Timer läuft' : '● Bereit für deinen Einsatz'}</span></div><div className="maker-clock">{elapsedString}</div><div className="maker-timer-controls">{activeEntry ? <><span className="maker-running-activity">{activeEntry.activity || 'Aktiver Einsatz'}</span><button onClick={handleStop} className="maker-button" disabled={saving}>{saving ? 'Wird gespeichert …' : '■ Zeit stoppen'}</button></> : <><select value={selectedActivity} onChange={e => setSelectedActivity(e.target.value)} aria-label="Tätigkeit" disabled={saving}><option value="">Tätigkeit auswählen …</option>{Object.entries(ACTIVITIES).map(([group, acts]) => <optgroup key={group} label={group}>{acts.map(a => <option key={a} value={a}>{a}</option>)}</optgroup>)}</select><button onClick={handleStart} className="maker-button" disabled={!selectedActivity || saving}>{saving ? 'Startet …' : '▶ Zeit starten'}</button></>}</div><p>{activeEntry ? 'Läuft weiter, während du dich im Makerspace umschaust.' : 'Tätigkeit auswählen und loslegen. Schön, dass du dabei bist.'}</p></section>
-          <section className="maker-community"><div className="maker-community-art"/><div className="maker-community-body"><span className="maker-eyebrow">Unser gemeinsames Ziel</span><h2>Aus Ideen wird Werkstatt.</h2><p>Wir packen zusammen an – Stunde für Stunde.</p><div className="maker-progress" role="progressbar" aria-label="Gemeinsames Stundenziel" aria-valuenow={Math.round(percentage)} aria-valuemin={0} aria-valuemax={100}><span style={{width: percentage + '%'}}/></div><div className="maker-progress-label"><strong>{projectHours.toLocaleString('de-DE')} / {stats.totalGoalHours.toLocaleString('de-DE')} Stunden</strong><span>{Math.round(percentage)} % geschafft</span></div></div></section>
-        </div>
-        <section className="maker-metrics" aria-label="Deine Stunden"><div><span className="maker-eyebrow">Dein Beitrag</span><strong>{totalHours.toLocaleString('de-DE')} <small>h</small></strong><p>Insgesamt mit angepackt</p></div><div><span className="maker-eyebrow">Diesen Monat</span><strong>{monthHours.toLocaleString('de-DE')} <small>h</small></strong><p>Danke für deinen Einsatz!</p></div><Link href="/dashboard/highscore"><span className="maker-eyebrow">Zusammen machen</span><strong>Trophäen <small>↗</small></strong><p>Unsere gemeinsamen Erfolge</p></Link></section>
-        </>}
-        {activeTab === 'WEBHEIMAT' ? <Webheimat user={user} stats={stats} /> : activeTab === 'TASKS' ? <TaskManager user={user} /> : activeTab === 'EQUIPMENT' ? <EquipmentSection user={user} /> : activeTab === 'INVENTORY' ? <InventorySection canManage={user?.role === 'ADMIN'} /> : <>
+        {activeTab === 'WEBHEIMAT' && <Webheimat user={user}>{hoursContent}</Webheimat>}
+        {activeTab === 'STUNDEN' && hoursContent}
+        {activeTab === 'WEBHEIMAT' ? null : activeTab === 'LEADER' ? <>          <section className="maker-community"><div className="maker-community-art"/><div className="maker-community-body"><span className="maker-eyebrow">Unser gemeinsames Ziel</span><h2>Aus Ideen wird Werkstatt.</h2><p>Wir packen zusammen an – Stunde für Stunde.</p><div className="maker-progress" role="progressbar" aria-label="Gemeinsames Stundenziel" aria-valuenow={Math.round(percentage)} aria-valuemin={0} aria-valuemax={100}><span style={{width: percentage + '%'}}/></div><div className="maker-progress-label"><strong>{projectHours.toLocaleString('de-DE')} / {stats.totalGoalHours.toLocaleString('de-DE')} Stunden</strong><span>{Math.round(percentage)} % geschafft</span></div></div></section><LeaderFunding stats={stats} /></> : activeTab === 'TASKS' ? <TaskManager user={user} /> : activeTab === 'EQUIPMENT' ? <EquipmentSection user={user} /> : activeTab === 'INVENTORY' ? <InventorySection canManage={user?.role === 'ADMIN'} /> : <>
       <div style={{ marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontSize: '1.2rem', fontWeight: 600, whiteSpace: 'nowrap' }}>Letzte Einträge</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
