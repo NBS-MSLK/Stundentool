@@ -26,6 +26,22 @@ test('forum handlers: permissions, uploads, replies, moderation and persistence'
  require.extensions['.ts']=(module,filename)=>module._compile(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText,filename);
  const prisma=require('../src/lib/prisma.ts').default;
  try {
+  const {uploadRoot}=require('../src/lib/forum.ts');
+  const configuredUploads=process.env.FORUM_UPLOAD_DIR;
+  const originalMode=process.env.NODE_ENV;
+  const originalDatabase=process.env.DATABASE_URL;
+  try {
+   process.env.NODE_ENV='production';
+   assert.equal(uploadRoot(),configuredUploads);
+   delete process.env.FORUM_UPLOAD_DIR;
+   assert.equal(uploadRoot(),path.join(dir,'forum-uploads'));
+   process.env.DATABASE_URL='file:./database.sqlite';
+   assert.throws(()=>uploadRoot(),/persistent storage/);
+  } finally {
+   process.env.FORUM_UPLOAD_DIR=configuredUploads;
+   process.env.DATABASE_URL=originalDatabase;
+   if(originalMode===undefined)delete process.env.NODE_ENV;else process.env.NODE_ENV=originalMode;
+  }
   const script=fs.readFileSync('scripts/prepare-forum.mjs','utf8');
   const statements=[...script.matchAll(/executeRawUnsafe\('([^']+)'\)/g)].map(m=>m[1]);
   for(const sql of statements)await prisma.$executeRawUnsafe(sql);
@@ -60,6 +76,26 @@ test('forum handlers: permissions, uploads, replies, moderation and persistence'
   assert.equal((await call(edit.PUT,'bob',{id:main,method:'PUT',body:{content:'Forgery'}})).status,403);
   assert.equal((await call(edit.PUT,'alice',{id:main,method:'PUT',body:{content:'Edited'}})).status,200);
   assert.equal((await call(comments.POST,'bob',{id,method:'POST',body:{content:'Reply',parentId:main}})).status,201);
+  const oldTopic=await prisma.forumTopic.findUnique({where:{id}});
+  assert.equal((await call(detail.PUT,undefined,{id,method:'PUT',body:form()})).status,401);
+  assert.equal((await call(detail.PUT,'alice',{id,method:'PUT',body:form()})).status,403);
+  assert.equal((await call(detail.PUT,'admin',{id,method:'PUT',body:form(),origin:'https://evil.example'})).status,403);
+  assert.equal((await call(detail.PUT,'admin',{id,method:'PUT',body:form('bad')})).status,400);
+  assert.equal((await call(detail.PUT,'admin',{id,method:'PUT',body:form('x'.repeat(10*1024*1024+1))})).status,413);
+  assert.equal((await prisma.forumTopic.findUnique({where:{id}})).pdfKey,oldTopic.pdfKey);
+  const noPdf=new FormData();noPdf.set('title','Title correction');noPdf.set('description','Discussion');
+  assert.equal((await call(detail.PUT,'admin',{id,method:'PUT',body:noPdf})).status,200);
+  assert.equal((await prisma.forumTopic.findUnique({where:{id}})).pdfKey,oldTopic.pdfKey);
+  assert.equal((await call(detail.PUT,'admin',{id,method:'PUT',body:form('%PDF-1.4\nReplacement\n%%EOF')})).status,200);
+  assert.equal(await (await call(pdf.GET,'alice',{id})).text(),'%PDF-1.4\nReplacement\n%%EOF');
+  assert.equal(fs.existsSync(path.join(process.env.FORUM_UPLOAD_DIR,oldTopic.pdfKey)),false);
+  assert.equal(await prisma.forumComment.count({where:{topicId:id}}),2);
+  // Restore a missing PDF without deleting the topic or its comments.
+  const replacement=await prisma.forumTopic.findUnique({where:{id}});
+  fs.unlinkSync(path.join(process.env.FORUM_UPLOAD_DIR,replacement.pdfKey));
+  assert.equal((await call(pdf.GET,'alice',{id})).status,404);
+  assert.equal((await call(detail.PUT,'admin',{id,method:'PUT',body:form()})).status,200);
+  assert.equal((await call(pdf.GET,'alice',{id})).status,200);
   rows=await prisma.forumComment.findMany({where:{topicId:id}});const reply=rows.find(r=>r.parentId).id;
   assert.equal((await call(comments.POST,'bob',{id,method:'POST',body:{content:'Too deep',parentId:reply}})).status,400);
   const other=await prisma.forumTopic.create({data:{title:'Other',description:''}});

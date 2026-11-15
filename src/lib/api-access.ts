@@ -155,7 +155,7 @@ export function secureRoute<R extends Request, C>(route: string, handler: (reque
       if (!session) throw new AccessError(401, 'Bitte erneut anmelden.');
       checkOrigin(request);
       let body: Body = {};
-      const multipart = route === '/api/forum' && request.method === 'POST' && request.headers.get('content-type')?.startsWith('multipart/form-data');
+      const multipart = ((route === '/api/forum' && request.method === 'POST') || (route === '/api/forum/[id]' && request.method === 'PUT')) && request.headers.get('content-type')?.startsWith('multipart/form-data');
       if (multipart) {
         if (session.user.role !== 'ADMIN') deny();
       }
