@@ -2,6 +2,7 @@
 import LinkedText from '@/app/components/LinkedText';
 import { useState, useEffect } from 'react';
 import Events from './Events';
+import RecentForum from './RecentForum';
 
 export default function Webheimat({ user }: { user: { role: string } }) {
   const [news, setNews] = useState<any[]>([]);
@@ -134,7 +135,10 @@ export default function Webheimat({ user }: { user: { role: string } }) {
         </div>
       )}
 
-      <Events canManage={user.role === 'ADMIN'} />
+      <div className="maker-start-sidebar">
+        <Events canManage={user.role === 'ADMIN'} />
+        <RecentForum />
+      </div>
       </div>
       <div className="maker-content-pair">
       {/* 7. FAQ */}

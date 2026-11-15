@@ -85,6 +85,30 @@ test('session and API access integration', { timeout: 300000 }, async t => {
     const b = await login(bob, 'bob-test-only');
     const root = await login(admin, 'admin-test-only');
 
+    await t.test('recent forum topics include replies, exclude hidden activity and expose only summary fields', async () => {
+      const ids = [];
+      try {
+        for (let index = 0; index < 4; index++) {
+          const date = new Date(`2030-01-0${index + 1}T12:00:00Z`);
+          const topic = await prisma.forumTopic.create({ data: { title: 'Recent ' + index, description: 'Private body', authorId: admin.id, createdAt: date, updatedAt: date } });
+          ids.push(topic.id);
+        }
+        await prisma.forumComment.create({ data: { topicId: ids[0], userId: alice.id, content: 'Visible reply', createdAt: new Date('2030-02-01'), updatedAt: new Date('2030-02-01') } });
+        await prisma.forumComment.create({ data: { topicId: ids[1], userId: bob.id, content: 'Hidden reply', hiddenAt: new Date(), createdAt: new Date('2030-03-01'), updatedAt: new Date('2030-03-01') } });
+        assert.equal((await request('/api/forum?recent=true')).status, 401);
+        const response = await request('/api/forum?recent=true', { cookie: a });
+        assert.equal(response.status, 200);
+        const { topics } = await response.json();
+        assert.deepEqual(topics.map(topic => topic.id), [ids[0], ids[3], ids[2]]);
+        assert.equal(topics[0].authorName, alice.name);
+        assert.equal(topics[0].activity, 'Kommentar');
+        assert.equal(topics[1].authorName, admin.name);
+        assert.deepEqual(Object.keys(topics[0]).sort(), ['activity', 'authorName', 'id', 'lastActivityAt', 'title']);
+      } finally {
+        await prisma.forumTopic.deleteMany({ where: { id: { in: ids } } });
+      }
+    });
+
     await t.test('general events require admin writes and validate dates', async () => {
       const body = { title: 'Offene Werkstatt', date: '2027-03-15', time: '18:30', location: 'MakerSpace', description: 'Alle willkommen', category: 'WORK' };
       assert.equal((await request('/api/events', { method: 'POST', cookie: root, body: { ...body, category: 'INVALID' } })).status, 400);
