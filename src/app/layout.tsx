@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MakerSpace Stundentool",
+  title: "MakerSpace Lübbecke",
   description: "Einfache Zeiterfassung für das MakerSpace Projekt",
 };
 
