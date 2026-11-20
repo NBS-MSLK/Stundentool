@@ -57,10 +57,10 @@ test('forum handlers: permissions, uploads, replies, moderation and persistence'
   const comments=require('../src/app/api/forum/[id]/comments/route.ts');
   const edit=require('../src/app/api/forum/comments/[id]/route.ts');
   const pdf=require('../src/app/api/forum/[id]/pdf/route.ts');
-  async function call(handler,who,{id,body,method='GET',origin='http://localhost'}={}){
+  async function call(handler,who,{id,body,method='GET',origin='http://localhost',query=''}={}){
    token=tokens[who]; const headers={origin};
    if(body && !(body instanceof FormData))headers['content-type']='application/json';
-   return handler(new Request('http://localhost/api/forum',{method,headers,body:body instanceof FormData?body:body?JSON.stringify(body):undefined}),{params:Promise.resolve({id})});
+   return handler(new Request('http://localhost/api/forum'+query,{method,headers,body:body instanceof FormData?body:body?JSON.stringify(body):undefined}),{params:Promise.resolve({id})});
   }
   const form=(bytes='%PDF-1.4\n%%EOF',type='application/pdf')=>{const f=new FormData();f.set('title','Test');f.set('description','Discussion');f.set('pdf',new Blob([bytes],{type}),'test.pdf');return f;};
   assert.equal((await call(topics.GET)).status,401);
@@ -94,9 +94,29 @@ test('forum handlers: permissions, uploads, replies, moderation and persistence'
   const replacement=await prisma.forumTopic.findUnique({where:{id}});
   fs.unlinkSync(path.join(process.env.FORUM_UPLOAD_DIR,replacement.pdfKey));
   assert.equal((await call(pdf.GET,'alice',{id})).status,404);
-  assert.equal((await call(detail.PUT,'admin',{id,method:'PUT',body:form()})).status,200);
-  assert.equal((await call(pdf.GET,'alice',{id})).status,200);
+  const previousVersion=(await (await call(detail.GET,'alice',{id})).json()).topic.pdfVersion;
+  const pdfOnly=new FormData();
+  pdfOnly.set('pdfOnly','true');
+  assert.equal((await call(detail.PUT,'admin',{id,method:'PUT',body:pdfOnly})).status,400);
+  pdfOnly.set('pdf',new Blob(['%PDF-1.4\nRestored\n%%EOF'],{type:'application/octet-stream'}),'restored.pdf');
+  assert.equal((await call(detail.PUT,'alice',{id,method:'PUT',body:pdfOnly})).status,403);
+  assert.equal((await call(detail.PUT,'admin',{id,method:'PUT',body:pdfOnly})).status,200);
+  const restored=(await (await call(detail.GET,'alice',{id})).json()).topic;
+  assert.notEqual(restored.pdfVersion,previousVersion);
+  assert.equal(restored.title,replacement.title);
+  assert.equal(restored.description,replacement.description);
+  assert.equal(restored.pdfName,'restored.pdf');
+  assert.equal(await (await call(pdf.GET,'alice',{id,query:'?v='+restored.pdfVersion+'&download=1'})).text(),'%PDF-1.4\nRestored\n%%EOF');
   rows=await prisma.forumComment.findMany({where:{topicId:id}});const reply=rows.find(r=>r.parentId).id;
+  assert.equal((await call(edit.PUT,'bob',{id:reply,method:'PUT',body:{content:'Edited reply',reference:'Page 2'}})).status,200);
+  const savedReply=await prisma.forumComment.findUnique({where:{id:reply}});
+  assert.equal(savedReply.content,'Edited reply');
+  assert.equal(savedReply.reference,'Page 2');
+  assert.equal(savedReply.parentId,main);
+  await prisma.forumComment.update({where:{id:reply},data:{updatedAt:new Date(replacement.updatedAt.getTime()+60000)}});
+  const recent=await call(topics.GET,'bob',{query:'?recent=true'});
+  assert.equal(recent.status,200);
+  assert.equal((await recent.json()).topics[0].commentId,reply);
   assert.equal((await call(comments.POST,'bob',{id,method:'POST',body:{content:'Too deep',parentId:reply}})).status,400);
   const other=await prisma.forumTopic.create({data:{title:'Other',description:''}});
   assert.equal((await call(comments.POST,'bob',{id:other.id,method:'POST',body:{content:'Wrong topic',parentId:main}})).status,400);
@@ -106,6 +126,18 @@ test('forum handlers: permissions, uploads, replies, moderation and persistence'
   assert.equal(shown.comments.find(c=>c.id===main).content,'');assert.equal(shown.comments.find(c=>c.id===main).reference,null);assert.equal(shown.comments.length,2);
   assert.equal((await call(comments.POST,'bob',{id,method:'POST',body:{content:'Hidden parent',parentId:main}})).status,400);
   await prisma.user.delete({where:{id:'alice'}});assert.equal((await prisma.forumComment.findUnique({where:{id:main}})).userId,null);
-  await prisma.$disconnect();assert.equal(await prisma.forumTopic.count(),2);assert.equal(fs.readdirSync(process.env.FORUM_UPLOAD_DIR).length,1);
+  assert.equal((await call(detail.DELETE,undefined,{id,method:'DELETE'})).status,401);
+  assert.equal((await call(detail.DELETE,'bob',{id,method:'DELETE'})).status,403);
+  assert.equal((await call(detail.DELETE,'admin',{id,method:'DELETE',origin:'https://evil.example'})).status,403);
+  assert.equal((await call(pdf.GET,'bob',{id})).status,200);
+  assert.equal(await prisma.forumComment.count({where:{topicId:id}}),2);
+  assert.equal((await call(detail.DELETE,'admin',{id,method:'DELETE'})).status,200);
+  assert.equal((await call(detail.GET,'bob',{id})).status,404);
+  assert.equal((await call(pdf.GET,'bob',{id})).status,404);
+  assert.equal((await call(detail.DELETE,'admin',{id,method:'DELETE'})).status,404);
+  assert.equal(await prisma.forumComment.count({where:{topicId:id}}),0);
+  const remainingTopics=await prisma.forumTopic.findMany({select:{id:true}});
+  assert.deepEqual(remainingTopics,[{id:other.id}]);
+  assert.equal(fs.readdirSync(process.env.FORUM_UPLOAD_DIR).length,0);
  } finally {await prisma.$disconnect();Module._load=originalLoad;if(previousTS)require.extensions['.ts']=previousTS;else delete require.extensions['.ts'];}
 });

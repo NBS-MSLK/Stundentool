@@ -3,5 +3,18 @@
 @media(max-width:800px){.shell{padding:16px}.split{display:block}.document,.discussion{height:auto;min-height:0}.document iframe{height:65dvh;flex:auto}.mobileTabs{display:flex;gap:10px;margin-bottom:16px}.mobileHidden{display:none}.header h1{font-size:1.7rem}}
 
 .main{min-width:0}.layout{container-type:inline-size}
+.comment { scroll-margin-top: 5rem; }
+.shell button.dangerAction { color: var(--danger); }
+.commentHeader {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ flex-wrap: wrap;
+ gap: 8px;
+}
+.commentHeader button {
+ color: var(--accent-primary);
+ font-size: .9rem;
+}
 @media(max-width:1100px){.layout .split{display:block}.layout .document,.layout .discussion{height:auto;min-height:0}.layout .document iframe{height:65dvh;flex:auto}.layout .mobileTabs{display:flex;gap:10px;margin-bottom:16px}.layout .mobileHidden{display:none}}
 @media(max-width:650px){.layout :global(.maker-sidebar){position:sticky;top:0;z-index:10}}

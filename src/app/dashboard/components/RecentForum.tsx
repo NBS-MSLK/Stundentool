@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-type Topic = { id: string; title: string; lastActivityAt: string; authorName: string; activity: string };
+type Topic = { id: string; title: string; lastActivityAt: string; authorName: string; activity: string; commentId: string | null };
 
 export default function RecentForum() {
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -27,7 +27,7 @@ export default function RecentForum() {
     <h2 id="recent-forum-heading">Neues im Forum</h2>
     {loading ? <p className="maker-forum-hint" role="status">Beiträge werden geladen …</p> : error ? <p className="maker-forum-hint" role="alert">Das Forum konnte nicht geladen werden. <button onClick={() => { setError(false); setLoading(true); setAttempt(value => value + 1); }}>Erneut versuchen</button></p> : topics.length ?
       <ul className="maker-forum-list">{topics.map(topic => <li key={topic.id}>
-        <Link href={'/dashboard/forum/' + topic.id}>
+        <Link href={'/dashboard/forum/' + topic.id + (topic.commentId ? '#beitrag-' + topic.commentId : '')}>
           <strong>{topic.title}<span aria-hidden="true"> ↗</span></strong>
           <span className="maker-forum-author">{topic.activity} · {topic.authorName}</span>
           <time dateTime={topic.lastActivityAt}>{new Date(topic.lastActivityAt).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</time>
